@@ -18,7 +18,7 @@ wave2fa
 # make a new folder where you'll put wave2fa
 # then download bundle.cjs from https://github.com/wavedevgit/wave2fa/releases
 # and put it there
-echo "[]" > _data.json
+echo [] > "%USERPROFILE%\_data.json"
 npm init -y
 npm i blessed # install blessed if not installed
 node bundle.cjs # download it from https://github.com/wavedevgit/wave2fa/releases
