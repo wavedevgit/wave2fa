@@ -44,5 +44,4 @@ export default async function checkForUpdates() {
         await fs.writeFile(filePath, content, 'utf-8');
         return;
     }
-    console.log('uptodate');
 }

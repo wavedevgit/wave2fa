@@ -13,9 +13,13 @@ curl -L -o "$APP_DIR/wave2fa.sh" \
 chmod +x "$APP_DIR/wave2fa.sh"
 
 mkdir -p "$HOME/bin"
-ln -sf "$APP_DIR/wave2fa.sh" "$HOME/bin/wave2fa"
+sudo ln -sf "$APP_DIR/wave2fa.sh" "/bin/wave2fa"
 
 # blessed is the tui library used
-npm -g i blessed
+cd $APP_DIR
+npm init -y
+npm i blessed
+echo "[]" >> _data.json
+
 
 echo "Installed wave2fa. Run with: wave2fa"

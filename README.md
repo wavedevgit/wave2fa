@@ -14,7 +14,13 @@ curl -s https://raw.githubusercontent.com/wavedevgit/wave2fa/main/scripts/instal
 wave2fa
 
 # for windows, there is currently no installer, you can however run wave2fa using:
-npm -g i blessed # install blessed if not installed
+
+# make a new folder where you'll put wave2fa
+# then download bundle.cjs from https://github.com/wavedevgit/wave2fa/releases
+# and put it there
+echo "[]" > _data.json
+npm init -y
+npm i blessed # install blessed if not installed
 node bundle.cjs # download it from https://github.com/wavedevgit/wave2fa/releases
 ```
 
