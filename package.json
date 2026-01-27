@@ -19,7 +19,7 @@
         "jsqr": "^1.4.0",
         "jsqrcode": "^0.0.7",
         "node-file-dialog": "^1.0.3",
-        "otplib": "^13.1.1",
-        "protobufjs": "^8.0.0"
+        "protobufjs": "^8.0.0",
+        "speakeasy": "^2.0.0"
     }
 }

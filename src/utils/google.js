@@ -1,4 +1,8 @@
-import { parse } from 'protobufjs';
+import protobufjs from 'protobufjs';
+import { base32Encode } from './base32.js';
+import { normalizeBase32 } from './otp.js';
+
+const { parse } = protobufjs;
 
 const PROTOBUF_MIGRATION_PAYLOAD = `/*
    Google Authenticator offline migration parser
@@ -67,7 +71,7 @@ const OtpType = {
 
 export function parseUri(uri) {
     const url = new URL(uri);
-    if (url.protocol !== 'otpauth-migration')
+    if (url.protocol !== 'otpauth-migration:')
         return {
             err: 'Invalid Qr code, this is not a google authenticator migration qr code!',
         };
@@ -85,17 +89,17 @@ export function parseUri(uri) {
         const data = Buffer.from(url.searchParams.get('data'), 'base64');
         const MigrationPayload = root.lookupType('MigrationPayload');
         const otpParams = MigrationPayload.decode(data).otpParameters;
-
-        return {
-            ...otpParams,
-            algorithm: Algorithm[otpParams.algorithm],
-            type: OtpType[otpParams.type],
-            digits: DigitCount[otpParams.digits],
-            secret: base32Encode(otpParams.secret),
-            // todo: verify how to get period from the payload
+        return otpParams.map((otpParam) => ({
+            name: otpParam.name + ' ' + otpParam.issuer,
+            algorithm: Algorithm[otpParam.algorithm],
+            type: OtpType[otpParam.type],
+            digits: DigitCount[otpParam.digits],
+            secret: normalizeBase32(base32Encode(otpParam.secret)),
             period: 30,
-        };
+        }));
     } catch (err) {
-        return { err: 'Failed to parse qr code data: ' + err.toString() };
+        return {
+            err: 'Failed to parse qr code data: ' + err.toString() + err.stack,
+        };
     }
 }

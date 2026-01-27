@@ -1,5 +1,5 @@
-import GIT_HASH from './gitHash';
-import { repo } from './gitHash';
+import GIT_HASH from './gitHash.js';
+import { repo } from './gitHash.js';
 import fs from 'fs/promises';
 
 async function getShortHash() {
@@ -24,7 +24,6 @@ async function getLatestBundleContent() {
 }
 
 export default async function checkForUpdates() {
-    const shortHash = await getShortHash();
     const filePath = (() => {
         try {
             // try commonjs __filename if fail then return esm filename
@@ -35,6 +34,8 @@ export default async function checkForUpdates() {
 
     // skip checks if wasnt built using build ci
     if (GIT_HASH === 'commitHash') return;
+    const shortHash = await getShortHash();
+
     // skip checks if not running with bundle.cjs file
     if (!filePath.endsWith('bundle.cjs')) return;
 

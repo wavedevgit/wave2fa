@@ -5,6 +5,9 @@ import { readInputAsync } from '../utils/inputs.js';
 import { addItem, validatePath } from '../utils/storage.js';
 import { scanQrCode } from '../utils/qrcode.js';
 import path from 'path';
+import { initHomeScreen } from './home.js';
+import { isValidSecret } from '../utils/otp.js';
+import { randomUUID } from 'crypto';
 
 /**
  *
@@ -50,6 +53,11 @@ async function initImportFromGoogleAuthScreen(screen) {
         );
         input.destroy();
         screen.render();
+        screen.onceKey('enter', () => {
+            box.destroy();
+            screen.render();
+            initHomeScreen(screen);
+        });
         return;
     }
 
@@ -60,32 +68,50 @@ async function initImportFromGoogleAuthScreen(screen) {
         box.setContent("Couldn't parse image: " + err);
         input.destroy();
         screen.render();
+        screen.onceKey('enter', () => {
+            box.destroy();
+            screen.render();
+            initHomeScreen(screen);
+        });
         return;
     }
 
     const values = parseUri(res);
-
-    if (values.err) {
+    values.forEach((value) => (value.uuid = randomUUID()));
+    if (values?.err) {
         box.setContent(values.err);
         input.destroy();
         screen.render();
+        screen.onceKey('enter', () => {
+            box.destroy();
+            screen.render();
+            initHomeScreen(screen);
+        });
         return;
     }
     screen.leave();
 
-    values.uuid = crypto.randomUUID();
-
-    if (!(await isValidSecret(values.secret))) {
+    if (values.some((item) => !isValidSecret(item.secret))) {
         box.setContent('Invalid base32 secret...');
         input.destroy();
         screen.render();
+        screen.onceKey('enter', () => {
+            box.destroy();
+            screen.render();
+            initHomeScreen(screen);
+        });
         return;
     }
 
-    await addItem(values);
+    for (const value of values) await addItem(value);
 
     box.setContent('{bold}✓{/bold} Succesfuly added!');
     input.destroy();
     screen.render();
+    screen.onceKey('enter', () => {
+        box.destroy();
+        screen.render();
+        initHomeScreen(screen);
+    });
 }
 export { initImportFromGoogleAuthScreen };

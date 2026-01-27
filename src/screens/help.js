@@ -17,7 +17,7 @@ function initHelpScreen(screen) {
             left: 1,
             right: 1,
         },
-        content: `{bold}Wave2FA Help:{/bold}\nPress {bold}h{/bold} - open help\nPress {bold}n{/bold} - add new 2fa secret\nPress {bold}t{/bold} - import keys from google auth\nPress {bold}m{/bold} - go to home screen\n`,
+        content: `{bold}Wave2FA Help:{/bold}\nPress {bold}h{/bold} - open help\nPress {bold}n{/bold} - add new 2fa secret\n{bold}e{/bold} - add new 2fa secret using qr code\nPress {bold}t{/bold} - import keys from google auth\nPress {bold}m{/bold} - go to home screen\n`,
         tags: true,
         border: 'line',
         style: {

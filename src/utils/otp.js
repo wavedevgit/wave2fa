@@ -1,4 +1,4 @@
-import { generate } from 'otplib';
+import * as speakeasy from 'speakeasy';
 
 function normalizeBase32(secret) {
     return secret
@@ -7,11 +7,16 @@ function normalizeBase32(secret) {
         .padEnd(Math.ceil(secret.length / 8) * 8, '=');
 }
 
-const isValidSecret = async (secret,period,) => {
+const isValidSecret = (secret) => {
     try {
-        await generate({ secret });
+        speakeasy.totp({
+            secret,
+            encoding: 'base32',
+        });
+
         return true;
     } catch (err) {
+        throw err;
         return false;
     }
 };

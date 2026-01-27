@@ -1,7 +1,7 @@
 import blessed from 'blessed';
 import clearScreen from '../utils/clearScreen.js';
-import { generate, generateSecret } from 'otplib';
 import { getKeys } from '../utils/storage.js';
+import * as speakeasy from 'speakeasy';
 
 function getSecondsLeft(step) {
     const epoch = Math.floor(Date.now() / 1000);
@@ -14,6 +14,7 @@ function getSecondsLeft(step) {
  */
 async function initHomeScreen(screen) {
     clearScreen(screen);
+
     const main = blessed.box({
         top: 'center',
         padding: {
@@ -49,7 +50,7 @@ async function initHomeScreen(screen) {
     };
     const updateSecrets = async (period) => {
         for (let item of keys.filter((item) => item.period === period)) {
-            cache[item.uuid] = await generate({
+            cache[item.uuid] = await speakeasy.totp({
                 digits: item.digits || 6,
                 period: period,
                 secret: item.secret,

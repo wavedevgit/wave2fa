@@ -4,6 +4,7 @@ import { addItem } from '../utils/storage.js';
 import crypto from 'node:crypto';
 import { readInputAsync } from '../utils/inputs.js';
 import { isValidSecret, normalizeBase32 } from '../utils/otp.js';
+import { initHomeScreen } from './home.js';
 
 /**
  *
@@ -56,6 +57,11 @@ async function initAddSecretScreen(screen) {
         input.destroy();
         box.setContent('Invalid base32 secret...');
         screen.render();
+        screen.onceKey('enter', () => {
+            box.destroy();
+            screen.render();
+            initHomeScreen(screen);
+        });
         return;
     }
 
@@ -64,5 +70,10 @@ async function initAddSecretScreen(screen) {
 
     box.setContent('{bold}✓{/bold} Succesfuly added!');
     screen.render();
+    screen.onceKey('enter', () => {
+        box.destroy();
+        screen.render();
+        initHomeScreen(screen);
+    });
 }
 export { initAddSecretScreen };

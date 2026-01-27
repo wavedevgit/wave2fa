@@ -1,3 +1,4 @@
+import fs from 'fs/promises';
 export function base32Encode(buf) {
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
     let bits = 0,

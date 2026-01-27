@@ -6,6 +6,7 @@ import { initImportFromGoogleAuthScreen } from './screens/importFromGoogleAuth.j
 import { initAddSecretQrCodeScreen } from './screens/addSecretQrCode.js';
 import GIT_HASH from './gitHash.js';
 import checkForUpdates from './updater.js';
+import { initLoginScreen } from './screens/loginScreen.js';
 
 checkForUpdates();
 
@@ -51,7 +52,9 @@ screen.append(
     }),
 );
 
-initHomeScreen(screen);
+globalThis.password = null;
+
+initLoginScreen(screen);
 
 screen.key(['q', 'C-c'], () => process.exit(0));
 

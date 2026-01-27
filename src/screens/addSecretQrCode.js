@@ -4,9 +4,9 @@ import { addItem, validatePath } from '../utils/storage.js';
 import crypto from 'node:crypto';
 import { readInputAsync } from '../utils/inputs.js';
 import path from 'node:path';
-import * as OTPAuth from 'otplib';
 import { parseUri, scanQrCode } from '../utils/qrcode.js';
 import { isValidSecret } from '../utils/otp.js';
+import { initHomeScreen } from './home.js';
 
 /**
  *
@@ -40,6 +40,11 @@ async function initAddSecretQrCodeScreen(screen) {
         box.setContent('File not found.');
         input.destroy();
         screen.render();
+        screen.onceKey('enter', () => {
+            box.destroy();
+            screen.render();
+            initHomeScreen(screen);
+        });
         return;
     }
     if (
@@ -52,6 +57,11 @@ async function initAddSecretQrCodeScreen(screen) {
         );
         input.destroy();
         screen.render();
+        screen.onceKey('enter', () => {
+            box.destroy();
+            screen.render();
+            initHomeScreen(screen);
+        });
         return;
     }
 
@@ -62,6 +72,11 @@ async function initAddSecretQrCodeScreen(screen) {
         box.setContent("Couldn't parse image: " + err);
         input.destroy();
         screen.render();
+        screen.onceKey('enter', () => {
+            box.destroy();
+            screen.render();
+            initHomeScreen(screen);
+        });
         return;
     }
 
@@ -81,6 +96,11 @@ async function initAddSecretQrCodeScreen(screen) {
         box.setContent('Invalid base32 secret...');
         input.destroy();
         screen.render();
+        screen.onceKey('enter', () => {
+            box.destroy();
+            screen.render();
+            initHomeScreen(screen);
+        });
         return;
     }
 
@@ -89,5 +109,10 @@ async function initAddSecretQrCodeScreen(screen) {
     box.setContent('{bold}✓{/bold} Succesfuly added!');
     input.destroy();
     screen.render();
+    screen.onceKey('enter', () => {
+        box.destroy();
+        screen.render();
+        initHomeScreen(screen);
+    });
 }
 export { initAddSecretQrCodeScreen };
