@@ -5,6 +5,9 @@ import { initAddSecretScreen } from './screens/addSecret.js';
 import { initImportFromGoogleAuthScreen } from './screens/importFromGoogleAuth.js';
 import { initAddSecretQrCodeScreen } from './screens/addSecretQrCode.js';
 import GIT_HASH from './gitHash.js';
+import checkForUpdates from './updater.js';
+
+checkForUpdates();
 
 const screen = blessed.screen({
     smartCSR: true,
