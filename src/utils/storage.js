@@ -1,6 +1,8 @@
 import fs from 'fs/promises';
 import crypto from 'crypto';
 import { isValidSecret } from './otp.js';
+import os from 'os';
+import path from 'path';
 
 export async function verifyPassword() {
     try {
@@ -61,8 +63,26 @@ export async function decryptSecret(secret) {
     return decrypted;
 }
 
+const homeConfigPath = path.join(
+    os.homedir(),
+    '.config',
+    'wave2fa',
+    '_data.json',
+);
+const localPath = path.join(os.homedir(), './_data.json');
+let dataPath;
+
+(async () => {
+    try {
+        await fs.access(homeConfigPath);
+        dataPath = homeConfigPath;
+    } catch {
+        dataPath = localPath;
+    }
+})();
+
 async function getKeys(raw) {
-    const data = JSON.parse(await fs.readFile('./_data.json', 'utf-8'));
+    const data = JSON.parse(await fs.readFile(dataPath, 'utf-8'));
     if (raw) return data;
     return await Promise.all(
         data.map(async (item) => ({
@@ -79,7 +99,7 @@ async function addItem(item) {
     for (let item of data) {
         item.secret = await encryptSecret(item.secret);
     }
-    await fs.writeFile('./_data.json', JSON.stringify(data), 'utf-8');
+    await fs.writeFile(dataPath, JSON.stringify(data), 'utf-8');
 }
 async function validatePath(path) {
     try {
