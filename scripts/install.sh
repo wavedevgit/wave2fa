@@ -19,7 +19,7 @@ sudo ln -sf "$APP_DIR/wave2fa.sh" "/bin/wave2fa"
 cd $APP_DIR
 npm init -y
 npm i blessed
-echo "[]" >> _data.json
+echo "[]" > _data.json
 
 
 echo "Installed wave2fa. Run with: wave2fa"
