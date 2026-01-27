@@ -1,0 +1,25 @@
+{
+    "name": "wave2fa",
+    "version": "1.0.0",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "esbuild src/main.js   --bundle   --platform=node   --outfile=dist/bundle.cjs   --external:blessed --minify --sourcemap"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "blessed": "^0.1.81",
+        "canvas": "^3.2.1",
+        "esbuild": "^0.27.2",
+        "jimp": "^1.6.0",
+        "jsqr": "^1.4.0",
+        "jsqrcode": "^0.0.7",
+        "node-file-dialog": "^1.0.3",
+        "otplib": "^13.1.1",
+        "protobufjs": "^8.0.0"
+    }
+}
