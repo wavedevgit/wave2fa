@@ -10,6 +10,22 @@ import { initLoginScreen } from './screens/loginScreen.js';
 
 checkForUpdates();
 
+process.noDeprecation = true;
+
+// shim buffer as some libs are using old Buffer()
+const _Buffer = Buffer;
+function BufferShim(arg, encoding) {
+    if (typeof arg === 'number') {
+        return _Buffer.alloc(arg);
+    }
+    return _Buffer.from(arg, encoding);
+}
+
+Object.setPrototypeOf(BufferShim, _Buffer);
+BufferShim.prototype = _Buffer.prototype;
+
+global.Buffer = BufferShim;
+
 const screen = blessed.screen({
     smartCSR: true,
     title: 'Wave2FA',
