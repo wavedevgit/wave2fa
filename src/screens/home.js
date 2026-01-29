@@ -53,7 +53,9 @@ async function initHomeScreen(screen) {
             cache[item.uuid] = await speakeasy.totp({
                 digits: item.digits || 6,
                 period: period,
+                algorithm: item.algorithm.toLowerCase() || 'sha1',
                 secret: item.secret,
+                encoding: 'base32',
             });
         }
     };
