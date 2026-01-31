@@ -9,8 +9,8 @@ A lightweight 2fa authenticator in terminal ui.
 
 ```sh
 # currently there is only installer for linux
-# you can either install main build or developement
-curl -s https://raw.githubusercontent.com/wavedevgit/wave2fa/main/scripts/install.sh | sh -s -- main/developement
+# you can either install main build or development
+curl -s https://raw.githubusercontent.com/wavedevgit/wave2fa/main/scripts/install.sh | sh -s -- main/development
 # then run it:
 wave2fa
 
