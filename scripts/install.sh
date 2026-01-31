@@ -1,25 +1,45 @@
 APP_DIR="$HOME/.config/wave2fa"
+BRANCH=${1:-main} # default to main
 mkdir -p "$APP_DIR"
 
-curl -s https://api.github.com/repos/wavedevgit/wave2fa/releases/latest \
+download_bundle() {
+  curl -s https://api.github.com/repos/wavedevgit/wave2fa/releases/latest \
   | grep "browser_download_url" \
-  | grep "bundle.cjs" \
+  | grep "bundle_$BRANCH.cjs" \
   | cut -d '"' -f 4 \
   | xargs curl -L -o "$APP_DIR/bundle.cjs"
+}
 
-curl -L -o "$APP_DIR/wave2fa.sh" \
+download_wave2fa_binary() {
+  curl -L -o "$APP_DIR/wave2fa.sh" \
   https://raw.githubusercontent.com/wavedevgit/wave2fa/main/scripts/wave2fa.sh
+}
+
+download_bundle
+download_wave2fa_binary
 
 chmod +x "$APP_DIR/wave2fa.sh"
 
 mkdir -p "$HOME/bin"
-sudo ln -sf "$APP_DIR/wave2fa.sh" "/bin/wave2fa"
+
+
+# check if termux is being used
+
+if [ -d /data/data/com.termux/files/usr/bin/ ]; then
+  ln -sf "$APP_DIR/wave2fa.sh" "/data/data/com.termux/files/usr/bin/wave2fa"
+else
+  sudo ln -sf "$APP_DIR/wave2fa.sh" "/bin/wave2fa"
+fi
 
 # blessed is the tui library used
 cd $APP_DIR
 npm init -y
 npm i blessed
-echo "[]" > _data.json
+
+# used to not erease old user data
+if [ ! -f _data.json ]; then
+   echo "[]" > /_data.json
+fi
 
 
 echo "Installed wave2fa. Run with: wave2fa"

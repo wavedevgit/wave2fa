@@ -9,6 +9,7 @@ function normalizeBase32(secret) {
 
 const isValidSecret = (secret) => {
     try {
+        if (!secret || typeof secret !== 'string') return false;
         speakeasy.totp({
             secret,
             encoding: 'base32',

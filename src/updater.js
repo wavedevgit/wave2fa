@@ -19,7 +19,9 @@ async function getLatestBundleContent() {
         },
     );
     const data = await res.json();
-    const asset = data.assets.find((a) => a.name === 'bundle.cjs');
+    const asset = data.assets.find(
+        (a) => a.name === `bundle_${repo.branch}.cjs`,
+    );
     return await (await fetch(asset.browser_download_url)).text();
 }
 

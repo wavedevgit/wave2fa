@@ -4,6 +4,7 @@ on:
     push:
         branches:
             - main
+            - developement
     workflow_dispatch:
 
 jobs:
@@ -30,10 +31,12 @@ jobs:
               run: |
                   npm run build
                   sed -i "s/commitHash/$(git rev-parse --short HEAD)/" dist/bundle.cjs
+                  sed -i "s/commitBranch/$(git rev-parse --abbrev-ref HEAD)/" dist/bundle.cjs
+                  cp dist/bundle.cjs dist/dist_${{ github.ref_name }}.js
             - name: Create Release
               uses: softprops/action-gh-release@v1
               with:
-                  tag_name: build-${{ github.run_number }}
-                  name: Wave2FA Build ${{ github.run_number }} (${{ github.sha }})
+                  tag_name: build-${{ github.ref_name }}-${{ github.run_number }}
+                  name: Wave2FA Build ${{ github.ref_name }} ${{ github.run_number }} (${{ github.sha }})
                   files: |
-                      dist/bundle.cjs
+                      dist/bundle_${{ github.ref_name }}.cjs
