@@ -13,7 +13,7 @@ async function getShortHash() {
 
 async function getLatestBundleContent() {
     const res = await fetch(
-        `https://api.github.com/repos/${repo.owner}/${repo.repo}/releases/latest`,
+        `https://api.github.com/repos/${repo.owner}/${repo.repo}/releases`,
         {
             headers: { 'User-Agent': 'node' },
         },
