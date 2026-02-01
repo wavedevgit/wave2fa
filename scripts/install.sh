@@ -3,7 +3,7 @@ BRANCH=${1:-main} # default to main
 mkdir -p "$APP_DIR"
 
 download_bundle() {
-  curl -s https://api.github.com/repos/wavedevgit/wave2fa/releases/latest \
+  curl -s https://api.github.com/repos/wavedevgit/wave2fa/releases \
   | grep "browser_download_url" \
   | grep "bundle_$BRANCH.cjs" \
   | cut -d '"' -f 4 \
