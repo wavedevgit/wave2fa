@@ -41,6 +41,10 @@ export default async function checkForUpdates() {
     // skip checks if not running with bundle.cjs file
     if (!filePath.endsWith('bundle.cjs')) return;
 
+    // only check for updates every 5 mins
+    const lastRun = new Date(await getLastRun());
+    if (Date.now() - lastRun < 60 * 5 * 1000) return;
+
     if (GIT_HASH !== shortHash) {
         // auto update
         const content = await getLatestBundleContent();

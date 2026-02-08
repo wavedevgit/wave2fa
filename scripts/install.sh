@@ -1,5 +1,15 @@
 APP_DIR="$HOME/.config/wave2fa"
 BRANCH=${1:-main} # default to main
+
+# check if node exists
+if command -v program_name &> /dev/null; then
+  echo "node found, installing wave2fa."
+else
+  echo "Node is not installed, please install it!"
+  echo "Help: Use nvm or install it from https://nodejs.org/en/download"
+  exit 1
+fi
+
 mkdir -p "$APP_DIR"
 
 download_bundle() {
@@ -38,7 +48,7 @@ npm i blessed
 
 # used to not erease old user data
 if [ ! -f _data.json ]; then
-   echo "[]" > /_data.json
+   echo "[]" > $APP_DIR/_data.json
 fi
 
 

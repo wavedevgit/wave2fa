@@ -7,8 +7,10 @@ import { initAddSecretQrCodeScreen } from './screens/addSecretQrCode.js';
 import GIT_HASH from './gitHash.js';
 import checkForUpdates from './updater.js';
 import { initLoginScreen } from './screens/loginScreen.js';
+import { saveRun } from './utils/lastRun.js';
 
 checkForUpdates();
+saveRun();
 
 process.noDeprecation = true;
 
