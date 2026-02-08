@@ -63,21 +63,19 @@ export async function decryptSecret(secret) {
     return decrypted;
 }
 
-const homeConfigPath = path.join(
-    os.homedir(),
-    '.config',
-    'wave2fa',
-    '_data.json',
-);
+const homeConfigPath = path.join(os.homedir(), '.config', 'wave2fa');
+const homeConfigDataPath = path.join(homeConfigPath, '_data.json');
+
 const localPath = path.join(os.homedir(), './_data.json');
 let dataPath;
 
 (async () => {
     try {
-        await fs.access(homeConfigPath);
-        dataPath = homeConfigPath;
+        await fs.access(homeConfigDataPath);
+        dataPath = homeConfigDataPath;
     } catch {
-        dataPath = localPath;
+        console.log('config files dont exist, please configure wave2fa first!');
+        process.kill(1);
     }
 })();
 
@@ -110,4 +108,4 @@ async function validatePath(path) {
     }
 }
 
-export { getKeys, addItem, validatePath };
+export { getKeys, addItem, validatePath, homeConfigPath };

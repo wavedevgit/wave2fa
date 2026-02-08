@@ -56,8 +56,10 @@ async function initLoginScreen(screen) {
         return;
     }
 
+    if (!password) process.kill(0);
+
     let goodPassword =
-        password.length >= 8 &&
+        password?.length >= 8 &&
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>\/?]).{8,}$/.test(
             password,
         );
