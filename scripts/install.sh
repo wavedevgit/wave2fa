@@ -2,7 +2,7 @@ APP_DIR="$HOME/.config/wave2fa"
 BRANCH=${1:-main} # default to main
 
 # check if node exists
-if command -v program_name &> /dev/null; then
+if command -v node &> /dev/null; then
   echo "node found, installing wave2fa."
 else
   echo "Node is not installed, please install it!"
