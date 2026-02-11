@@ -30,7 +30,7 @@ download_wave2fa_binary
 
 chmod +x "$APP_DIR/wave2fa.sh"
 
-mkdir -p "$HOME/bin"
+mkdir -p "$HOME/bin"e
 
 
 # check if termux is being used
