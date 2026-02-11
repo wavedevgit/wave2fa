@@ -1,6 +1,7 @@
 import GIT_HASH from './gitHash.js';
 import { repo } from './gitHash.js';
 import fs from 'fs/promises';
+import { getLastRun } from './utils/lastRun.js';
 
 async function getShortHash() {
     const res = await fetch(

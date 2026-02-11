@@ -30,7 +30,7 @@ download_wave2fa_binary
 
 chmod +x "$APP_DIR/wave2fa.sh"
 
-mkdir -p "$HOME/bin"
+mkdir -p "$HOME/bin"e
 
 
 # check if termux is being used
@@ -47,7 +47,7 @@ npm init -y
 npm i blessed
 
 # used to not erease old user data
-if [ ! -f _data.json ]; then
+if [ ! -f $APP_DIR/_data.json ]; then
    echo "[]" > $APP_DIR/_data.json
 fi
 
