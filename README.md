@@ -2,6 +2,8 @@
 
 A lightweight 2fa authenticator in terminal ui.
 
+## ⚠️ WARNING: wave2fa is still in very early development stages, please only test it and do not expect it to the best yet.
+
 ## How to install:
 
 1. make sure you have node installed
