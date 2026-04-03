@@ -4,27 +4,16 @@ A lightweight 2fa authenticator in terminal ui.
 
 ## ⚠️ WARNING: wave2fa is still in very early development stages, please only test it and do not expect it to the best yet.
 
-## How to install:
+## How to test wave2fa:
 
-1. make sure you have node installed
+1. make sure you have node & git installed
 2. run this command
 
 ```sh
-# currently there is only installer for linux
-# you can either install main build or development
-curl -s https://raw.githubusercontent.com/wavedevgit/wave2fa/main/scripts/install.sh | sh -s -- main/development
-# then run it:
-wave2fa
-
-# for windows, there is currently no installer, you can however run wave2fa using:
-
-# make a new folder where you'll put wave2fa
-# then download bundle.cjs from https://github.com/wavedevgit/wave2fa/releases
-# and put it there
-echo [] > "%USERPROFILE%\_data.json"
-npm init -y
-npm i blessed # install blessed if not installed
-node bundle.cjs # download it from https://github.com/wavedevgit/wave2fa/releases
+git clone --depth=1 https://github.com/wavedevgit/wave2fa
+cd wave2fa
+npm i
+node src/main.js 
 ```
 
 ## Contributing
