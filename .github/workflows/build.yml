@@ -1,42 +1,47 @@
 name: Build
 
 on:
-    push:
-        branches:
-            - main
-            - development
-    workflow_dispatch:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version number to use for this build"
+        required: true
+        default: "0.0.1"
 
 jobs:
-    build:
-        permissions:
-            contents: write
-            packages: write
-            pull-requests: write
-            issues: write
-            statuses: write
-            deployments: write
-        runs-on: ubuntu-latest
+  build:
+    permissions:
+      contents: write
+      packages: write
+      pull-requests: write
+      issues: write
+      statuses: write
+      deployments: write
+    runs-on: ubuntu-latest
 
-        steps:
-            - uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-            - name: Use Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: '20.x'
-            - run: npm i
-            - name: Build & Add git hash
-              run: |
-                  npm run build
-                  sed -i "s/commitHash/$(git rev-parse --short HEAD)/" dist/bundle.cjs
-                  sed -i "s/commitBranch/$(git rev-parse --abbrev-ref HEAD)/" dist/bundle.cjs
-                  cp dist/bundle.cjs dist/bundle_${{ github.ref_name }}.cjs
-            - name: Create Release
-              uses: softprops/action-gh-release@v1
-              with:
-                  tag_name: build-${{ github.ref_name }}-${{ github.run_number }}
-                  name: Wave2FA Build ${{ github.ref_name }} ${{ github.run_number }} (${{ github.sha }})
-                  files: |
-                      dist/bundle_${{ github.ref_name }}.cjs
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - run: npm i
+
+      - name: Build & Add git hash
+        run: |
+          npm run build
+          sed -i "s/commitHash/$(git rev-parse --short HEAD)/" dist/bundle.cjs
+          sed -i "s/commitBranch/$(git rev-parse --abbrev-ref HEAD)/" dist/bundle.cjs
+          cp dist/bundle.cjs dist/bundle_${{ github.event.inputs.version }}.cjs
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          name: Wave2FA Build ${{ github.event.inputs.version }} (${{ github.sha }})
+          files: |
+            dist/bundle_${{ github.event.inputs.version }}.cjs
