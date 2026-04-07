@@ -13,7 +13,7 @@ fi
 mkdir -p "$APP_DIR"
 
 # download latest.json
-LATEST_JSON_URL="https://raw.githubusercontent.com/wavedevgit/wave2fa-releases/$BRANCH/latest.json"
+LATEST_JSON_URL="https://raw.githubusercontent.com/wavedevgit/wave2fa-releases/refs/heads/main/$BRANCH/latest.json"
 LATEST_JSON=$(curl -sL "$LATEST_JSON_URL")
 
 if [ -z "$LATEST_JSON" ]; then
@@ -32,7 +32,7 @@ fi
 echo "Latest version for branch $BRANCH is $VERSION"
 
 # download bundle.zip
-BUNDLE_URL="https://raw.githubusercontent.com/wavedevgit/wave2fa-releases/$BRANCH/$VERSION/bundle.zip"
+BUNDLE_URL="https://raw.githubusercontent.com/wavedevgit/wave2fa-releases/refs/heads/main/$BRANCH/$VERSION/bundle.zip"
 echo "Downloading $BUNDLE_URL..."
 curl -L "$BUNDLE_URL" -o "$APP_DIR/bundle.zip"
 
@@ -41,7 +41,7 @@ unzip -o "$APP_DIR/bundle.zip" -d "$APP_DIR"
 
 # download runner
 curl -L -o "$APP_DIR/wave2fa.sh" \
-  "https://raw.githubusercontent.com/wavedevgit/wave2fa/$BRANCH/scripts/wave2fa.sh"
+  "https://raw.githubusercontent.com/wavedevgit/wave2fa/refs/heads/main/$BRANCH/scripts/wave2fa.sh"
 
 chmod +x "$APP_DIR/wave2fa.sh"
 
