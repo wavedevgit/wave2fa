@@ -55,12 +55,7 @@ jobs:
                   mkdir -p "$TARGET"
                   cp -r dist/* "$TARGET/"
                   cp package.json "$TARGET/" || echo "no package.json"
-
-                  (cd "$TARGET" && zip -r "bundle.zip" .)
-
-            - name: Generate latest.json with all file hashes
-              run: |
-                  TARGET_DIR="releases/${{ github.event.inputs.branch }}"
+                  TARGET_DIR_BRANCH="releases/${{ github.event.inputs.branch }}"
                   VERSION_DIR="$TARGET_DIR/${{ github.event.inputs.version }}"
                   FILES_JSON="{ }"
 
@@ -84,7 +79,9 @@ jobs:
                       shortCommit: $shortCommit,
                       buildTime: $buildTime,
                       files: $files
-                    }' > "$TARGET_DIR/latest.json"
+                    }' > "$TARGET_DIR_BRANCH/latest.json"
+                  cp $TARGET_DIR_BRANCH/latest.json $TARGET/info.json
+                  (cd "$TARGET" && zip -r "bundle.zip" .)
 
             - name: Commit & push
               run: |
