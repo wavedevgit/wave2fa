@@ -4,11 +4,11 @@ import path from 'path';
 
 const lastRunFile = path.join(homeConfigPath, '.last_run');
 
-async function getLastRun() {
+async function getLastRun(): Promise<number> {
     try {
-        return new Date(await readFile(lastRunFile, 'utf-8'));
+        return new Date(await readFile(lastRunFile, 'utf-8')).getMilliseconds();
     } catch {
-        return new Date();
+        return new Date().getMilliseconds();
     }
 }
 async function saveRun() {

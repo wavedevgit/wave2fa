@@ -1,4 +1,4 @@
-import blessed from 'blessed';
+import blessed, { Widgets } from 'blessed';
 import clearScreen from '../utils/clearScreen.js';
 import { parseUri } from '../utils/google.js';
 import { readInputAsync } from '../utils/inputs.js';
@@ -8,12 +8,9 @@ import path from 'path';
 import { initHomeScreen } from './home.js';
 import { isValidSecret } from '../utils/otp.js';
 import { randomUUID } from 'crypto';
+import { TotpItem } from '../types.js';
 
-/**
- *
- * @param {blessed.Widgets.Screen} screen
- */
-async function initImportFromGoogleAuthScreen(screen) {
+async function initImportFromGoogleAuthScreen(screen: Widgets.Screen) {
     clearScreen(screen);
     const box = blessed.box({
         tags: true,
@@ -76,9 +73,19 @@ async function initImportFromGoogleAuthScreen(screen) {
         return;
     }
 
+    if (typeof res === 'object' && 'err' in res) {
+        box.setContent(res.err);
+        input.destroy();
+        screen.render();
+        screen.onceKey('enter', () => {
+            box.destroy();
+            screen.render();
+            initHomeScreen(screen);
+        });
+        return;
+    }
     const values = parseUri(res);
-    values.forEach((value) => (value.uuid = randomUUID()));
-    if (values?.err) {
+    if ('err' in values) {
         box.setContent(values.err);
         input.destroy();
         screen.render();
@@ -89,6 +96,7 @@ async function initImportFromGoogleAuthScreen(screen) {
         });
         return;
     }
+    // @ts-ignore
     screen.leave();
 
     if (values.some((item) => !isValidSecret(item.secret))) {

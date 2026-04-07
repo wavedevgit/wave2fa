@@ -1,14 +1,10 @@
-import blessed from 'blessed';
+import blessed, { Widgets } from 'blessed';
 import clearScreen from '../utils/clearScreen.js';
 import { readInputAsync } from '../utils/inputs.js';
 import { initHomeScreen } from './home.js';
 import { saveWithPassword, verifyPassword } from '../utils/storage.js';
 
-/**
- *
- * @param {blessed.Widgets.Screen} screen
- */
-async function initLoginScreen(screen) {
+async function initLoginScreen(screen: Widgets.Screen) {
     clearScreen(screen);
     const box = blessed.box({
         tags: true,
@@ -35,7 +31,14 @@ async function initLoginScreen(screen) {
     input.setLabel('Enter password:');
     input.censor = true;
     screen.render();
-    globalThis.password = await readInputAsync(input);
+    globalThis.password = (
+        process.argv.includes('--password')
+            ? process.argv[process.argv.indexOf('--password') + 1]
+            : process.argv
+                  .find((a) => a.startsWith('--password='))
+                  ?.split('=')[1]
+    ) as string;
+    globalThis.password ??= await readInputAsync(input);
 
     const isValidPassword = await verifyPassword();
     if (!isValidPassword && isValidPassword !== undefined) {

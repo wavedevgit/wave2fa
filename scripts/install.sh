@@ -2,11 +2,11 @@ APP_DIR="$HOME/.config/wave2fa"
 BRANCH=${1:-main} # default to main
 
 # check if node exists
-if command -v node &> /dev/null; then
-  echo "node found, installing wave2fa."
+if command -v bun &> /dev/null; then
+  echo "bun found, installing wave2fa."
 else
-  echo "Node is not installed, please install it!"
-  echo "Help: Use nvm or install it from https://nodejs.org/en/download"
+  echo "Bun is not installed, please install it!"
+  echo "Help: Use nvm or install it from https://bun.com/docs/installation"
   exit 1
 fi
 

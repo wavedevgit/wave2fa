@@ -1,4 +1,4 @@
-import blessed from 'blessed';
+import blessed, { Widgets } from 'blessed';
 import clearScreen from '../utils/clearScreen.js';
 import { addItem, validatePath } from '../utils/storage.js';
 import crypto from 'node:crypto';
@@ -7,12 +7,9 @@ import path from 'node:path';
 import { parseUri, scanQrCode } from '../utils/qrcode.js';
 import { isValidSecret } from '../utils/otp.js';
 import { initHomeScreen } from './home.js';
+import { TotpItem } from '../types.js';
 
-/**
- *
- * @param {blessed.Widgets.Screen} screen
- */
-async function initAddSecretQrCodeScreen(screen) {
+async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
     clearScreen(screen);
     const box = blessed.box({
         tags: true,
@@ -82,14 +79,16 @@ async function initAddSecretQrCodeScreen(screen) {
 
     const values = parseUri(res);
 
-    if (values.err) {
+    if ('err' in values) {
         box.setContent(values.err);
         input.destroy();
         screen.render();
         return;
     }
+    // @ts-ignore
     screen.leave();
 
+    // @ts-ignore
     values.uuid = crypto.randomUUID();
 
     if (!(await isValidSecret(values.secret))) {
@@ -104,7 +103,7 @@ async function initAddSecretQrCodeScreen(screen) {
         return;
     }
 
-    await addItem(values);
+    await addItem(values as TotpItem);
 
     box.setContent('{bold}✓{/bold} Succesfuly added!');
     input.destroy();

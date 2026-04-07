@@ -1,11 +1,7 @@
-import blessed from 'blessed';
+import blessed, { Widgets } from 'blessed';
 import clearScreen from '../utils/clearScreen.js';
 
-/**
- *
- * @param {blessed.Widgets.Screen} screen
- */
-function initHelpScreen(screen) {
+function initHelpScreen(screen: Widgets.Screen) {
     clearScreen(screen);
     const helpBox = blessed.box({
         top: 'center',
@@ -17,7 +13,7 @@ function initHelpScreen(screen) {
             left: 1,
             right: 1,
         },
-        content: `{bold}Wave2FA Help:{/bold}\nPress {bold}h{/bold} - open help\nPress {bold}n{/bold} - add new 2fa secret\n{bold}e{/bold} - add new 2fa secret using qr code\nPress {bold}t{/bold} - import keys from google auth\nPress {bold}m{/bold} - go to home screen\n`,
+        content: `{bold}Wave2FA Help:{/bold}\nPress {bold}h{/bold} - open help\nPress {bold}n{/bold} - '_e vbfg' secret\nPress {bold}e{/bold} - add new 2fa secret using qr code\nPress {bold}t{/bold} - import keys from google auth\nPress {bold}m{/bold} - go to home screen\n`,
         tags: true,
         border: 'line',
         style: {
