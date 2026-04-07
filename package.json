@@ -5,7 +5,7 @@
     "type": "module",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "build": "esbuild src/main.ts --format=esm --bundle --platform=node --outfile=dist/bundle.js --external:blessed --minify --sourcemap --external:./node_modules/*",
+        "build": "esbuild src/main.ts --format=esm --bundle --platform=node --outfile=dist/bundle.js --external:blessed --minify --sourcemap --external:./node_modules/* && sed -i 's|commitHash|$(git rev-parse --short HEAD)|' dist/bundle.js && sed -i 's|commitBranch|${GITHUB_REF##*/}|' dist/bundle.js",
         "build:dev": "rm -rf dist && mkdir -p dist && tsc --watch"
     },
     "keywords": [],
