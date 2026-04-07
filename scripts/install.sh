@@ -10,11 +10,22 @@ if ! command -v bun >/dev/null 2>&1; then
   exit 1
 fi
 
+# check curl or wget
+DOWNLOAD_CMD=""
+if command -v curl >/dev/null 2>&1; then
+  DOWNLOAD_CMD="curl -sL"
+elif command -v wget >/dev/null 2>&1; then
+  DOWNLOAD_CMD="wget -qO-"
+else
+  echo "Neither curl nor wget is installed. Please install one to proceed."
+  exit 1
+fi
+
 mkdir -p "$APP_DIR"
 
 # download latest.json
 LATEST_JSON_URL="https://raw.githubusercontent.com/wavedevgit/wave2fa-releases/refs/heads/main/$BRANCH/latest.json"
-LATEST_JSON=$(curl -sL "$LATEST_JSON_URL")
+LATEST_JSON=$($DOWNLOAD_CMD "$LATEST_JSON_URL")
 
 if [ -z "$LATEST_JSON" ]; then
   echo "Could not fetch latest.json from branch $BRANCH"
@@ -37,14 +48,22 @@ echo "Latest version for branch $BRANCH is $VERSION"
 # download bundle.zip
 BUNDLE_URL="https://raw.githubusercontent.com/wavedevgit/wave2fa-releases/refs/heads/main/$BRANCH/$VERSION/bundle.zip"
 echo "Downloading $BUNDLE_URL..."
-curl -L "$BUNDLE_URL" -o "$APP_DIR/bundle.zip"
+if [ "$DOWNLOAD_CMD" = "curl -sL" ]; then
+  curl -L "$BUNDLE_URL" -o "$APP_DIR/bundle.zip"
+else
+  wget -q "$BUNDLE_URL" -O "$APP_DIR/bundle.zip"
+fi
 
 # unzip
 unzip -o "$APP_DIR/bundle.zip" -d "$APP_DIR"
 
 # download runner
-curl -L -o "$APP_DIR/wave2fa.sh" \
-  "https://raw.githubusercontent.com/wavedevgit/wave2fa/refs/heads/$BRANCH/scripts/wave2fa.sh"
+RUNNER_URL="https://raw.githubusercontent.com/wavedevgit/wave2fa/refs/heads/$BRANCH/scripts/wave2fa.sh"
+if [ "$DOWNLOAD_CMD" = "curl -sL" ]; then
+  curl -L -o "$APP_DIR/wave2fa.sh" "$RUNNER_URL"
+else
+  wget -q -O "$APP_DIR/wave2fa.sh" "$RUNNER_URL"
+fi
 
 chmod +x "$APP_DIR/wave2fa.sh"
 
@@ -54,6 +73,8 @@ mkdir -p "$HOME/bin"
 if [ -d "/data/data/com.termux/files/usr/bin" ]; then
   ln -sf "$APP_DIR/wave2fa.sh" "/data/data/com.termux/files/usr/bin/wave2fa"
 else
+  clear
+  echo adding wave2fa to /bin/wave2fa
   sudo ln -sf "$APP_DIR/wave2fa.sh" "/bin/wave2fa"
 fi
 
