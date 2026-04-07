@@ -52,17 +52,19 @@ export async function encryptSecret(secret: string) {
 
 export async function decryptSecret(secret: string) {
     // no password is set yet
-    if (typeof secret === 'string') return secret;
-    const { data, iv: ivStr } = secret;
-    const key = crypto
-        .createHash('sha256')
-        .update(globalThis.password)
-        .digest();
-    const ivBuffer = Buffer.from(ivStr, 'base64');
-    const decipher = crypto.createDecipheriv('aes-256-cbc', key, ivBuffer);
-    let decrypted = decipher.update(data, 'base64', 'utf8');
-    decrypted += decipher.final('utf8');
-    return decrypted;
+    try {
+        if (typeof secret === 'string') return secret;
+        const { data, iv: ivStr } = secret;
+        const key = crypto
+            .createHash('sha256')
+            .update(globalThis.password)
+            .digest();
+        const ivBuffer = Buffer.from(ivStr, 'base64');
+        const decipher = crypto.createDecipheriv('aes-256-cbc', key, ivBuffer);
+        let decrypted = decipher.update(data, 'base64', 'utf8');
+        decrypted += decipher.final('utf8');
+        return decrypted;
+    } catch {}
 }
 
 const homeConfigPath = path.join(os.homedir(), '.config', 'wave2fa');

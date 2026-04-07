@@ -5,7 +5,7 @@
     "type": "module",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "build": "esbuild src/main.ts --bundle --platform=node --outfile=dist/bundle.cjs --external:blessed --minify --sourcemap",
+        "build": "esbuild src/main.ts --format=esm --bundle --platform=node --outfile=dist/bundle.js --external:blessed --minify --sourcemap --external:./node_modules/*",
         "build:dev": "rm -rf dist && mkdir -p dist && tsc --watch"
     },
     "keywords": [],
@@ -34,6 +34,11 @@
         "@typescript-eslint/parser": "^8.58.0",
         "eslint": "^10.2.0",
         "globals": "^17.4.0",
-        "typescript-eslint": "^8.58.0"
+        "typescript-eslint": "^8.58.0",
+        "@types/bun": "latest"
+    },
+    "private": true,
+    "peerDependencies": {
+        "typescript": "^5"
     }
 }

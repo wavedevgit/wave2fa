@@ -17,6 +17,7 @@ declare global {
     var password: string;
 }
 
+throw new Error("idk")
 process.noDeprecation = true;
 
 // shim buffer as some libs are using old Buffer()
