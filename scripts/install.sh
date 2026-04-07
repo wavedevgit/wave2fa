@@ -1,8 +1,9 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 APP_DIR="$HOME/.config/wave2fa"
 BRANCH=${1:-main} # default to main
 
+# check bun
 if ! command -v bun >/dev/null 2>&1; then
   echo "Bun is not installed, please install it!"
   echo "Help: Use nvm or install it from https://bun.com/docs/installation"
@@ -11,7 +12,7 @@ fi
 
 mkdir -p "$APP_DIR"
 
-# download latest.json for the branch
+# download latest.json
 LATEST_JSON_URL="https://raw.githubusercontent.com/wavedevgit/wave2fa-releases/$BRANCH/latest.json"
 LATEST_JSON=$(curl -sL "$LATEST_JSON_URL")
 
@@ -20,8 +21,8 @@ if [ -z "$LATEST_JSON" ]; then
   exit 1
 fi
 
-# extract latest version
-VERSION=$(echo "$LATEST_JSON" | bun --eval "console.log(JSON.parse(require('fs').readFileSync(0,'utf8')).version)" <(echo "$LATEST_JSON"))
+# extract version using bun
+VERSION=$(echo "$LATEST_JSON" | bun --eval "console.log(JSON.parse(require('fs').readFileSync(0,'utf8')).version)")
 
 if [ -z "$VERSION" ]; then
   echo "Could not determine latest version from latest.json"
@@ -30,7 +31,7 @@ fi
 
 echo "Latest version for branch $BRANCH is $VERSION"
 
-# download the bundle.zip for that version
+# download bundle.zip
 BUNDLE_URL="https://raw.githubusercontent.com/wavedevgit/wave2fa-releases/$BRANCH/$VERSION/bundle.zip"
 echo "Downloading $BUNDLE_URL..."
 curl -L "$BUNDLE_URL" -o "$APP_DIR/bundle.zip"
@@ -38,26 +39,29 @@ curl -L "$BUNDLE_URL" -o "$APP_DIR/bundle.zip"
 # unzip
 unzip -o "$APP_DIR/bundle.zip" -d "$APP_DIR"
 
-# download wave2fa.sh runner
+# download runner
 curl -L -o "$APP_DIR/wave2fa.sh" \
-  https://raw.githubusercontent.com/wavedevgit/wave2fa/$BRANCH/scripts/wave2fa.sh
+  "https://raw.githubusercontent.com/wavedevgit/wave2fa/$BRANCH/scripts/wave2fa.sh"
 
 chmod +x "$APP_DIR/wave2fa.sh"
 
 mkdir -p "$HOME/bin"
 
-if [ -d /data/data/com.termux/files/usr/bin/ ]; then
+# create symlink
+if [ -d "/data/data/com.termux/files/usr/bin" ]; then
   ln -sf "$APP_DIR/wave2fa.sh" "/data/data/com.termux/files/usr/bin/wave2fa"
 else
   sudo ln -sf "$APP_DIR/wave2fa.sh" "/bin/wave2fa"
 fi
 
-cd "$APP_DIR"
+cd "$APP_DIR" || exit 1
+
+# install deps
 bun i
 
 # preserve user data
 if [ ! -f "$APP_DIR/_data.json" ]; then
-   echo "[]" > "$APP_DIR/_data.json"
+  echo "[]" > "$APP_DIR/_data.json"
 fi
 
 echo "Installed wave2fa. Run with: wave2fa"
