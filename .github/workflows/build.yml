@@ -55,7 +55,7 @@ jobs:
                   mkdir -p $TARGET
                   cp -r dist/* $TARGET/
                   cp package.json "$TARGET/" || echo "no package-lock.json"
-                  zip -r bundle.zip ./*
+                  zip -r $TARGET/bundle.zip "$TARGET/*"
 
             - name: Generate latest.json with all file hashes
               run: |
