@@ -1,93 +1,94 @@
 name: Build
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version number to use for this build'
-        required: true
-        default: '0.0.1'
-      branch:
-        description: 'Branch to build'
-        required: true
-        default: 'main'
+    workflow_dispatch:
+        inputs:
+            version:
+                description: 'Version number to use for this build'
+                required: true
+                default: '0.0.1'
+            branch:
+                description: 'Branch to build'
+                required: true
+                default: 'main'
 
 jobs:
-  build:
-    permissions:
-      contents: write
+    build:
+        permissions:
+            contents: write
 
-    runs-on: ubuntu-latest
+        runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.inputs.branch }}
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  ref: ${{ github.event.inputs.branch }}
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20.x'
+            - name: Use Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: '20.x'
 
-      - run: npm i
+            - run: npm i
 
-      - name: Build & Add git hash
-        run: |
-          npm run build
-          sed -i "s/commitHash/$(git rev-parse --short HEAD)/" dist/bundle.js
-          sed -i "s/commitBranch/${{ github.event.inputs.branch }}/" dist/bundle.js
+            - name: Build & Add git hash
+              run: |
+                  npm run build
+                  COMMIT=$(git rev-parse --short HEAD)
+                  BRANCH="${{ github.event.inputs.branch }}"
+                  sed -i "s|commitHash|$COMMIT|" dist/bundle.js
+                  sed -i "s|commitBranch|$BRANCH|" dist/bundle.js
+            - name: Install jq
+              run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
+            - name: Checkout releases repo
+              uses: actions/checkout@v4
+              with:
+                  repository: wavedevgit/wave2fa-releases
+                  token: ${{ secrets.WAVE2FA_RELEASES_PAT }}
+                  path: releases
 
-      - name: Checkout releases repo
-        uses: actions/checkout@v4
-        with:
-          repository: wavedevgit/wave2fa-releases
-          token: ${{ secrets.WAVE2FA_RELEASES_PAT }}
-          path: releases
+            - name: Copy build to releases repo
+              run: |
+                  TARGET=releases/${{ github.event.inputs.branch }}/${{ github.event.inputs.version }}
+                  mkdir -p $TARGET
+                  cp -r dist/* $TARGET/
 
-      - name: Copy build to releases repo
-        run: |
-          TARGET=releases/${{ github.event.inputs.branch }}/${{ github.event.inputs.version }}
-          mkdir -p $TARGET
-          cp -r dist/* $TARGET/
+            - name: Generate latest.json with all file hashes
+              run: |
+                  TARGET_DIR="releases/${{ github.event.inputs.branch }}"
+                  VERSION_DIR="$TARGET_DIR/${{ github.event.inputs.version }}"
+                  FILES_JSON="{ }"
 
-      - name: Generate latest.json with all file hashes
-        run: |
-          TARGET_DIR="releases/${{ github.event.inputs.branch }}"
-          VERSION_DIR="$TARGET_DIR/${{ github.event.inputs.version }}"
-          FILES_JSON="{ }"
+                  for f in $(find $VERSION_DIR -type f); do
+                    REL_PATH=$(realpath --relative-to=$VERSION_DIR $f)
+                    HASH=$(sha256sum "$f" | awk '{print $1}')
+                    FILES_JSON=$(echo $FILES_JSON | jq --arg path "$REL_PATH" --arg hash "$HASH" '. + {($path): {"path": $path, "sha256": $hash}}')
+                  done
 
-          for f in $(find $VERSION_DIR -type f); do
-            REL_PATH=$(realpath --relative-to=$VERSION_DIR $f)
-            HASH=$(sha256sum "$f" | awk '{print $1}')
-            FILES_JSON=$(echo $FILES_JSON | jq --arg path "$REL_PATH" --arg hash "$HASH" '. + {($path): {"path": $path, "sha256": $hash}}')
-          done
+                  jq -n \
+                    --arg version "${{ github.event.inputs.version }}" \
+                    --arg branch "${{ github.event.inputs.branch }}" \
+                    --arg commit "${GITHUB_SHA}" \
+                    --arg shortCommit "$(git rev-parse --short HEAD)" \
+                    --arg buildTime "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+                    --argjson files "$FILES_JSON" \
+                    '{
+                      version: $version,
+                      branch: $branch,
+                      commit: $commit,
+                      shortCommit: $shortCommit,
+                      buildTime: $buildTime,
+                      files: $files
+                    }' > "$TARGET_DIR/latest.json"
 
-          jq -n \
-            --arg version "${{ github.event.inputs.version }}" \
-            --arg branch "${{ github.event.inputs.branch }}" \
-            --arg commit "${GITHUB_SHA}" \
-            --arg shortCommit "$(git rev-parse --short HEAD)" \
-            --arg buildTime "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-            --argjson files "$FILES_JSON" \
-            '{
-              version: $version,
-              branch: $branch,
-              commit: $commit,
-              shortCommit: $shortCommit,
-              buildTime: $buildTime,
-              files: $files
-            }' > "$TARGET_DIR/latest.json"
+            - name: Commit & push
+              run: |
+                  cd releases
+                  git config user.name "github-actions"
+                  git config user.email "github-actions@github.com"
 
-      - name: Commit & push
-        run: |
-          cd releases
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-
-          git add .
-          git commit -m "release: ${{ github.event.inputs.branch }} @ ${{ github.event.inputs.version }} (${GITHUB_SHA})" || echo "no changes"
-          git push
+                  git add .
+                  git commit -m "release: ${{ github.event.inputs.branch }} @ ${{ github.event.inputs.version }} (${GITHUB_SHA})" || echo "no changes"
+                  git push
