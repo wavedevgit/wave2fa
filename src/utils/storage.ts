@@ -10,7 +10,7 @@ export async function verifyPassword(): Promise<boolean | undefined> {
         let data: any = await getKeys<TotpItemRaw>(true);
         if (data.length === 0) return undefined;
         // password is not set
-        if (data.every((item) => typeof item.secret === 'string'))
+        if (data.every((item: any) => typeof item.secret === 'string'))
             return undefined;
         data = await getKeys<TotpItem>();
         return await isValidSecret(data[0].secret);
@@ -69,7 +69,7 @@ const homeConfigPath = path.join(os.homedir(), '.config', 'wave2fa');
 const homeConfigDataPath = path.join(homeConfigPath, '_data.json');
 
 // @ts-expect-error we already kill the process
-let dataPath: string = await (async () => {
+let dataPath: Promise<string> | string = (async () => {
     try {
         await fs.access(homeConfigDataPath);
         return homeConfigDataPath;
@@ -80,10 +80,11 @@ let dataPath: string = await (async () => {
 })();
 
 async function getKeys<T>(raw?: boolean): Promise<T[]> {
+    if (dataPath instanceof Promise) dataPath = await dataPath;
     const data = JSON.parse(await fs.readFile(dataPath, 'utf-8'));
     if (raw) return data;
     return await Promise.all(
-        data.map(async (item) => ({
+        data.map(async (item: any) => ({
             ...item,
             secret: await decryptSecret(item.secret),
         })),
@@ -91,6 +92,7 @@ async function getKeys<T>(raw?: boolean): Promise<T[]> {
 }
 
 async function addItem(item: TotpItem) {
+    if (dataPath instanceof Promise) dataPath = await dataPath;
     const data: any = await getKeys<TotpItem>();
     data.push(item);
 

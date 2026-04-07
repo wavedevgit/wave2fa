@@ -1,7 +1,6 @@
 import { Widgets } from 'blessed';
 
 export const roundedBorder: Widgets.Border = {
-    type: 'bg',
+    type: 'line',
     bold: 'yes',
-    ch: '-',
 };

@@ -5,7 +5,8 @@
     "type": "module",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "build": "esbuild src/main.ts --bundle --platform=node --outfile=dist/bundle.cjs --external:blessed --minify --sourcemap"
+        "build": "esbuild src/main.ts --bundle --platform=node --outfile=dist/bundle.cjs --external:blessed --minify --sourcemap",
+        "build:dev": "rm -rf dist && mkdir -p dist && tsc --watch"
     },
     "keywords": [],
     "author": "",

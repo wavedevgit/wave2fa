@@ -1,7 +1,8 @@
 import * as Jimp from 'jimp';
 import fs from 'fs/promises';
 import jsQR from 'jsqr';
-import { TotpItem } from '../types';
+import { TotpItem } from '../types.js';
+import { randomUUID } from 'crypto';
 
 type ResponseOrError<T> = T | { err: string };
 
@@ -10,6 +11,7 @@ const scanQrCode = async (path: string): Promise<ResponseOrError<string>> => {
 
     const image = await Jimp.Jimp.read(buffer);
 
+    // @ts-ignore
     const code = jsQR(
         new Uint8ClampedArray(image.bitmap.data),
         image.bitmap.width,
@@ -29,6 +31,7 @@ const parseUri = (uri: ResponseOrError<string>): ResponseOrError<TotpItem> => {
             return { err: 'Invalid qr code.' };
         if (url.host !== 'totp') return { err: 'Only TOTP is supported.' };
         return {
+            uuid: randomUUID(),
             name: decodeURIComponent(
                 url.searchParams.get('issuer') +
                     ': ' +

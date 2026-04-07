@@ -7,6 +7,7 @@ import path from 'node:path';
 import { parseUri, scanQrCode } from '../utils/qrcode.js';
 import { isValidSecret } from '../utils/otp.js';
 import { initHomeScreen } from './home.js';
+import { TotpItem } from '../types.js';
 
 async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
     clearScreen(screen);
@@ -78,7 +79,7 @@ async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
 
     const values = parseUri(res);
 
-    if (values.err) {
+    if ('err' in values) {
         box.setContent(values.err);
         input.destroy();
         screen.render();
@@ -87,6 +88,7 @@ async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
     // @ts-ignore
     screen.leave();
 
+    // @ts-ignore
     values.uuid = crypto.randomUUID();
 
     if (!(await isValidSecret(values.secret))) {
@@ -101,7 +103,7 @@ async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
         return;
     }
 
-    await addItem(values);
+    await addItem(values as TotpItem);
 
     box.setContent('{bold}✓{/bold} Succesfuly added!');
     input.destroy();
