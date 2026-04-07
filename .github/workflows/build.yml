@@ -56,7 +56,7 @@ jobs:
                   cp -r dist/* "$TARGET/"
                   cp package.json "$TARGET/" || echo "no package.json"
 
-                  (cd "$TARGET" && zip -r "../bundle.zip" .)
+                  (cd "$TARGET" && zip -r "bundle.zip" .)
 
             - name: Generate latest.json with all file hashes
               run: |
