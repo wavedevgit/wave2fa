@@ -35,9 +35,10 @@ jobs:
             - name: Build & Add git hash
               run: |
                   npm run build
-                  sed -i "s/commitHash/$(git rev-parse --short HEAD)/" dist/bundle.js
-                  sed -i "s/commitBranch/${{ github.event.inputs.branch }}/" dist/bundle.js
-
+                  COMMIT=$(git rev-parse --short HEAD)
+                  BRANCH="${{ github.event.inputs.branch }}"
+                  sed -i "s|commitHash|$COMMIT|" dist/bundle.js
+                  sed -i "s|commitBranch|$BRANCH|" dist/bundle.js
             - name: Install jq
               run: sudo apt-get update && sudo apt-get install -y jq
 
@@ -45,7 +46,7 @@ jobs:
               uses: actions/checkout@v4
               with:
                   repository: wavedevgit/wave2fa-releases
-                  token: ${{ secrets.GITHUB_TOKEN }}
+                  token: ${{ secrets.WAVE2FA_RELEASES_PAT }}
                   path: releases
 
             - name: Copy build to releases repo
