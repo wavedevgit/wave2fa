@@ -1,10 +1,6 @@
-import blessed from 'blessed';
+import { Widgets } from 'blessed';
 
-/**
- *
- * @param {blessed.Widgets.Screen} screen
- */
-const clearScreen = (screen) => {
+const clearScreen = (screen: Widgets.Screen): void => {
     screen.children
         .filter((c) => !c.options._isBase)
         .forEach((node) => {

@@ -3,28 +3,30 @@ import crypto from 'crypto';
 import { isValidSecret } from './otp.js';
 import os from 'os';
 import path from 'path';
+import { TotpItem, TotpItemRaw } from '../types.js';
 
-export async function verifyPassword() {
+export async function verifyPassword(): Promise<boolean | undefined> {
     try {
-        let data = await getKeys(true);
+        let data: any = await getKeys<TotpItemRaw>(true);
         if (data.length === 0) return undefined;
         // password is not set
         if (data.every((item) => typeof item.secret === 'string'))
             return undefined;
-        data = await getKeys();
+        data = await getKeys<TotpItem>();
         return await isValidSecret(data[0].secret);
-    } catch {
+    } catch (err) {
+        console.log(err);
         return false;
     }
 }
 
 export async function saveWithPassword() {
-    const data = await getKeys();
+    const data = await getKeys<TotpItem>();
     await fs.writeFile(
         './_data.json',
         JSON.stringify(
             await Promise.all(
-                data.map(async (item) => ({
+                data.map(async (item: TotpItem) => ({
                     ...item,
                     secret: await encryptSecret(item.secret),
                 })),
@@ -33,7 +35,7 @@ export async function saveWithPassword() {
     );
 }
 
-export async function encryptSecret(secret) {
+export async function encryptSecret(secret: string) {
     const key = crypto
         .createHash('sha256')
         .update(globalThis.password)
@@ -48,7 +50,7 @@ export async function encryptSecret(secret) {
     };
 }
 
-export async function decryptSecret(secret) {
+export async function decryptSecret(secret: string) {
     // no password is set yet
     if (typeof secret === 'string') return secret;
     const { data, iv: ivStr } = secret;
@@ -66,20 +68,18 @@ export async function decryptSecret(secret) {
 const homeConfigPath = path.join(os.homedir(), '.config', 'wave2fa');
 const homeConfigDataPath = path.join(homeConfigPath, '_data.json');
 
-const localPath = path.join(os.homedir(), './_data.json');
-let dataPath;
-
-(async () => {
+// @ts-expect-error we already kill the process
+let dataPath: string = await (async () => {
     try {
         await fs.access(homeConfigDataPath);
-        dataPath = homeConfigDataPath;
+        return homeConfigDataPath;
     } catch {
         console.log('config files dont exist, please configure wave2fa first!');
         process.kill(1);
     }
 })();
 
-async function getKeys(raw) {
+async function getKeys<T>(raw?: boolean): Promise<T[]> {
     const data = JSON.parse(await fs.readFile(dataPath, 'utf-8'));
     if (raw) return data;
     return await Promise.all(
@@ -90,8 +90,8 @@ async function getKeys(raw) {
     );
 }
 
-async function addItem(item) {
-    const data = await getKeys();
+async function addItem(item: TotpItem) {
+    const data: any = await getKeys<TotpItem>();
     data.push(item);
 
     for (let item of data) {
@@ -99,7 +99,7 @@ async function addItem(item) {
     }
     await fs.writeFile(dataPath, JSON.stringify(data), 'utf-8');
 }
-async function validatePath(path) {
+async function validatePath(path: string) {
     try {
         await fs.stat(path);
         return true;

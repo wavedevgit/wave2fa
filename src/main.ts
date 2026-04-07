@@ -8,14 +8,20 @@ import GIT_HASH from './gitHash.js';
 import checkForUpdates from './updater.js';
 import { initLoginScreen } from './screens/loginScreen.js';
 import { saveRun } from './utils/lastRun.js';
+import { roundedBorder } from './utils/roundedBorder.js';
 
 checkForUpdates();
 saveRun();
+
+declare global {
+    var password: string;
+}
 
 process.noDeprecation = true;
 
 // shim buffer as some libs are using old Buffer()
 const _Buffer = Buffer;
+// @ts-ignore
 function BufferShim(arg, encoding) {
     if (typeof arg === 'number') {
         return _Buffer.alloc(arg);
@@ -26,6 +32,7 @@ function BufferShim(arg, encoding) {
 Object.setPrototypeOf(BufferShim, _Buffer);
 BufferShim.prototype = _Buffer.prototype;
 
+// @ts-ignore
 global.Buffer = BufferShim;
 
 const screen = blessed.screen({
@@ -43,9 +50,7 @@ screen.append(
             '{bold}Wave2FA{/bold} - V1.0.0 ({bold}' + GIT_HASH + '{/bold})',
         tags: true,
         align: 'center',
-        border: {
-            type: 'line',
-        },
+        border: roundedBorder,
         style: {
             border: { fg: 'blue' },
         },
@@ -60,17 +65,15 @@ screen.append(
         tags: true,
         content:
             'press {bold}q{/bold} to quit, press {bold}h{/bold} for help, press {bold}m{/bold} for home',
-        border: {
-            type: 'line',
-            bold: true,
-        },
+        border: roundedBorder,
+
         style: {
             border: { fg: 'cyan' },
         },
     }),
 );
 
-globalThis.password = null;
+globalThis.password = '';
 
 initLoginScreen(screen);
 

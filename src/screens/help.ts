@@ -1,11 +1,7 @@
-import blessed from 'blessed';
+import blessed, { Widgets } from 'blessed';
 import clearScreen from '../utils/clearScreen.js';
 
-/**
- *
- * @param {blessed.Widgets.Screen} screen
- */
-function initHelpScreen(screen) {
+function initHelpScreen(screen: Widgets.Screen) {
     clearScreen(screen);
     const helpBox = blessed.box({
         top: 'center',

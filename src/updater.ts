@@ -3,7 +3,7 @@ import { repo } from './gitHash.js';
 import fs from 'fs/promises';
 import { getLastRun } from './utils/lastRun.js';
 
-async function getShortHash() {
+async function getShortHash(): Promise<string> {
     const res = await fetch(
         `https://api.github.com/repos/${repo.owner}/${repo.repo}/commits/${repo.branch}`,
     );
@@ -40,10 +40,10 @@ export default async function checkForUpdates() {
     const shortHash = await getShortHash();
 
     // skip checks if not running with bundle.cjs file
-    if (!filePath.endsWith('bundle.cjs')) return;
+    if (!filePath?.endsWith?.('bundle.cjs')) return;
 
     // only check for updates every 5 mins
-    const lastRun = new Date(await getLastRun());
+    const lastRun = await getLastRun();
     if (Date.now() - lastRun < 60 * 5 * 1000) return;
 
     if (GIT_HASH !== shortHash) {

@@ -5,15 +5,18 @@
     "type": "module",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "build": "esbuild src/main.js   --bundle   --platform=node   --outfile=dist/bundle.cjs   --external:blessed --minify --sourcemap"
+        "build": "esbuild src/main.ts --bundle --platform=node --outfile=dist/bundle.cjs --external:blessed --minify --sourcemap"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "description": "",
+    "resolutions": {},
     "dependencies": {
+        "@types/blessed": "^0.1.27",
         "blessed": "^0.1.81",
         "canvas": "^3.2.1",
+        "clipboardy": "^5.3.1",
         "esbuild": "^0.27.2",
         "jimp": "^1.6.0",
         "jsqr": "^1.4.0",
@@ -23,6 +26,13 @@
         "speakeasy": "^2.0.0"
     },
     "devDependencies": {
-        "@types/node": "^25.2.2"
+        "@eslint/js": "^10.0.1",
+        "@types/node": "^25.2.2",
+        "@types/speakeasy": "^2.0.10",
+        "@typescript-eslint/eslint-plugin": "^8.58.0",
+        "@typescript-eslint/parser": "^8.58.0",
+        "eslint": "^10.2.0",
+        "globals": "^17.4.0",
+        "typescript-eslint": "^8.58.0"
     }
 }

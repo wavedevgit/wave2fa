@@ -1,6 +1,8 @@
 import protobufjs from 'protobufjs';
 import { base32Encode } from './base32.js';
 import { normalizeBase32 } from './otp.js';
+import { TotpItem } from '../types.js';
+import { randomUUID } from 'node:crypto';
 
 const { parse } = protobufjs;
 
@@ -48,7 +50,6 @@ message MigrationPayload {
   int32 batch_index = 4;
   int32 batch_id = 5;
 }`;
-
 const { root } = parse(PROTOBUF_MIGRATION_PAYLOAD);
 
 const Algorithm = {
@@ -57,19 +58,39 @@ const Algorithm = {
     2: 'SHA256',
     3: 'SHA512',
     4: 'MD5',
-};
+} as const;
+
 const DigitCount = {
     0: null, // unspecified
     1: 6,
     2: 8,
-};
+} as const;
+
 const OtpType = {
     0: null,
     1: 'HOTP',
     2: 'TOTP',
+} as const;
+
+export type MigrationPayloadOtpParameters = {
+    secret: Uint8Array;
+    name: string;
+    issuer: string;
+    algorithm: keyof typeof Algorithm; // numeric key
+    digits: keyof typeof DigitCount; // numeric key
+    type: keyof typeof OtpType; // numeric key
+    counter?: bigint | number; // counter only for HOTP
 };
 
-export function parseUri(uri) {
+export type MigrationPayloadType = {
+    otpParameters: MigrationPayloadOtpParameters[];
+    version?: number;
+    batchSize?: number;
+    batchIndex?: number;
+    batchId?: number;
+};
+
+export function parseUri(uri: string): { err: string } | TotpItem[] {
     const url = new URL(uri);
     if (url.protocol !== 'otpauth-migration:')
         return {
@@ -80,26 +101,27 @@ export function parseUri(uri) {
             err: 'Invalid Qr code, this is not a google authenticator migration qr code!',
         };
 
-    if (!url.searchParams.get('data'))
-        return {
-            err: 'Invalid Qr code, this is not a google authenticator migration qr code!',
-        };
+    const dataParam = url.searchParams.get('data');
+    if (!dataParam) return { err: 'Invalid Qr code, missing data parameter' };
 
     try {
-        const data = Buffer.from(url.searchParams.get('data'), 'base64');
+        const data = Buffer.from(dataParam, 'base64');
         const MigrationPayload = root.lookupType('MigrationPayload');
-        const otpParams = MigrationPayload.decode(data).otpParameters;
-        return otpParams.map((otpParam) => ({
-            name: otpParam.name + ' ' + otpParam.issuer,
+        const decoded = MigrationPayload.decode(
+            data,
+        ) as any as MigrationPayloadType;
+        return decoded.otpParameters.map((otpParam) => ({
+            uuid: randomUUID(),
+            name: `${otpParam.name} ${otpParam.issuer}`,
             algorithm: Algorithm[otpParam.algorithm],
             type: OtpType[otpParam.type],
-            digits: DigitCount[otpParam.digits],
+            digits: DigitCount[otpParam.digits] || 6,
             secret: normalizeBase32(base32Encode(otpParam.secret)),
             period: 30,
         }));
     } catch (err) {
         return {
-            err: 'Failed to parse qr code data: ' + err.toString() + err.stack,
+            err: 'Failed to parse qr code data: ' + (err as Error).toString(),
         };
     }
 }

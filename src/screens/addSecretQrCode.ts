@@ -1,4 +1,4 @@
-import blessed from 'blessed';
+import blessed, { Widgets } from 'blessed';
 import clearScreen from '../utils/clearScreen.js';
 import { addItem, validatePath } from '../utils/storage.js';
 import crypto from 'node:crypto';
@@ -8,11 +8,7 @@ import { parseUri, scanQrCode } from '../utils/qrcode.js';
 import { isValidSecret } from '../utils/otp.js';
 import { initHomeScreen } from './home.js';
 
-/**
- *
- * @param {blessed.Widgets.Screen} screen
- */
-async function initAddSecretQrCodeScreen(screen) {
+async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
     clearScreen(screen);
     const box = blessed.box({
         tags: true,
@@ -88,6 +84,7 @@ async function initAddSecretQrCodeScreen(screen) {
         screen.render();
         return;
     }
+    // @ts-ignore
     screen.leave();
 
     values.uuid = crypto.randomUUID();
