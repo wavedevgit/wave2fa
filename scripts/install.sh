@@ -22,7 +22,10 @@ if [ -z "$LATEST_JSON" ]; then
 fi
 
 # extract version using bun
-VERSION=$(echo "$LATEST_JSON" | bun --eval "console.log(JSON.parse(require('fs').readFileSync(0,'utf8')).version)")
+TMPFILE=$(mktemp)
+printf '%s' "$LATEST_JSON" > "$TMPFILE"
+VERSION=$(bun --eval "console.log(JSON.parse(require('fs').readFileSync('$TMPFILE','utf8')).version)")
+rm -f "$TMPFILE"
 
 if [ -z "$VERSION" ]; then
   echo "Could not determine latest version from latest.json"
