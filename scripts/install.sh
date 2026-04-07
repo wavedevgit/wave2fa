@@ -44,7 +44,7 @@ unzip -o "$APP_DIR/bundle.zip" -d "$APP_DIR"
 
 # download runner
 curl -L -o "$APP_DIR/wave2fa.sh" \
-  "https://raw.githubusercontent.com/wavedevgit/wave2fa/refs/heads/main/$BRANCH/scripts/wave2fa.sh"
+  "https://raw.githubusercontent.com/wavedevgit/wave2fa/refs/heads/$BRANCH/scripts/wave2fa.sh"
 
 chmod +x "$APP_DIR/wave2fa.sh"
 
