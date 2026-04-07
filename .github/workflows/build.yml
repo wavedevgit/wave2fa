@@ -52,10 +52,11 @@ jobs:
             - name: Copy build to releases repo
               run: |
                   TARGET=releases/${{ github.event.inputs.branch }}/${{ github.event.inputs.version }}
-                  mkdir -p $TARGET
-                  cp -r dist/* $TARGET/
-                  cp package.json "$TARGET/" || echo "no package-lock.json"
-                  zip -r $TARGET/bundle.zip "$TARGET/*"
+                  mkdir -p "$TARGET"
+                  cp -r dist/* "$TARGET/"
+                  cp package.json "$TARGET/" || echo "no package.json"
+
+                  (cd "$TARGET" && zip -r "../bundle.zip" .)
 
             - name: Generate latest.json with all file hashes
               run: |
