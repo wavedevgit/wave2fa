@@ -44,7 +44,7 @@ jobs:
             - name: Checkout releases repo
               uses: actions/checkout@v4
               with:
-                  repository: wave2fa/wave2fa-releases
+                  repository: wavedevgit/wave2fa-releases
                   token: ${{ secrets.GITHUB_TOKEN }}
                   path: releases
 
