@@ -54,6 +54,8 @@ jobs:
                   TARGET=releases/${{ github.event.inputs.branch }}/${{ github.event.inputs.version }}
                   mkdir -p $TARGET
                   cp -r dist/* $TARGET/
+                  cp package.json "$TARGET/" || echo "no package-lock.json"
+                  zip -r bundle.zip ./*
 
             - name: Generate latest.json with all file hashes
               run: |
