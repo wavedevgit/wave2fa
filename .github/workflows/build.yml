@@ -96,10 +96,21 @@ jobs:
                   git config --global user.name "github-actions"
                   git config --global user.email "github-actions@github.com"
 
+                  # Commit package.json if changed
                   git add package.json
-                  git commit -m "bump version: ${{ github.event.inputs.version }}"
-                  git push
+                  if ! git diff --cached --quiet; then
+                    git commit -m "bump version: ${{ github.event.inputs.version }}"
+                    git push
+                  else
+                    echo "No changes in package.json to commit"
+                  fi
+
+                  # Commit releases if changed
                   cd releases
                   git add .
-                  git commit -m "release: ${{ github.event.inputs.branch }} @ ${{ github.event.inputs.version }} (${GITHUB_SHA})" || echo "no changes"
-                  git push
+                  if ! git diff --cached --quiet; then
+                    git commit -m "release: ${{ github.event.inputs.branch }} @ ${{ github.event.inputs.version }} (${GITHUB_SHA})"
+                    git push
+                  else
+                    echo "No changes in releases to commit"
+                  fi

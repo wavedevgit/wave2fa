@@ -10,10 +10,14 @@ A lightweight 2fa authenticator in terminal ui.
 2. run this command
 
 ```sh
+# local test
 git clone --depth=1 https://github.com/wavedevgit/wave2fa
 cd wave2fa
-npm i
-node src/main.js 
+bun i
+bun build:dev
+bun dist/main.js
+# or install alpha (might have a lot of bugs, rerun to update to latest)
+curl -fSS https://raw.githubusercontent.com/wavedevgit/wave2fa/refs/heads/development/scripts/install.sh | sh -s -- development
 ```
 
 ## Contributing
