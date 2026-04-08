@@ -57,7 +57,7 @@ jobs:
                   cp scripts/wave2fa.sh $TARGET/
                   cp package.json "$TARGET/" || echo "no package.json"
                   TARGET_DIR_BRANCH="releases/${{ github.event.inputs.branch }}"
-                  VERSION_DIR="$TARGET/${{ github.event.inputs.version }}"
+                  VERSION_DIR="$TARGET_DIR_BRANCH/${{ github.event.inputs.version }}"
                   FILES_JSON="{ }"
 
                   for f in $(find $VERSION_DIR -type f); do
