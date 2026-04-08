@@ -1,7 +1,7 @@
 #!/bin/sh
 
 APP_DIR="$HOME/.config/wave2fa"
-BUNDLE="$APP_DIR/bundle.js"
+BUNDLE="$APP_DIR/dist/bundle.js"
 INFO_JSON="$APP_DIR/info.json"
 
 RED='\033[31m'
