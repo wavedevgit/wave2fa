@@ -20,7 +20,7 @@ rm -f "$LOG_FILE"
 exec 3> "$LOG_FILE"
 
 
-bun "$BUNDLE"
+bun "$BUNDLE" $@
 
 STATUS=${$?}
 # error logging is handled by wave2fa bundle
