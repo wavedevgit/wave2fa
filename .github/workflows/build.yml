@@ -54,6 +54,7 @@ jobs:
               run: |
                   TARGET=releases/${{ github.event.inputs.branch }}/${{ github.event.inputs.version }}
                   mkdir -p "$TARGET"
+                  mkdir -p "$TARGET/dist"
                   cp -r dist/* "$TARGET/dist"
                   cp scripts/wave2fa.sh $TARGET/
                   cp package.json "$TARGET/" || echo "no package.json"
