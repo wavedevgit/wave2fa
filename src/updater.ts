@@ -6,7 +6,7 @@ import type { Widgets } from 'blessed';
 
 async function getLatestReleaseInfo() {
     const res = await fetch(
-        `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/${repo.branch}/latest.json`,
+        `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/refs/heads/main/${repo.branch}/latest.json`,
     );
     return res.json() as Promise<{
         version: string;
