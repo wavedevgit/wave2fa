@@ -37,7 +37,9 @@ jobs:
                   npm run build
                   COMMIT=$(git rev-parse --short HEAD)
                   BRANCH="${{ github.event.inputs.branch }}"
+                  VERSION="${{ github.event.inputs.version }}"
                   sed -i "s|commitHash|$COMMIT|" dist/bundle.js
+                  sed -i "s|version|$VERSION|" dist/bundle.js
                   sed -i "s|commitBranch|$BRANCH|" dist/bundle.js
             - name: Install jq
               run: sudo apt-get update && sudo apt-get install -y jq
