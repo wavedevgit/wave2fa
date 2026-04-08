@@ -1,6 +1,6 @@
 #!/bin/sh
 
-APP_DIR="$HOME/.config/wave2fa"
+export APP_DIR="$HOME/.config/wave2fa"
 BUNDLE="$APP_DIR/dist/bundle.js"
 export INFO_JSON="$APP_DIR/info.json"
 export LOG_FILE="$APP_DIR/tmp_output.log"
@@ -14,13 +14,31 @@ RESET='\033[0m'
 generate_issue_body() {
     bun -e '
         const fs = require("fs");
+        const crypto = require("crypto");
+
         let info = "No info.json found";
         try {
             info = JSON.stringify(JSON.parse(fs.readFileSync(process.env.INFO_JSON, "utf8")));
         } catch (e) {}
+
         const output = fs.readFileSync(process.env.LOG_FILE, "utf8");
+
+        let hash = "No bundle.js found";
+        try {
+            const bundleData = fs.readFileSync(process.env.APP_DIR + "/dist/bundle.js");
+            const sha = crypto.createHash("sha256");
+            sha.update(bundleData);
+            hash = sha.digest("hex");
+        } catch (e) {}
+
         const esc = s => s.replace(/`/g, "\\`").replace(/\$/g, "\\$");
-        console.log(encodeURIComponent("# Version info\n```json\n" + esc(info) + "\n```\n\n# Error\n```text\n" + esc(output) + "\n```"));
+
+        const body = 
+            "# Version info\n```json\n" + esc(info) + "\n```\n\n" +
+            "# Bundle hash\n```\n" + hash + "\n```\n\n" +
+            "# Error\n```text\n" + esc(output) + "\n```";
+
+        console.log(encodeURIComponent(body));
     '
 }
 
