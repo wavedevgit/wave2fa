@@ -56,6 +56,7 @@ fi
 
 # unzip
 unzip -o "$APP_DIR/bundle.zip" -d "$APP_DIR"
+rm -rf "$APP_DIR/bundle.zip"
 
 chmod +x "$APP_DIR/wave2fa.sh"
 

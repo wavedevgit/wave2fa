@@ -3,32 +3,35 @@
 APP_DIR="$HOME/.config/wave2fa"
 BUNDLE="$APP_DIR/dist/bundle.js"
 INFO_JSON="$APP_DIR/info.json"
+LOG_FILE="$APP_DIR/tmp_output.log"
 
 RED='\033[31m'
 GREEN='\033[32m'
 CYAN='\033[36m'
 RESET='\033[0m'
 
-# urlencode using Bun
-urlencode() {
-    bun -e 'console.log(encodeURIComponent(process.argv.slice(1).join("")))' "$@"
-}
-
-# generate GitHub issue body using Bun
 generate_issue_body() {
-    bun -e 'const fs=require("fs");let info="No info.json found";try{info=fs.readFileSync("'"$INFO_JSON"'","utf8")}catch{}const output=process.argv[1];const esc=s=>s.replace(/`/g,"\\`").replace(/\$/g,"\\$");console.log(encodeURIComponent(`# Version info\n\`\`\`json\n${esc(info)}\n\`\`\`\n\n# Error\n\`\`\`text\n${esc(output)}\n\`\`\``));' "$1"
+    bun -e 'const fs=require("fs");let info="No info.json found";try{info=JSON.stringify(JSON.parse(fs.readFileSync("'"$INFO_JSON"'","utf8"))}catch{}const output=fs.readFileSync("'"$LOG_FILE"'","utf8");const esc=s=>s.replace(/`/g,"\\`").replace(/\$/g,"\\$");console.log(encodeURIComponent(`# Version info\n\`\`\`json\n${esc(info)}\n\`\`\`\n\n# Error\n\`\`\`text\n${esc(output)}\n\`\`\``));'
 }
 
-# Run bundle
-OUTPUT=$(bun "$BUNDLE" 2>&1)
-STATUS=$?
+rm -f "$LOG_FILE"
+
+# Open a new fd 3 for logging
+exec 3> "$LOG_FILE"
+
+
+bun "$BUNDLE"
+
+STATUS=${$?}
+# error logging is handled by wave2fa bundle
+OUTPUT=$(cat "$LOG_FILE")
+
+echo "$OUTPUT" | grep -qi '^error:' && STATUS=1
 
 if [ "$STATUS" -ne 0 ]; then
     printf "${RED}wave2fa exited with error${RESET}\n\n"
-    printf "%s\n\n" "$OUTPUT"
 
-    # generate URL-encoded issue body via Bun
-    BODY_ENC=$(generate_issue_body "$OUTPUT")
+    BODY_ENC=$(generate_issue_body)
     ISSUE_URL="https://github.com/wavedevgit/wave2fa/issues/new?title=wave2fa+runtime+error&body=$BODY_ENC"
 
     printf "${CYAN}Open GitHub issue with the error (clickable in supported terminals):${RESET}\n"
@@ -36,7 +39,11 @@ if [ "$STATUS" -ne 0 ]; then
 
     exit 1
 else
-    printf "${GREEN}Hey friend! 🙂\n"
-    printf "wave2fa is completely open source and made with ❤️ for everyone.\n"
-    printf "If you’re enjoying it and want to help keep it growing, consider donating today & starring the repo!\n${RESET}"
+    if [ ! -f "$HOME/.config/wave2fa/disable-donation-message" ] && [ $(( RANDOM % 100 )) -lt 5 ]; then
+        printf "${GREEN}Hey friend! 🙂\n"
+        printf "wave2fa is completely open source and made with ❤️ for everyone.\n"
+        printf "If you’re enjoying it and want to help keep it growing, consider donating today & starring the repo!\n${RESET}"
+    fi
 fi
+
+rm -f "$LOG_FILE"

@@ -9,9 +9,28 @@ import checkForUpdates from './updater.js';
 import { initLoginScreen } from './screens/loginScreen.js';
 import { saveRun } from './utils/lastRun.js';
 import { roundedBorder } from './utils/roundedBorder.js';
+import fs from 'fs';
+import path from 'path';
+import { homeConfigPath } from './utils/storage.js';
 
 checkForUpdates();
 saveRun();
+
+const LOG_FILE = path.join(homeConfigPath, 'tmp_output.log');
+
+// errors logger
+process.on('uncaughtException', (err) => {
+    fs.writeFileSync(LOG_FILE, (err.stack || err.toString()) + '\n', {
+        flag: 'a',
+    });
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason: any) => {
+    fs.writeFileSync(LOG_FILE, (reason.stack || reason).toString() + '\n', {
+        flag: 'a',
+    });
+});
 
 declare global {
     var password: string;
@@ -77,7 +96,10 @@ globalThis.password = '';
 
 initLoginScreen(screen);
 
-screen.key(['q', 'C-c'], () => process.exit(0));
+screen.key(['q', 'C-c'], () => {
+    screen.destroy();
+    process.exit(0);
+});
 
 screen.key('h', () => {
     initHelpScreen(screen);
