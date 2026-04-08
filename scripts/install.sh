@@ -1,64 +1,95 @@
-#!/usr/bin/env bash
+name: Build
 
-APP_DIR="$HOME/.config/wave2fa"
-BRANCH=${1:-main} # default to main
+on:
+    workflow_dispatch:
+        inputs:
+            version:
+                description: 'Version number to use for this build'
+                required: true
+                default: '0.0.1'
+            branch:
+                description: 'Branch to build'
+                required: true
+                default: 'main'
 
-# check if bun exists
-if ! command -v bun &> /dev/null; then
-  echo "Bun is not installed, please install it!"
-  echo "Help: Use nvm or install it from https://bun.com/docs/installation"
-  exit 1
-fi
+jobs:
+    build:
+        permissions:
+            contents: write
 
-mkdir -p "$APP_DIR"
+        runs-on: ubuntu-latest
 
-# download latest.json for the branch
-LATEST_JSON_URL="https://raw.githubusercontent.com/wavedevgit/wave2fa-releases/$BRANCH/latest.json"
-LATEST_JSON=$(curl -sL "$LATEST_JSON_URL")
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  ref: ${{ github.event.inputs.branch }}
 
-if [ -z "$LATEST_JSON" ]; then
-  echo "Could not fetch latest.json from branch $BRANCH"
-  exit 1
-fi
+            - name: Use Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: '20.x'
 
-# extract latest version
-VERSION=$(echo "$LATEST_JSON" | bun --eval "console.log(JSON.parse(require('fs').readFileSync(0,'utf8')).version)" <(echo "$LATEST_JSON"))
+            - run: npm i
 
-if [ -z "$VERSION" ]; then
-  echo "Could not determine latest version from latest.json"
-  exit 1
-fi
+            - name: Build & Add git hash
+              run: |
+                  npm run build
+                  COMMIT=$(git rev-parse --short HEAD)
+                  BRANCH="${{ github.event.inputs.branch }}"
+                  sed -i "s|commitHash|$COMMIT|" dist/bundle.js
+                  sed -i "s|commitBranch|$BRANCH|" dist/bundle.js
+            - name: Install jq
+              run: sudo apt-get update && sudo apt-get install -y jq
 
-echo "Latest version for branch $BRANCH is $VERSION"
+            - name: Checkout releases repo
+              uses: actions/checkout@v4
+              with:
+                  repository: wavedevgit/wave2fa-releases
+                  token: ${{ secrets.WAVE2FA_RELEASES_PAT }}
+                  path: releases
 
-# download the bundle.zip for that version
-BUNDLE_URL="https://raw.githubusercontent.com/wavedevgit/wave2fa-releases/$BRANCH/$VERSION/bundle.zip"
-echo "Downloading $BUNDLE_URL..."
-curl -L "$BUNDLE_URL" -o "$APP_DIR/bundle.zip"
+            - name: Copy build to releases repo
+              run: |
+                  TARGET=releases/${{ github.event.inputs.branch }}/${{ github.event.inputs.version }}
+                  mkdir -p "$TARGET"
+                  cp -r dist/* "$TARGET/"
+                  cp scripts/wave2fa.sh $TARGET/
+                  cp package.json "$TARGET/" || echo "no package.json"
+                  TARGET_DIR_BRANCH="releases/${{ github.event.inputs.branch }}"
+                  VERSION_DIR="$TARGET/${{ github.event.inputs.version }}"
+                  FILES_JSON="{ }"
 
-# unzip
-unzip -o "$APP_DIR/bundle.zip" -d "$APP_DIR"
+                  for f in $(find $VERSION_DIR -type f); do
+                    REL_PATH=$(realpath --relative-to=$VERSION_DIR $f)
+                    HASH=$(sha256sum "$f" | awk '{print $1}')
+                    FILES_JSON=$(echo $FILES_JSON | jq --arg path "$REL_PATH" --arg hash "$HASH" '. + {($path): {"path": $path, "sha256": $hash}}')
+                  done
 
-# download wave2fa.sh runner
-curl -L -o "$APP_DIR/wave2fa.sh" \
-  https://raw.githubusercontent.com/wavedevgit/wave2fa/$BRANCH/scripts/wave2fa.sh
+                  jq -n \
+                    --arg version "${{ github.event.inputs.version }}" \
+                    --arg branch "${{ github.event.inputs.branch }}" \
+                    --arg commit "${GITHUB_SHA}" \
+                    --arg shortCommit "$(git rev-parse --short HEAD)" \
+                    --arg buildTime "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+                    --argjson files "$FILES_JSON" \
+                    '{
+                      version: $version,
+                      branch: $branch,
+                      commit: $commit,
+                      shortCommit: $shortCommit,
+                      buildTime: $buildTime,
+                      files: $files
+                    }' > "$TARGET_DIR_BRANCH/latest.json"
+                  cp $TARGET_DIR_BRANCH/latest.json $TARGET/info.json
+                  (cd "$TARGET" && zip -r "bundle.zip" .)
 
-chmod +x "$APP_DIR/wave2fa.sh"
+            - name: Commit & push
+              run: |
+                  cd releases
+                  git config user.name "github-actions"
+                  git config user.email "github-actions@github.com"
 
-mkdir -p "$HOME/bin"
-
-if [ -d /data/data/com.termux/files/usr/bin/ ]; then
-  ln -sf "$APP_DIR/wave2fa.sh" "/data/data/com.termux/files/usr/bin/wave2fa"
-else
-  sudo ln -sf "$APP_DIR/wave2fa.sh" "/bin/wave2fa"
-fi
-
-cd "$APP_DIR"
-bun i
-
-# preserve user data
-if [ ! -f "$APP_DIR/_data.json" ]; then
-   echo "[]" > "$APP_DIR/_data.json"
-fi
-
-echo "Installed wave2fa. Run with: wave2fa"
+                  git add .
+                  git commit -m "release: ${{ github.event.inputs.branch }} @ ${{ github.event.inputs.version }} (${GITHUB_SHA})" || echo "no changes"
+                  git push
