@@ -70,15 +70,16 @@ export async function decryptSecret(secret: string) {
 const homeConfigPath = path.join(os.homedir(), '.config', 'wave2fa');
 const homeConfigDataPath = path.join(homeConfigPath, '_data.json');
 
-// @ts-expect-error we already kill the process
 let dataPath: Promise<string> | string = (async () => {
+    const dir = path.dirname(homeConfigDataPath);
+    await fs.mkdir(dir, { recursive: true });
+
     try {
         await fs.access(homeConfigDataPath);
-        return homeConfigDataPath;
     } catch {
-        console.log('config files dont exist, please configure wave2fa first!');
-        process.kill(1);
+        await fs.writeFile(homeConfigDataPath, '[]', 'utf8');
     }
+    return homeConfigDataPath;
 })();
 
 async function getKeys<T>(raw?: boolean): Promise<T[]> {

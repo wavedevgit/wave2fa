@@ -9,7 +9,7 @@ import checkForUpdates from './updater.js';
 import { initLoginScreen } from './screens/loginScreen.js';
 import { saveRun } from './utils/lastRun.js';
 import { roundedBorder } from './utils/roundedBorder.js';
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import { homeConfigPath } from './utils/storage.js';
 
@@ -22,16 +22,17 @@ saveRun();
 
 const LOG_FILE = path.join(homeConfigPath, 'tmp_output.log');
 
+await fs.mkdir(homeConfigPath, { recursive: true });
 // errors logger
-process.on('uncaughtException', (err) => {
-    fs.writeFileSync(LOG_FILE, (err.stack || err.toString()) + '\n', {
+process.on('uncaughtException', async (err) => {
+    await fs.writeFile(LOG_FILE, (err.stack || err.toString()) + '\n', {
         flag: 'a',
     });
     process.exit(1);
 });
 
-process.on('unhandledRejection', (reason: any) => {
-    fs.writeFileSync(LOG_FILE, (reason.stack || reason).toString() + '\n', {
+process.on('unhandledRejection', async (reason: any) => {
+    await fs.writeFile(LOG_FILE, (reason.stack || reason).toString() + '\n', {
         flag: 'a',
     });
 });
