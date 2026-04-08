@@ -1,55 +1,41 @@
-import GIT_HASH from './gitHash.js';
+import { GIT_HASH, VERSION } from './gitHash.js';
 import { repo } from './gitHash.js';
-import fs from 'fs/promises';
+import { toast } from './utils/toast.js';
 import { getLastRun } from './utils/lastRun.js';
+import type { Widgets } from 'blessed';
 
-async function getShortHash(): Promise<string> {
+async function getLatestReleaseInfo() {
     const res = await fetch(
-        `https://api.github.com/repos/${repo.owner}/${repo.repo}/commits/${repo.branch}`,
+        `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/${repo.branch}/latest.json`,
     );
-    const data = await res.json();
-    const shortHash = data.sha.slice(0, 7);
-    return shortHash;
+    return res.json() as Promise<{
+        version: string;
+        branch: string;
+        commit: string;
+        shortCommit: string;
+        buildTime: string;
+        files: Record<string, { path: string; sha256: string }>;
+    }>;
 }
 
-async function getLatestBundleContent() {
-    const res = await fetch(
-        `https://api.github.com/repos/${repo.owner}/${repo.repo}/releases`,
-        {
-            headers: { 'User-Agent': 'node' },
-        },
-    );
-    const data = await res.json();
-    const asset = data.assets.find(
-        (a: any) => a.name === `bundle_${repo.branch}.cjs`,
-    );
-    return await (await fetch(asset.browser_download_url)).text();
-}
-
-export default async function checkForUpdates() {
-    const filePath = (() => {
-        try {
-            // try commonjs __filename if fail then return esm filename
-            if (__filename) return __filename;
-            return import.meta.filename;
-        } catch {}
-    })();
-
+export default async function checkForUpdates(screen: Widgets.Screen) {
     // skip checks if wasnt built using build ci
     if (GIT_HASH === 'commitHash') return;
-    const shortHash = await getShortHash();
-
-    // skip checks if not running with bundle.cjs file
-    if (!filePath?.endsWith?.('bundle.cjs')) return;
 
     // only check for updates every 5 mins
     const lastRun = await getLastRun();
     if (Date.now() - lastRun < 60 * 5 * 1000) return;
 
-    if (GIT_HASH !== shortHash) {
-        // auto update
-        const content = await getLatestBundleContent();
-        await fs.writeFile(filePath, content, 'utf-8');
-        return;
+    try {
+        const latest = await getLatestReleaseInfo();
+
+        if (GIT_HASH !== latest.shortCommit) {
+            toast(
+                `wave2fa update available: ${VERSION} → ${latest.version} (${latest.shortCommit})`,
+                screen,
+            );
+        }
+    } catch (err) {
+        console.error('Failed to check for updates:', err);
     }
 }

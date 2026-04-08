@@ -4,7 +4,7 @@ import { initHomeScreen } from './screens/home.js';
 import { initAddSecretScreen } from './screens/addSecret.js';
 import { initImportFromGoogleAuthScreen } from './screens/importFromGoogleAuth.js';
 import { initAddSecretQrCodeScreen } from './screens/addSecretQrCode.js';
-import GIT_HASH from './gitHash.js';
+import { GIT_HASH, VERSION } from './gitHash.js';
 import checkForUpdates from './updater.js';
 import { initLoginScreen } from './screens/loginScreen.js';
 import { saveRun } from './utils/lastRun.js';
@@ -13,7 +13,11 @@ import fs from 'fs';
 import path from 'path';
 import { homeConfigPath } from './utils/storage.js';
 
-checkForUpdates();
+if (process.argv.includes('--version')) {
+    console.log(`Wave2fa ${VERSION} (${GIT_HASH})`);
+    process.exit(0);
+}
+
 saveRun();
 
 const LOG_FILE = path.join(homeConfigPath, 'tmp_output.log');
@@ -66,7 +70,11 @@ screen.append(
         top: 'top',
         height: 3,
         content:
-            '{bold}Wave2FA{/bold} - V1.0.0 ({bold}' + GIT_HASH + '{/bold})',
+            '{bold}Wave2FA{/bold} - V' +
+            VERSION +
+            ' ({bold}' +
+            GIT_HASH +
+            '{/bold})',
         tags: true,
         align: 'center',
         border: roundedBorder,
@@ -95,6 +103,8 @@ screen.append(
 globalThis.password = '';
 
 initLoginScreen(screen);
+
+checkForUpdates(screen);
 
 screen.key(['q', 'C-c'], () => {
     screen.destroy();
