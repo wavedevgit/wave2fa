@@ -57,14 +57,6 @@ fi
 # unzip
 unzip -o "$APP_DIR/bundle.zip" -d "$APP_DIR"
 
-# download runner
-RUNNER_URL="https://raw.githubusercontent.com/wavedevgit/wave2fa/refs/heads/$BRANCH/scripts/wave2fa.sh"
-if [ "$DOWNLOAD_CMD" = "curl -sL" ]; then
-  curl -L -o "$APP_DIR/wave2fa.sh" "$RUNNER_URL"
-else
-  wget -q -O "$APP_DIR/wave2fa.sh" "$RUNNER_URL"
-fi
-
 chmod +x "$APP_DIR/wave2fa.sh"
 
 mkdir -p "$HOME/bin"
