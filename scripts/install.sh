@@ -6,7 +6,7 @@ BRANCH=${1:-main} # default to main
 # check bun
 if ! command -v bun >/dev/null 2>&1; then
   echo "Bun is not installed, please install it!"
-  echo "Help: Use nvm or install it from https://bun.com/docs/installation"
+  echo "Help: install it from https://bun.com/docs/installation"
   exit 1
 fi
 
