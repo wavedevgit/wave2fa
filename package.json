@@ -37,7 +37,7 @@
         "typescript-eslint": "^8.58.0",
         "@types/bun": "latest"
     },
-    "private": true,
+    "private": false,
     "peerDependencies": {
         "typescript": "^5"
     }
