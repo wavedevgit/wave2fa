@@ -41,7 +41,8 @@ jobs:
                   sed -i "s|commitBranch|$BRANCH|" dist/bundle.js
             - name: Install jq
               run: sudo apt-get update && sudo apt-get install -y jq
-
+            - name: Bump version
+              run: jq --arg v "$VERSION" '.version=$v' package.json > package.json.tmp && mv package.json.tmp package.json
             - name: Checkout releases repo
               uses: actions/checkout@v4
               with:
@@ -53,7 +54,7 @@ jobs:
               run: |
                   TARGET=releases/${{ github.event.inputs.branch }}/${{ github.event.inputs.version }}
                   mkdir -p "$TARGET"
-                  cp -r dist/* "$TARGET/"
+                  cp -r dist/* "$TARGET/dist"
                   cp scripts/wave2fa.sh $TARGET/
                   cp package.json "$TARGET/" || echo "no package.json"
                   TARGET_DIR_BRANCH="releases/${{ github.event.inputs.branch }}"
@@ -86,10 +87,13 @@ jobs:
 
             - name: Commit & push
               run: |
-                  cd releases
-                  git config user.name "github-actions"
-                  git config user.email "github-actions@github.com"
+                  git config --global user.name "github-actions"
+                  git config --global user.email "github-actions@github.com"
 
+                  git add package.json
+                  git commit -m "bump version: ${{ github.event.inputs.version }}"
+                  git push
+                  cd releases
                   git add .
                   git commit -m "release: ${{ github.event.inputs.branch }} @ ${{ github.event.inputs.version }} (${GITHUB_SHA})" || echo "no changes"
                   git push
