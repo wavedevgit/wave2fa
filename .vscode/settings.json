@@ -1,0 +1,46 @@
+{
+    "files.autoSave": "afterDelay",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "prettier.trailingComma": "all",
+    "prettier.singleQuote": true,
+    "prettier.arrowParens": "always",
+    "prettier.tabWidth": 4,
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "security.workspace.trust.untrustedFiles": "open",
+    "github.copilot.advanced": {},
+    "github.copilot.enable": {
+        "*": false,
+        "plaintext": false,
+        "markdown": false,
+        "scminput": false
+    },
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "hediet.vscode-drawio.resizeImages": null,
+    "git.openRepositoryInParentFolders": "never",
+    "codesnap.shutterAction": "copy",
+    "workbench.editorAssociations": {
+        "*.copilotmd": "vscode.markdown.preview.editor",
+        "*.bin": "default",
+        "*.sql": "default"
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "git.confirmSync": false,
+    "editor.fontFamily": "JetBrains Mono, monospace",
+    "editor.fontLigatures": true,
+    "editor.formatOnSave": true,
+    "workbench.editor.empty.hint": "hidden",
+    "[xml]": {
+        "editor.defaultFormatter": "redhat.vscode-xml"
+    },
+    "window.titleBarStyle": "custom",
+    "[shellscript]": {
+        "editor.defaultFormatter": "mads-hartmann.bash-ide-vscode"
+    },
+    "[csharp]": {
+        "editor.defaultFormatter": "csharpier.csharpier-vscode"
+    },
+    "claudeCode.preferredLocation": "panel",
+    "workbench.colorTheme": "Catppuccin Mocha"
+}
