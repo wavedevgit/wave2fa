@@ -1,44 +1,43 @@
 {
-  "name": "wave2fa",
-  "version": "0.0.6",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "test": "bun run src/main.ts",
-    "build": "esbuild src/main.ts --format=esm --bundle --platform=node --outfile=dist/bundle.js --external:blessed --minify --sourcemap --external:./node_modules/*",
-    "build:dev": "rm -rf dist && mkdir -p dist && tsc --watch"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "resolutions": {},
-  "dependencies": {
-    "@types/blessed": "^0.1.27",
-    "blessed": "^0.1.81",
-    "canvas": "^3.2.1",
-    "clipboardy": "^5.3.1",
-    "esbuild": "^0.27.2",
-    "jimp": "^1.6.0",
-    "jsqr": "^1.4.0",
-    "jsqrcode": "^0.0.7",
-    "node-file-dialog": "^1.0.3",
-    "protobufjs": "^8.0.0",
-    "speakeasy": "^2.0.0"
-  },
-  "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@types/node": "^25.5.2",
-    "@types/speakeasy": "^2.0.10",
-    "@typescript-eslint/eslint-plugin": "^8.58.0",
-    "@typescript-eslint/parser": "^8.58.0",
-    "eslint": "^10.2.0",
-    "globals": "^17.4.0",
-    "typescript-eslint": "^8.58.0",
-    "@types/bun": "^1.3.11"
-  },
-  "private": false,
-  "peerDependencies": {
-    "typescript": "^5"
-  }
+    "name": "wave2fa",
+    "version": "0.0.6",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "test": "bun run src/main.ts",
+        "build": "esbuild src/main.ts --format=esm --bundle --platform=node --outfile=dist/bundle.js --external:blessed --minify --sourcemap --external:./node_modules/*"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "resolutions": {},
+    "dependencies": {
+        "@types/blessed": "^0.1.27",
+        "blessed": "^0.1.81",
+        "canvas": "^3.2.1",
+        "clipboardy": "^5.3.1",
+        "esbuild": "^0.27.2",
+        "jimp": "^1.6.0",
+        "jsqr": "^1.4.0",
+        "jsqrcode": "^0.0.7",
+        "node-file-dialog": "^1.0.3",
+        "protobufjs": "^8.0.0",
+        "speakeasy": "^2.0.0"
+    },
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "@types/node": "^25.5.2",
+        "@types/speakeasy": "^2.0.10",
+        "@typescript-eslint/eslint-plugin": "^8.58.0",
+        "@typescript-eslint/parser": "^8.58.0",
+        "eslint": "^10.2.0",
+        "globals": "^17.4.0",
+        "typescript-eslint": "^8.58.0",
+        "@types/bun": "^1.3.11"
+    },
+    "private": false,
+    "peerDependencies": {
+        "typescript": "^5"
+    }
 }
