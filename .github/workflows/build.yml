@@ -72,6 +72,7 @@ jobs:
             - name: Copy build to releases repo + generate metadata
               run: |
                   TARGET="releases/${BRANCH}/${VERSION}"
+                  BRANCH_TARGET="releases/${BRANCH}/"
                   mkdir -p "$TARGET/dist"
 
                   cp -r dist/* "$TARGET/dist"
@@ -119,7 +120,7 @@ jobs:
                     };
 
                     fs.writeFileSync(
-                      process.env.TARGET + '/latest.json',
+                      process.env.BRANCH_TARGET + '/latest.json',
                       JSON.stringify(meta, null, 4)
                     );
                   "
