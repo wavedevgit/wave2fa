@@ -4,9 +4,8 @@
     "main": "index.js",
     "type": "module",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "build": "esbuild src/main.ts --format=esm --bundle --platform=node --outfile=dist/bundle.js --external:blessed --minify --sourcemap --external:./node_modules/*",
-        "build:dev": "rm -rf dist && mkdir -p dist && tsc --watch"
+        "test": "bun run src/main.ts",
+        "build": "esbuild src/main.ts --format=esm --bundle --platform=node --outfile=dist/bundle.js --external:blessed --minify --sourcemap --external:./node_modules/*"
     },
     "keywords": [],
     "author": "",
@@ -28,14 +27,14 @@
     },
     "devDependencies": {
         "@eslint/js": "^10.0.1",
-        "@types/node": "^25.2.2",
+        "@types/node": "^25.5.2",
         "@types/speakeasy": "^2.0.10",
         "@typescript-eslint/eslint-plugin": "^8.58.0",
         "@typescript-eslint/parser": "^8.58.0",
         "eslint": "^10.2.0",
         "globals": "^17.4.0",
         "typescript-eslint": "^8.58.0",
-        "@types/bun": "latest"
+        "@types/bun": "^1.3.11"
     },
     "private": false,
     "peerDependencies": {
