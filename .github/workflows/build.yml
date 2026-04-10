@@ -72,7 +72,7 @@ jobs:
             - name: Copy build to releases repo + generate metadata
               run: |
                   TARGET="releases/${BRANCH}/${VERSION}"
-                  BRANCH_TARGET="releases/${BRANCH}"
+                  export BRANCH_TARGET="releases/${BRANCH}"
                   mkdir -p "$TARGET/dist"
 
                   cp -r dist/* "$TARGET/dist"
@@ -90,7 +90,7 @@ jobs:
                   EOF
 
                   VERSION_DIR="$TARGET"
-                  FILES_JSON="{}"
+                  export FILES_JSON="{}"
 
                   for f in $(find "$VERSION_DIR" -type f); do
                     REL_PATH=$(realpath --relative-to="$VERSION_DIR" "$f")
