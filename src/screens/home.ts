@@ -53,9 +53,7 @@ async function initHomeScreen(screen: Widgets.Screen) {
                       item.name.slice(0, 3) +
                       '*'.repeat(item.name.slice(3).length)
                   } - ${cache[item.uuid]} ${getSecondsLeft(item.period)}s`
-                : `${item.name} - ${cache[item.uuid]} ${getSecondsLeft(
-                      item.period,
-                  )}s`,
+                : `${item.name} - ${cache[item.uuid]} ${getSecondsLeft(item.period)}s`,
         );
         main.setItems(items);
         screen.render();
@@ -80,16 +78,22 @@ async function initHomeScreen(screen: Widgets.Screen) {
     updateContent();
     setInterval(() => updateSecrets(30), 30 * 1e3);
 
-    setTimeout(() => {
-        updateSecrets(30);
+    setTimeout(
+        () => {
+            updateSecrets(30);
 
-        setInterval(() => updateSecrets(30), 30 * 1000);
-    }, getSecondsLeft(30) * 1e3);
-    setTimeout(() => {
-        updateSecrets(60);
+            setInterval(() => updateSecrets(30), 30 * 1000);
+        },
+        getSecondsLeft(30) * 1e3,
+    );
+    setTimeout(
+        () => {
+            updateSecrets(60);
 
-        setInterval(() => updateSecrets(60), 60 * 1000);
-    }, getSecondsLeft(60) * 1e3);
+            setInterval(() => updateSecrets(60), 60 * 1000);
+        },
+        getSecondsLeft(60) * 1e3,
+    );
     setInterval(updateContent, 1 * 1e3);
 
     main.on('select', (item, index) => {
