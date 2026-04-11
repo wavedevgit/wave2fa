@@ -47,14 +47,7 @@ jobs:
                   echo "BRANCH=$BRANCH" >> $GITHUB_ENV
                   echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-
-                  sed -i "s|commitHash|$SHORT_COMMIT|" dist/gitHash.js
-                  sed -i "s|wave2faVersion|$VERSION|" dist/gitHash.js
-                  sed -i "s|commitBranch|$BRANCH|" dist/gitHash.js
-
-                  rm -rf dist
-                  bun run build
-
+                  mkdir -p dist/binaries
                   # thank you bun for this great feature
                   bun run build:binary:linux
                   bun run build:binary:linux:arm64
@@ -62,9 +55,21 @@ jobs:
                   bun run build:binary:mac:arm64
                   bun run build:binary:win
                   bun run build:binary:win:arm64
+
+                  sed -i "s|commitHash|$SHORT_COMMIT|" dist/gitHash.js
+                  sed -i "s|wave2faVersion|$VERSION|" dist/gitHash.js
+                  sed -i "s|commitBranch|$BRANCH|" dist/gitHash.js
+
+                  mkdir -p temp-binaries
+                  mv dist/binaries temp-binaries
+                  rm -rf dist
+                  bun run build
+
                   sed -i "s|commitHash|$SHORT_COMMIT|" dist/bundle.js
                   sed -i "s|wave2faVersion|$VERSION|" dist/bundle.js
                   sed -i "s|commitBranch|$BRANCH|" dist/bundle.js
+                  mv temp-binaries/* dist
+                  rm -rf temp-binaries
 
             - name: Bump version
               run: |
