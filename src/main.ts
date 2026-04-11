@@ -37,10 +37,6 @@ process.on('unhandledRejection', async (reason: any) => {
     });
 });
 
-declare global {
-    var password: string;
-}
-
 process.noDeprecation = true;
 
 // shim buffer as some libs are using old Buffer()
@@ -100,8 +96,6 @@ screen.append(
         },
     }),
 );
-
-globalThis.password = '';
 
 initLoginScreen(screen);
 

@@ -1,8 +1,8 @@
 import blessed, { Widgets } from 'blessed';
 import clearScreen from '../utils/clearScreen.js';
-import { getKeys } from '../utils/storage.js';
+import { getKeys, migrateDataToV2 } from '../utils/storage.js';
 import * as speakeasy from 'speakeasy';
-import { isTruthy } from '../utils/env.js';
+import { isTruthy } from '../utils/cli.js';
 import clipboardy from 'clipboardy';
 import { toast } from '../utils/toast.js';
 import { TotpItem } from '../types.js';
@@ -44,7 +44,18 @@ async function initHomeScreen(screen: Widgets.Screen) {
     main.focus();
     let cache: Record<string, string> = {};
     const keys = await getKeys<TotpItem>();
+    if (keys.some((item) => item.version !== 2)) {
+        await migrateDataToV2();
 
+        // nextTick is for waiting for next render
+        process.nextTick(() => {
+            toast(
+                '{bold}{green-fg}✓ Migrated data to more secure encryption method.{green-fg}{bold}',
+                screen,
+            );
+            screen.render();
+        });
+    }
     const updateContent = () => {
         const redactInfo = shouldRedactInfo();
         const items = keys.map((item) =>

@@ -3,74 +3,181 @@ import crypto from 'crypto';
 import { isValidSecret } from './otp.js';
 import os from 'os';
 import path from 'path';
-import { TotpItem, TotpItemRaw } from '../types.js';
+import { SecretEncrypted, TotpItem, TotpItemRaw } from '../types.js';
+import argon2 from 'argon2';
+import PasswordStore from '../stores/password.js';
+
+const passwordStore = new PasswordStore();
+
+export async function deriveKey(
+    password: string,
+    version?: number | undefined,
+    salt?: Buffer<ArrayBuffer> | undefined,
+): Promise<{ key: Buffer; salt?: Buffer }> {
+    // outdated insecure version, wave2fa will automatically migrate user data to new version
+    if (version === 1 || !version)
+        return { key: crypto.createHash('sha256').update(password).digest() };
+    // this is more secure :)
+    const saltToUse = salt || crypto.randomBytes(16);
+    return {
+        key: await argon2.hash(password, {
+            type: argon2.argon2id,
+            salt: saltToUse,
+            hashLength: 32,
+            raw: true,
+        }),
+        salt: saltToUse,
+    };
+}
 
 export async function verifyPassword(): Promise<boolean | undefined> {
     try {
-        let data: any = await getKeys<TotpItemRaw>(true);
-        if (data.length === 0) return undefined;
-        // password is not set
-        if (data.every((item: any) => typeof item.secret === 'string'))
+        const data = await getKeys<TotpItemRaw>(true);
+
+        // nothing to verify against
+        if (data.length === 0) return true;
+
+        // find an encrypted entry (not plaintext legacy)
+        const encryptedItem = data.find(
+            (item: any) => typeof item.secret !== 'string',
+        );
+
+        if (!encryptedItem) {
             return undefined;
-        data = await getKeys<TotpItem>();
-        return await isValidSecret(data[0].secret);
+        }
+
+        // try decrypting ONE item only
+        await decryptSecret(
+            encryptedItem.secret,
+            passwordStore.getPassword(),
+            encryptedItem.version,
+        );
+
+        return true;
     } catch (err) {
-        console.log(err);
+        throw err;
+
         return false;
     }
 }
 
+export function checkPasswordStrength() {
+    const password = passwordStore.getPassword();
+    let goodPassword =
+        password?.length >= 8 &&
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>\/?]).{8,}$/.test(
+            password,
+        );
+    const result = {
+        valid: goodPassword,
+        reasons: {
+            chars_requirement: false, // true = doesnt have requirement, false means we can proceed
+            uppercase: false,
+            lowercase: false,
+            numbers: false,
+            special: false,
+        },
+    };
+
+    if (password?.length < 8) result.reasons.chars_requirement = true; // break down regex part by part
+    if (!password?.match(/[a-z]/)) result.reasons.lowercase = true;
+    if (!password?.match(/[A-Z]/)) result.reasons.uppercase = true;
+    if (!password.match(/[0-9]/)) result.reasons.numbers = true;
+    if (!password.match(/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>\/?]/))
+        result.reasons.special = true;
+    return result;
+}
+
+// used to encrypt secrets if any secret found in _data.json
 export async function saveWithPassword() {
     const data = await getKeys<TotpItem>();
     await fs.writeFile(
-        './_data.json',
+        homeConfigDataPath,
         JSON.stringify(
             await Promise.all(
                 data.map(async (item: TotpItem) => ({
                     ...item,
-                    secret: await encryptSecret(item.secret),
+                    secret: await encryptSecret(
+                        item.secret,
+                        passwordStore.getPassword(),
+                    ),
                 })),
             ),
         ),
     );
 }
 
-export async function encryptSecret(secret: string) {
-    const key = crypto
-        .createHash('sha256')
-        .update(globalThis.password)
-        .digest();
-    const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-    let encrypted = cipher.update(secret, 'utf8', 'base64');
-    encrypted += cipher.final('base64');
+export async function encryptSecret(
+    secret: string,
+    password: string,
+): Promise<SecretEncrypted> {
+    const { key, salt } = await deriveKey(password, 2);
+
+    const iv = crypto.randomBytes(12);
+
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+
+    const encrypted = Buffer.concat([
+        cipher.update(secret, 'utf8'),
+        cipher.final(),
+    ]);
+
+    const tag = cipher.getAuthTag();
+
     return {
         iv: iv.toString('base64'),
-        data: encrypted,
+        data: encrypted.toString('base64'),
+        tag: tag.toString('base64'),
+        salt: salt?.toString('base64'),
     };
 }
 
-export async function decryptSecret(secret: string) {
+export async function decryptSecret(
+    secret: string | SecretEncrypted,
+    password: string,
+    version: number | undefined,
+): Promise<string | undefined> {
     // no password is set yet
     try {
         if (typeof secret === 'string') return secret;
-        const { data, iv: ivStr } = secret;
-        const key = crypto
-            .createHash('sha256')
-            .update(globalThis.password)
-            .digest();
+        const { data, iv: ivStr, tag, salt } = secret;
+        const { key } = await deriveKey(
+            password,
+            version,
+            salt ? Buffer.from(salt, 'base64') : undefined,
+        );
         const ivBuffer = Buffer.from(ivStr, 'base64');
-        const decipher = crypto.createDecipheriv('aes-256-cbc', key, ivBuffer);
-        let decrypted = decipher.update(data, 'base64', 'utf8');
-        decrypted += decipher.final('utf8');
-        return decrypted;
-    } catch {}
+        if (version === 1 || !version) {
+            const decipher = crypto.createDecipheriv(
+                'aes-256-cbc',
+                key,
+                ivBuffer,
+            );
+            let decrypted = decipher.update(data, 'base64', 'utf8');
+            decrypted += decipher.final('utf8');
+            return decrypted;
+        }
+        const decipher = crypto.createDecipheriv('aes-256-gcm', key, ivBuffer);
+        if (!tag) {
+            throw new Error(
+                "Wave2FA: invalid encrypted data (missing 'tag' for AES-GCM v2 secret)",
+            );
+        }
+        if (version === 2) {
+            decipher.setAuthTag(Buffer.from(tag, 'base64'));
+            let decrypted = decipher.update(data, 'base64', 'utf8');
+            decrypted += decipher.final('utf8');
+            return decrypted;
+        }
+    } catch (err) {
+        throw err;
+    }
 }
 
 const homeConfigPath = path.join(os.homedir(), '.config', 'wave2fa');
 const homeConfigDataPath = path.join(homeConfigPath, '_data.json');
 
-let dataPath: Promise<string> | string = (async () => {
+let dataPath: string = await (async () => {
     const dir = path.dirname(homeConfigDataPath);
     await fs.mkdir(dir, { recursive: true });
 
@@ -83,24 +190,42 @@ let dataPath: Promise<string> | string = (async () => {
 })();
 
 async function getKeys<T>(raw?: boolean): Promise<T[]> {
-    if (dataPath instanceof Promise) dataPath = await dataPath;
     const data = JSON.parse(await fs.readFile(dataPath, 'utf-8'));
     if (raw) return data;
     return await Promise.all(
         data.map(async (item: any) => ({
             ...item,
-            secret: await decryptSecret(item.secret),
+            secret: await decryptSecret(
+                item.secret,
+                passwordStore.getPassword(),
+                item?.version,
+            ),
         })),
     );
 }
 
+export async function migrateDataToV2() {
+    const data = await getKeys<TotpItem | TotpItemRaw>(false);
+    for (const item of data) {
+        if (item.version === 2) continue;
+        item.version = 2;
+        item.secret = await encryptSecret(
+            item.secret as string,
+            passwordStore.getPassword(),
+        );
+    }
+    await fs.writeFile(dataPath, JSON.stringify(data), 'utf-8');
+}
+
 async function addItem(item: TotpItem) {
-    if (dataPath instanceof Promise) dataPath = await dataPath;
     const data: any = await getKeys<TotpItem>();
     data.push(item);
 
     for (let item of data) {
-        item.secret = await encryptSecret(item.secret);
+        item.secret = await encryptSecret(
+            item.secret,
+            passwordStore.getPassword(),
+        );
     }
     await fs.writeFile(dataPath, JSON.stringify(data), 'utf-8');
 }
@@ -114,4 +239,4 @@ async function validatePath(path: string) {
     }
 }
 
-export { getKeys, addItem, validatePath, homeConfigPath };
+export { getKeys, addItem, validatePath, homeConfigPath, passwordStore };

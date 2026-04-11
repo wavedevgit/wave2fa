@@ -9,6 +9,9 @@
         "build": "esbuild src/main.ts --format=esm --bundle --platform=node --outfile=dist/bundle.js --external:blessed --minify --sourcemap --external:./node_modules/*",
         "lint": "tsc --noEmit"
     },
+    "bin": {
+        "wave2fa": "./dist/bundle.js"
+    },
     "keywords": [],
     "author": "",
     "license": "ISC",
@@ -16,6 +19,7 @@
     "resolutions": {},
     "dependencies": {
         "@types/blessed": "^0.1.27",
+        "argon2": "^0.44.0",
         "blessed": "^0.1.81",
         "canvas": "^3.2.1",
         "clipboardy": "^5.3.1",
