@@ -52,6 +52,9 @@ jobs:
                   sed -i "s|wave2faVersion|$VERSION|" dist/gitHash.js
                   sed -i "s|commitBranch|$BRANCH|" dist/gitHash.js
 
+                  rm -rf dist
+                  bun run build
+
                   # thank you bun for this great feature
                   bun run build:binary:linux
                   bun run build:binary:linux:arm64
@@ -59,15 +62,13 @@ jobs:
                   bun run build:binary:mac:arm64
                   bun run build:binary:win
                   bun run build:binary:win:arm64
-                  rm -rf dist
-                  bun run build
                   sed -i "s|commitHash|$SHORT_COMMIT|" dist/bundle.js
                   sed -i "s|wave2faVersion|$VERSION|" dist/bundle.js
                   sed -i "s|commitBranch|$BRANCH|" dist/bundle.js
 
             - name: Bump version
               run: |
-                  node -e "
+                  bun -e "
                     const fs = require('fs');
                     const pkg = JSON.parse(fs.readFileSync('package.json','utf8'));
                     pkg.version = process.env.VERSION;
