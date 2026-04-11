@@ -4,6 +4,7 @@ import { addItem, validatePath } from '../utils/storage.js';
 import crypto from 'node:crypto';
 import { readInputAsync } from '../utils/inputs.js';
 import path from 'node:path';
+import os from 'os';
 import { parseUri, scanQrCode } from '../utils/qrcode.js';
 import { isValidSecret } from '../utils/otp.js';
 import { initHomeScreen } from './home.js';
@@ -25,16 +26,19 @@ async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
         height: 3,
         valign: 'middle',
         align: 'center',
-        label: 'Enter QR image path ',
+        label: 'Enter QR image path',
         border: { type: 'line' },
         style: { border: { fg: 'magenta' } },
         parent: screen,
     });
 
-    const filePath = await readInputAsync(input);
+    let filePath = await readInputAsync(input);
+    if (filePath.startsWith('~')) filePath = filePath.replace('~', os.homedir());
 
     if (!(await validatePath(filePath))) {
-        box.setContent('File not found.');
+        box.setContent(
+            `{red-fg} ! File {bold}not found:{/bold}{/red-fg} (${filePath})\n\n Press {bold}ENTER{/bold} to continue.`,
+        );
         input.destroy();
         screen.render();
         screen.onceKey('enter', () => {
@@ -44,14 +48,8 @@ async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
         });
         return;
     }
-    if (
-        !['.png', '.jpg', '.jpeg', '.webp'].includes(
-            path.extname(filePath).toLowerCase(),
-        )
-    ) {
-        box.setContent(
-            'File extension is not .png,.jpg,.jpeg,.webp (not an image)',
-        );
+    if (!['.png', '.jpg', '.jpeg', '.webp'].includes(path.extname(filePath).toLowerCase())) {
+        box.setContent('File extension is not .png,.jpg,.jpeg,.webp (not an image)');
         input.destroy();
         screen.render();
         screen.onceKey('enter', () => {
