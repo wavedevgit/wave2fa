@@ -61,7 +61,7 @@ jobs:
                   sed -i "s|commitBranch|$BRANCH|" dist/gitHash.js
 
                   mkdir -p temp-binaries
-                  mv dist/binaries temp-binaries
+                  mv dist/binaries/* temp-binaries
                   rm -rf dist
                   bun run build
 
