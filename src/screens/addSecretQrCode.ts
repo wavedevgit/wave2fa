@@ -33,7 +33,8 @@ async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
     });
 
     let filePath = await readInputAsync(input);
-    if (filePath.startsWith('~')) filePath = filePath.replace('~', os.homedir());
+    if (filePath.startsWith('~'))
+        filePath = filePath.replace('~', os.homedir());
 
     if (!(await validatePath(filePath))) {
         box.setContent(
@@ -48,8 +49,14 @@ async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
         });
         return;
     }
-    if (!['.png', '.jpg', '.jpeg', '.webp'].includes(path.extname(filePath).toLowerCase())) {
-        box.setContent('File extension is not .png,.jpg,.jpeg,.webp (not an image)');
+    if (
+        !['.png', '.jpg', '.jpeg', '.webp'].includes(
+            path.extname(filePath).toLowerCase(),
+        )
+    ) {
+        box.setContent(
+            'File extension is not .png,.jpg,.jpeg,.webp (not an image)',
+        );
         input.destroy();
         screen.render();
         screen.onceKey('enter', () => {

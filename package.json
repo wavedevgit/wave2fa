@@ -4,8 +4,8 @@
     "main": "index.js",
     "type": "module",
     "scripts": {
-        "dev": "bun run src/main.ts",
-        "test": "bun run src/main.ts",
+        "dev": "bun run src/main.ts --demo",
+        "test": "bun run src/main.ts --demo",
         "build": "esbuild src/main.ts --format=esm --bundle --platform=node --outfile=dist/bundle.js --external:blessed --minify --sourcemap --external:./node_modules/*",
         "lint": "tsc --noEmit"
     },
