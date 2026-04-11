@@ -31,11 +31,11 @@ jobs:
                   echo "$HOME/.bun/bin" >> $GITHUB_PATH
 
             - name: Install dependencies
-              run: bun install
+              run: bun install --ignore-scripts=false
 
-            - name: Build & set build metadata (ONCE)
+            - name: Build all binaries
               run: |
-                  bun run build
+                  bun run build:ts
 
                   COMMIT=$(git rev-parse HEAD)
                   SHORT_COMMIT=$(git rev-parse --short HEAD)
@@ -47,6 +47,20 @@ jobs:
                   echo "BRANCH=$BRANCH" >> $GITHUB_ENV
                   echo "VERSION=$VERSION" >> $GITHUB_ENV
 
+
+                  sed -i "s|commitHash|$SHORT_COMMIT|" dist/gitHash.js
+                  sed -i "s|wave2faVersion|$VERSION|" dist/gitHash.js
+                  sed -i "s|commitBranch|$BRANCH|" dist/gitHash.js
+
+                  # thank you bun for this great feature
+                  bun run build:binary:linux
+                  bun run build:binary:linux:arm64
+                  bun run build:binary:mac
+                  bun run build:binary:mac:arm64
+                  bun run build:binary:win
+                  bun run build:binary:win:arm64
+                  rm -rf dist
+                  bun run build
                   sed -i "s|commitHash|$SHORT_COMMIT|" dist/bundle.js
                   sed -i "s|wave2faVersion|$VERSION|" dist/bundle.js
                   sed -i "s|commitBranch|$BRANCH|" dist/bundle.js
@@ -130,8 +144,45 @@ jobs:
 
             - name: Create bundle zip
               run: |
-                  (cd "releases/${BRANCH}/${VERSION}" && zip -r "bundle.zip" .)
+                  cd "releases/${BRANCH}/${VERSION}"
+                  mkdir -p bundles
+                  # Linux x64
+                  mkdir -p tmp-linux-x64
+                  cp wave2fa-linux-x64 tmp-linux-x64/wave2fa
+                  cp wave2fa.sh tmp-linux-x64/
+                  (cd tmp-linux-x64 && zip -r "../bundles/wave2fa-linux-x64.zip" .)
+                  rm -rf tmp-linux-x64
 
+                  # Linux arm64
+                  mkdir -p tmp-linux-arm64
+                  cp wave2fa-linux-arm64 tmp-linux-arm64/wave2fa
+                  cp wave2fa.sh tmp-linux-arm64/
+                  (cd tmp-linux-arm64 && zip -r "../bundles/wave2fa-linux-arm64.zip" .)
+                  rm -rf tmp-linux-arm64
+
+                  # macOS x64
+                  mkdir -p tmp-macos-x64
+                  cp wave2fa-macos-x64 tmp-macos-x64/wave2fa
+                  (cd tmp-macos-x64 && zip -r "../bundles/wave2fa-macos-x64.zip" .)
+                  rm -rf tmp-macos-x64
+
+                  # macOS arm64
+                  mkdir -p tmp-macos-arm64
+                  cp wave2fa-macos-arm64 tmp-macos-arm64/wave2fa
+                  (cd tmp-macos-arm64 && zip -r "../bundles/wave2fa-macos-arm64.zip" .)
+                  rm -rf tmp-macos-arm64
+
+                  # Windows x64
+                  mkdir -p tmp-win-x64
+                  cp wave2fa-windows-x64.exe tmp-win-x64/wave2fa.exe
+                  (cd tmp-win-x64 && zip -r "../bundles/wave2fa-windows-x64.zip" .)
+                  rm -rf tmp-win-x64
+
+                  # Windows arm64
+                  mkdir -p tmp-win-arm64
+                  cp wave2fa-windows-arm64.exe tmp-win-arm64/wave2fa.exe
+                  (cd tmp-win-arm64 && zip -r "../bundles/wave2fa-windows-arm64.zip" .)
+                  rm -rf tmp-win-arm64
             - name: Commit & push
               run: |
                   git config --global user.name "github-actions"
