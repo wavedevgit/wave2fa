@@ -7,7 +7,15 @@
         "dev": "bun run src/main.ts --demo",
         "test": "bun run src/main.ts --demo",
         "build": "esbuild src/main.ts --format=esm --bundle --platform=node --outfile=dist/bundle.js --external:blessed --minify --sourcemap --external:./node_modules/*",
-        "lint": "tsc --noEmit"
+        "build:ts": "tsc",
+        "build:binary:linux": "bun build ./dist/main.js --compile --outfile=dist/wave2fa-linux-x64 --target=bun-linux-x64",
+        "build:binary:linux:arm64": "bun build ./dist/main.js --compile --outfile=dist/wave2fa-linux-arm64 --target=bun-linux-arm64",
+        "build:binary:mac": "bun build ./dist/main.js --compile --outfile=dist/wave2fa-macos-x64 --target=bun-macos-x64",
+        "build:binary:mac:arm64": "bun build ./dist/main.js --compile --outfile=dist/wave2fa-macos-arm64 --target=bun-macos-arm64",
+        "build:binary:win": "bun build ./dist/main.js --compile --outfile=dist/wave2fa-windows-x64.exe --target=bun-windows-x64",
+        "build:binary:win:arm64": "bun build ./dist/main.js --compile --outfile=dist/wave2fa-windows-arm64.exe --target=bun-windows-arm64",
+        "lint": "tsc --noEmit",
+        "postinstall": "patch-package"
     },
     "bin": {
         "wave2fa": "./dist/bundle.js"
@@ -28,6 +36,7 @@
         "jsqr": "^1.4.0",
         "jsqrcode": "^0.0.7",
         "node-file-dialog": "^1.0.3",
+        "patch-package": "^8.0.1",
         "prettier": "^3.8.2",
         "protobufjs": "^8.0.0",
         "speakeasy": "^2.0.0"

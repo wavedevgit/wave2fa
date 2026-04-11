@@ -7,6 +7,8 @@ import clipboardy from 'clipboardy';
 import { toast } from '../utils/toast.js';
 import { TotpItem } from '../types.js';
 import type { Algorithm as SpeakeasyAlgorithm } from 'speakeasy';
+import { roundedBorder } from '../utils/roundedBorder.js';
+import { buildStyle } from '../utils/styles.js';
 
 function getSecondsLeft(step: number) {
     const epoch = Math.floor(Date.now() / 1000);
@@ -35,11 +37,11 @@ async function initHomeScreen(screen: Widgets.Screen) {
         vi: true,
         keys: true,
         content: '',
-        border: 'line',
-        style: {
-            border: { fg: 'magenta' },
-            selected: { bg: 'blue' },
-        },
+        border: roundedBorder,
+        style: await buildStyle({
+            border: { fg: 'home.list.border' },
+            selected: { bg: 'home.list.selected' },
+        }),
     });
     main.focus();
     let cache: Record<string, string> = {};

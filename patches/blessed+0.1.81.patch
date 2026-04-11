@@ -1,0 +1,255 @@
+diff --git a/node_modules/blessed/lib/helpers.js b/node_modules/blessed/lib/helpers.js
+index fbf3cdc..da6f247 100644
+--- a/node_modules/blessed/lib/helpers.js
++++ b/node_modules/blessed/lib/helpers.js
+@@ -25,6 +25,30 @@ helpers.merge = function(a, b) {
+   return a;
+ };
+ 
++helpers.getBorderChars = function (border) {
++  if (typeof border.ch === 'string') {
++    return {
++      tl: border.ch,
++      tr: border.ch,
++      bl: border.ch,
++      br: border.ch,
++      h: border.ch,
++      v: border.ch,
++      fill: border.ch
++    };
++  }
++
++  return {
++    tl: border.ch?.tl ?? '┌',
++    tr: border.ch?.tr ?? '┐',
++    bl: border.ch?.bl ?? '└',
++    br: border.ch?.br ?? '┘',
++    h: border.ch?.h ?? '─',
++    v: border.ch?.v ?? '│',
++    fill: border.ch?.fill ?? ' '
++  };
++}
++
+ helpers.asort = function(obj) {
+   return obj.sort(function(a, b) {
+     a = a.name.toLowerCase();
+diff --git a/node_modules/blessed/lib/widget.js b/node_modules/blessed/lib/widget.js
+index 6d1444d..e82eb00 100644
+--- a/node_modules/blessed/lib/widget.js
++++ b/node_modules/blessed/lib/widget.js
+@@ -1,51 +1,49 @@
+-/**
+- * widget.js - high-level interface for blessed
+- * Copyright (c) 2013-2015, Christopher Jeffrey and contributors (MIT License).
+- * https://github.com/chjj/blessed
+- */
+-
+ var widget = exports;
+ 
+-widget.classes = [
+-  'Node',
+-  'Screen',
+-  'Element',
+-  'Box',
+-  'Text',
+-  'Line',
+-  'ScrollableBox',
+-  'ScrollableText',
+-  'BigText',
+-  'List',
+-  'Form',
+-  'Input',
+-  'Textarea',
+-  'Textbox',
+-  'Button',
+-  'ProgressBar',
+-  'FileManager',
+-  'Checkbox',
+-  'RadioSet',
+-  'RadioButton',
+-  'Prompt',
+-  'Question',
+-  'Message',
+-  'Loading',
+-  'Listbar',
+-  'Log',
+-  'Table',
+-  'ListTable',
+-  'Terminal',
+-  'Image',
+-  'ANSIImage',
+-  'OverlayImage',
+-  'Video',
+-  'Layout'
+-];
++const widgets = {
++  node: require('./widgets/node.js'),
++  screen: require('./widgets/screen.js'),
++  element: require('./widgets/element.js'),
++  box: require('./widgets/box.js'),
++  text: require('./widgets/text.js'),
++  line: require('./widgets/line.js'),
++  scrollablebox: require('./widgets/scrollablebox.js'),
++  scrollabletext: require('./widgets/scrollabletext.js'),
++  bigtext: require('./widgets/bigtext.js'),
++  list: require('./widgets/list.js'),
++  form: require('./widgets/form.js'),
++  input: require('./widgets/input.js'),
++  textarea: require('./widgets/textarea.js'),
++  textbox: require('./widgets/textbox.js'),
++  button: require('./widgets/button.js'),
++  progressbar: require('./widgets/progressbar.js'),
++  filemanager: require('./widgets/filemanager.js'),
++  checkbox: require('./widgets/checkbox.js'),
++  radioset: require('./widgets/radioset.js'),
++  radiobutton: require('./widgets/radiobutton.js'),
++  prompt: require('./widgets/prompt.js'),
++  question: require('./widgets/question.js'),
++  message: require('./widgets/message.js'),
++  loading: require('./widgets/loading.js'),
++  listbar: require('./widgets/listbar.js'),
++  log: require('./widgets/log.js'),
++  table: require('./widgets/table.js'),
++  listtable: require('./widgets/listtable.js'),
++  terminal: require('./widgets/terminal.js'),
++  image: require('./widgets/image.js'),
++  ansiimage: require('./widgets/ansiimage.js'),
++  overlayimage: require('./widgets/overlayimage.js'),
++  video: require('./widgets/video.js'),
++  layout: require('./widgets/layout.js'),
++};
++
++widget.classes = Object.keys(widgets).map(
++  k => k.charAt(0).toUpperCase() + k.slice(1)
++);
+ 
+ widget.classes.forEach(function(name) {
+   var file = name.toLowerCase();
+-  widget[name] = widget[file] = require('./widgets/' + file);
++  widget[name] = widget[file] = widgets[file];
+ });
+ 
+ widget.aliases = {
+diff --git a/node_modules/blessed/lib/widgets/element.js b/node_modules/blessed/lib/widgets/element.js
+index 29a783c..331e144 100644
+--- a/node_modules/blessed/lib/widgets/element.js
++++ b/node_modules/blessed/lib/widgets/element.js
+@@ -19,6 +19,8 @@ var helpers = require('../helpers');
+ 
+ var Node = require('./node');
+ 
++
++
+ /**
+  * Element
+  */
+@@ -116,7 +118,9 @@ function Element(options) {
+   };
+ 
+   this.border = options.border;
++
+   if (this.border) {
++    this.border.ch = helpers.getBorderChars(this.border);
+     if (typeof this.border === 'string') {
+       this.border = { type: this.border };
+     }
+@@ -2144,33 +2148,33 @@ Element.prototype.render = function() {
+       if (!cell) continue;
+       if (this.border.type === 'line') {
+         if (x === xi) {
+-          ch = '\u250c'; // '┌'
++          ch = this.border.ch.tl || '\u250c'; // '┌'
+           if (!this.border.left) {
+             if (this.border.top) {
+-              ch = '\u2500'; // '─'
++              ch = this.border.ch.h || '\u2500'; // '─'
+             } else {
+               continue;
+             }
+           } else {
+             if (!this.border.top) {
+-              ch = '\u2502'; // '│'
++              ch = this.border.ch.v || '\u2502'; // '│'
+             }
+           }
+         } else if (x === xl - 1) {
+-          ch = '\u2510'; // '┐'
++          ch = this.border.ch.tr || '\u2510'; // '┐'
+           if (!this.border.right) {
+             if (this.border.top) {
+-              ch = '\u2500'; // '─'
++              ch = this.border.ch.h || '\u2500'; // '─'
+             } else {
+               continue;
+             }
+           } else {
+             if (!this.border.top) {
+-              ch = '\u2502'; // '│'
++              ch =  this.border.ch.v || '\u2502'; // '│'
+             }
+           }
+         } else {
+-          ch = '\u2500'; // '─'
++          ch = this.border.ch.h || '\u2500'; // '─'
+         }
+       } else if (this.border.type === 'bg') {
+         ch = this.border.ch;
+@@ -2197,7 +2201,7 @@ Element.prototype.render = function() {
+       if (cell) {
+         if (this.border.left) {
+           if (this.border.type === 'line') {
+-            ch = '\u2502'; // '│'
++            ch = this.border.ch.v || '\u2502'; // '│'
+           } else if (this.border.type === 'bg') {
+             ch = this.border.ch;
+           }
+@@ -2220,7 +2224,7 @@ Element.prototype.render = function() {
+       if (cell) {
+         if (this.border.right) {
+           if (this.border.type === 'line') {
+-            ch = '\u2502'; // '│'
++            ch = this.border.ch.v || '\u2502'; // '│'
+           } else if (this.border.type === 'bg') {
+             ch = this.border.ch;
+           }
+@@ -2250,33 +2254,33 @@ Element.prototype.render = function() {
+       if (!cell) continue;
+       if (this.border.type === 'line') {
+         if (x === xi) {
+-          ch = '\u2514'; // '└'
++          ch = this.border.ch.bl || '\u2514'; // '└'
+           if (!this.border.left) {
+             if (this.border.bottom) {
+-              ch = '\u2500'; // '─'
++              ch = this.border.ch.h || '\u2500'; // '─'
+             } else {
+               continue;
+             }
+           } else {
+             if (!this.border.bottom) {
+-              ch = '\u2502'; // '│'
++              ch = this.border.ch.v || '\u2502'; // '│'
+             }
+           }
+         } else if (x === xl - 1) {
+-          ch = '\u2518'; // '┘'
++          ch = this.border.ch.br || '\u2518'; // '┘'
+           if (!this.border.right) {
+             if (this.border.bottom) {
+-              ch = '\u2500'; // '─'
++              ch = this.border.ch.v || '\u2500'; // '─'
+             } else {
+               continue;
+             }
+           } else {
+             if (!this.border.bottom) {
+-              ch = '\u2502'; // '│'
++              ch = this.border.ch.v || '\u2502'; // '│'
+             }
+           }
+         } else {
+-          ch = '\u2500'; // '─'
++          ch = this.border.ch.h || '\u2500'; // '─'
+         }
+       } else if (this.border.type === 'bg') {
+         ch = this.border.ch;

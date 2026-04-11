@@ -55,8 +55,6 @@ export async function verifyPassword(): Promise<boolean | undefined> {
 
         return true;
     } catch (err) {
-        throw err;
-
         return false;
     }
 }

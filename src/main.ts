@@ -12,6 +12,7 @@ import { roundedBorder } from './utils/roundedBorder.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { homeConfigPath } from './utils/storage.js';
+import { buildStyle } from './utils/styles.js';
 
 if (process.argv.includes('--version')) {
     console.log(`Wave2fa ${VERSION} (${GIT_HASH})`);
@@ -25,16 +26,30 @@ const LOG_FILE = path.join(homeConfigPath, 'tmp_output.log');
 await fs.mkdir(homeConfigPath, { recursive: true });
 // errors logger
 process.on('uncaughtException', async (err) => {
-    await fs.writeFile(LOG_FILE, (err.stack || err.toString()) + '\n', {
-        flag: 'a',
-    });
+    await fs.writeFile(
+        LOG_FILE,
+        new Date().toLocaleString() +
+            ' ' +
+            (err.stack || err.toString()) +
+            '\n',
+        {
+            flag: 'a',
+        },
+    );
     process.exit(1);
 });
 
 process.on('unhandledRejection', async (reason: any) => {
-    await fs.writeFile(LOG_FILE, (reason.stack || reason).toString() + '\n', {
-        flag: 'a',
-    });
+    await fs.writeFile(
+        LOG_FILE,
+        new Date().toLocaleString() +
+            ' ' +
+            (reason.stack || reason).toString() +
+            '\n',
+        {
+            flag: 'a',
+        },
+    );
 });
 
 process.noDeprecation = true;
@@ -75,9 +90,9 @@ screen.append(
         tags: true,
         align: 'center',
         border: roundedBorder,
-        style: {
-            border: { fg: 'blue' },
-        },
+        style: await buildStyle({
+            border: { fg: 'versioninfo.border' },
+        }),
     }),
 );
 screen.append(
@@ -91,9 +106,9 @@ screen.append(
             'press {bold}q{/bold} to quit, press {bold}h{/bold} for help, press {bold}m{/bold} for home',
         border: roundedBorder,
 
-        style: {
-            border: { fg: 'cyan' },
-        },
+        style: await buildStyle({
+            border: { fg: 'tips.border' },
+        }),
     }),
 );
 

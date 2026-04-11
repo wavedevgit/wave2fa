@@ -30,7 +30,7 @@ export default async function checkForUpdates(screen: Widgets.Screen) {
         const latest = await getLatestReleaseInfo();
 
         if (VERSION !== latest.version) {
-            toast(
+            await toast(
                 `wave2fa update available: ${VERSION} → ${latest.version} (${latest.shortCommit})`,
                 screen,
             );

@@ -26,7 +26,8 @@
 git clone --depth=1 https://github.com/wavedevgit/wave2fa
 git checkout development
 cd wave2fa
-bun i
+# flag is important to patch blessed
+bun install --ignore-scripts=false
 bun run src/index.ts
 
 # or install alpha (might have a lot of bugs, rerun to update to latest)

@@ -10,6 +10,8 @@ import { initHomeScreen } from './home.js';
 import { isValidSecret } from '../utils/otp.js';
 import { randomUUID } from 'crypto';
 import { TotpItem } from '../types.js';
+import { roundedBorder } from '../utils/roundedBorder.js';
+import { buildStyle } from '../utils/styles.js';
 
 async function initImportFromGoogleAuthScreen(screen: Widgets.Screen) {
     clearScreen(screen);
@@ -28,8 +30,8 @@ async function initImportFromGoogleAuthScreen(screen: Widgets.Screen) {
         valign: 'middle',
         align: 'center',
         label: 'Enter QR image path ',
-        border: { type: 'line' },
-        style: { border: { fg: 'magenta' } },
+        border: roundedBorder,
+        style: await buildStyle({ border: { fg: 'input' } }),
         parent: screen,
     });
 
@@ -43,6 +45,11 @@ async function initImportFromGoogleAuthScreen(screen: Widgets.Screen) {
         );
         input.destroy();
         screen.render();
+        screen.onceKey('enter', () => {
+            box.destroy();
+            screen.render();
+            initHomeScreen(screen);
+        });
         return;
     }
 
@@ -52,7 +59,7 @@ async function initImportFromGoogleAuthScreen(screen: Widgets.Screen) {
         )
     ) {
         box.setContent(
-            'File extension is not .png,.jpg,.jpeg,.webp (not an image)',
+            '{red-fg} File extension is not {bold}.png,.jpg,.jpeg,.webp (not an image){bold} {red-fg}\n\n Press {bold}ENTER{/bold} to continue.',
         );
         input.destroy();
         screen.render();

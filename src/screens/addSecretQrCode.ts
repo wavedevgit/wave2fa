@@ -9,6 +9,8 @@ import { parseUri, scanQrCode } from '../utils/qrcode.js';
 import { isValidSecret } from '../utils/otp.js';
 import { initHomeScreen } from './home.js';
 import { TotpItem } from '../types.js';
+import { roundedBorder } from '../utils/roundedBorder.js';
+import { buildStyle } from '../utils/styles.js';
 
 async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
     clearScreen(screen);
@@ -27,8 +29,8 @@ async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
         valign: 'middle',
         align: 'center',
         label: 'Enter QR image path',
-        border: { type: 'line' },
-        style: { border: { fg: 'magenta' } },
+        border: roundedBorder,
+        style: await buildStyle({ input: { fg: 'input' } }),
         parent: screen,
     });
 

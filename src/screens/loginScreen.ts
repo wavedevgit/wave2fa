@@ -9,6 +9,8 @@ import {
     verifyPassword,
 } from '../utils/storage.js';
 import { getArg } from '../utils/cli.js';
+import { roundedBorder } from '../utils/roundedBorder.js';
+import { buildStyle } from '../utils/styles.js';
 
 async function initLoginScreen(screen: Widgets.Screen) {
     clearScreen(screen);
@@ -27,8 +29,8 @@ async function initLoginScreen(screen: Widgets.Screen) {
         width: '50%',
         height: 3,
         label: '  ',
-        border: { type: 'line' },
-        style: { border: { fg: 'magenta' } },
+        border: roundedBorder,
+        style: await buildStyle({ border: { fg: 'input' } }),
         censor: false,
     });
 
@@ -49,6 +51,7 @@ async function initLoginScreen(screen: Widgets.Screen) {
 
     const isValidPassword = await verifyPassword();
     if (!isValidPassword && isValidPassword !== undefined) {
+        box.height = 3;
         box.setContent(
             '{red-fg}{bold}✗{/bold} Invalid password,{/red-fg} Press enter to retry!',
         );
@@ -79,6 +82,7 @@ async function initLoginScreen(screen: Widgets.Screen) {
         isValidPassword === undefined &&
         passwordStrength.valid
     ) {
+        box.height = 3;
         input.destroy();
         await saveWithPassword();
         box.setContent(
@@ -102,6 +106,7 @@ async function initLoginScreen(screen: Widgets.Screen) {
             false: '{bold}{green-fg}✔{/green-fg}{/bold}',
         };
 
+        box.height = 9;
         input.destroy();
 
         let text = `{bold} {red-fg}✗ Invalid Password! ✗{/red-fg} {/bold}\nYour password contents {bold}must{/bold} include the following:\n\n`;

@@ -1,0 +1,44 @@
+diff --git a/node_modules/@types/blessed/index.d.ts b/node_modules/@types/blessed/index.d.ts
+index 7c4043c..1a6ccd7 100644
+--- a/node_modules/@types/blessed/index.d.ts
++++ b/node_modules/@types/blessed/index.d.ts
+@@ -473,9 +473,17 @@ export namespace Widgets {
+             type?: "line" | "bg" | undefined;
+ 
+             /**
+-             * Character to use if bg type, default is space.
++             * Character(s) to use for border, default is space/unicode.
+              */
+-            ch?: string | undefined;
++            ch?: string |  {
++        tl?: string;
++        tr?: string;
++        bl?: string;
++        br?: string;
++        h?: string;
++        v?: string;
++        fill?: string;
++      }|undefined;
+ 
+             /**
+              * Border foreground and background, must be numbers (-1 for default).
+@@ -1541,9 +1549,17 @@ export namespace Widgets {
+         type?: "line" | "bg" | undefined;
+ 
+         /**
+-         * Character to use if bg type, default is space.
++         * Character(s) to use for border, default is space.
+          */
+-        ch?: string | undefined;
++        ch?: string | {
++        tl?: string;
++        tr?: string;
++        bl?: string;
++        br?: string;
++        h?: string;
++        v?: string;
++        fill?: string;
++      }| undefined;
+ 
+         /**
+          * Border foreground and background, must be numbers (-1 for default).

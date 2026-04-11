@@ -6,6 +6,8 @@ import { readInputAsync } from '../utils/inputs.js';
 import { isValidSecret, normalizeBase32 } from '../utils/otp.js';
 import { initHomeScreen } from './home.js';
 import { TotpItem } from '../types.js';
+import { roundedBorder } from '../utils/roundedBorder.js';
+import { buildStyle } from '../utils/styles.js';
 
 async function initAddSecretScreen(screen: Widgets.Screen) {
     clearScreen(screen);
@@ -23,9 +25,9 @@ async function initAddSecretScreen(screen: Widgets.Screen) {
         left: 'center',
         width: '50%',
         height: 3,
+        border: roundedBorder,
         label: '  ',
-        border: { type: 'line' },
-        style: { border: { fg: 'magenta' } },
+        style: await buildStyle({ border: { fg: 'input' } }),
         censor: false,
     });
 

@@ -1,7 +1,9 @@
 import blessed, { Widgets } from 'blessed';
 import clearScreen from './clearScreen.js';
+import { roundedBorder } from './roundedBorder.js';
+import { buildStyle } from './styles.js';
 
-export function toast(message: string, screen: Widgets.Screen) {
+export async function toast(message: string, screen: Widgets.Screen) {
     const toastBox = blessed.box({
         top: 'center',
         left: 'center',
@@ -14,10 +16,8 @@ export function toast(message: string, screen: Widgets.Screen) {
         },
         content: message,
         tags: true,
-        border: 'line',
-        style: {
-            border: { fg: 'magenta' },
-        },
+        border: roundedBorder,
+        style: await buildStyle({ border: { fg: 'toast.border' } }),
     });
 
     screen.append(toastBox);
