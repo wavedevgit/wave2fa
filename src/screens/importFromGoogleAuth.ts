@@ -5,6 +5,7 @@ import { readInputAsync } from '../utils/inputs.js';
 import { addItem, validatePath } from '../utils/storage.js';
 import { scanQrCode } from '../utils/qrcode.js';
 import path from 'path';
+import os from 'os';
 import { initHomeScreen } from './home.js';
 import { isValidSecret } from '../utils/otp.js';
 import { randomUUID } from 'crypto';
@@ -32,22 +33,20 @@ async function initImportFromGoogleAuthScreen(screen: Widgets.Screen) {
         parent: screen,
     });
 
-    const filePath = await readInputAsync(input);
+    let filePath = await readInputAsync(input);
+    if (filePath.startsWith('~')) filePath = filePath.replace('~', os.homedir());
 
     if (!(await validatePath(filePath))) {
-        box.setContent('File not found.');
+        box.setContent(
+            `{red-fg} ! File {bold}not found:{/bold}{/red-fg} (${filePath})\n\n Press {bold}ENTER{/bold} to continue.`,
+        );
         input.destroy();
         screen.render();
         return;
     }
-    if (
-        !['.png', '.jpg', '.jpeg', '.webp'].includes(
-            path.extname(filePath).toLowerCase(),
-        )
-    ) {
-        box.setContent(
-            'File extension is not .png,.jpg,.jpeg,.webp (not an image)',
-        );
+
+    if (!['.png', '.jpg', '.jpeg', '.webp'].includes(path.extname(filePath).toLowerCase())) {
+        box.setContent('File extension is not .png,.jpg,.jpeg,.webp (not an image)');
         input.destroy();
         screen.render();
         screen.onceKey('enter', () => {

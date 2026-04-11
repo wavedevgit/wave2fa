@@ -10,8 +10,7 @@ export async function verifyPassword(): Promise<boolean | undefined> {
         let data: any = await getKeys<TotpItemRaw>(true);
         if (data.length === 0) return undefined;
         // password is not set
-        if (data.every((item: any) => typeof item.secret === 'string'))
-            return undefined;
+        if (data.every((item: any) => typeof item.secret === 'string')) return undefined;
         data = await getKeys<TotpItem>();
         return await isValidSecret(data[0].secret);
     } catch (err) {
@@ -36,10 +35,7 @@ export async function saveWithPassword() {
 }
 
 export async function encryptSecret(secret: string) {
-    const key = crypto
-        .createHash('sha256')
-        .update(globalThis.password)
-        .digest();
+    const key = crypto.createHash('sha256').update(globalThis.password).digest();
     const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
     let encrypted = cipher.update(secret, 'utf8', 'base64');
@@ -55,10 +51,7 @@ export async function decryptSecret(secret: string) {
     try {
         if (typeof secret === 'string') return secret;
         const { data, iv: ivStr } = secret;
-        const key = crypto
-            .createHash('sha256')
-            .update(globalThis.password)
-            .digest();
+        const key = crypto.createHash('sha256').update(globalThis.password).digest();
         const ivBuffer = Buffer.from(ivStr, 'base64');
         const decipher = crypto.createDecipheriv('aes-256-cbc', key, ivBuffer);
         let decrypted = decipher.update(data, 'base64', 'utf8');
@@ -104,7 +97,10 @@ async function addItem(item: TotpItem) {
     }
     await fs.writeFile(dataPath, JSON.stringify(data), 'utf-8');
 }
+
 async function validatePath(path: string) {
+    if (path.startsWith('~')) path.replace('~', os.homedir());
+
     try {
         await fs.stat(path);
         return true;

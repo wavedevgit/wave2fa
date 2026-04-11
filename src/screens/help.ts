@@ -13,7 +13,7 @@ function initHelpScreen(screen: Widgets.Screen) {
             left: 1,
             right: 1,
         },
-        content: `{bold}Wave2FA Help:{/bold}\nPress {bold}h{/bold} - open help\nPress {bold}n{/bold} - '_e vbfg' secret\nPress {bold}e{/bold} - add new 2fa secret using qr code\nPress {bold}t{/bold} - import keys from google auth\nPress {bold}m{/bold} - go to home screen\n`,
+        content: `{bold}Wave2FA Help:{/bold}\nPress {bold}h{/bold} - Open this menu\nPress {bold}n{/bold} - '_e vbfg' secret\nPress {bold}e{/bold} - Add new code using downloaded QR code\nPress {bold}t{/bold} - Import codes from Google Authenticator\nPress {bold}m{/bold} - Go to home screen`,
         tags: true,
         border: 'line',
         style: {
