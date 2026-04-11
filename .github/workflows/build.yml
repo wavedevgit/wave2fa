@@ -150,6 +150,7 @@ jobs:
 
             - name: Create bundle zip
               run: |
+                  ls dist
                   cd "releases/${BRANCH}/${VERSION}"
                   mkdir -p bundles
                   # Linux x64
