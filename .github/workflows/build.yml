@@ -187,14 +187,14 @@ jobs:
                   mkdir -p tmp-win-x64
                   cp dist/wave2fa-windows-x64.exe tmp-win-x64/wave2fa.exe
                   (cd tmp-win-x64 && zip -r "../bundles/wave2fa-windows-x64.zip" .)
-                  rm -rf dist/wave2fa-win-x64.exe
+                  rm -rf dist/wave2fa-windows-x64.exe
                   rm -rf tmp-win-x64
 
                   # Windows arm64
                   mkdir -p tmp-win-arm64
                   cp dist/wave2fa-windows-arm64.exe tmp-win-arm64/wave2fa.exe
                   (cd tmp-win-arm64 && zip -r "../bundles/wave2fa-windows-arm64.zip" .)
-                  rm -rf dist/wave2fa-win-arm64.exe
+                  rm -rf dist/wave2fa-windows-arm64.exe
                   rm -rf tmp-win-arm64
 
             - name: Commit & push
