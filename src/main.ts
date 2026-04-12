@@ -1,3 +1,8 @@
+// probably fix bun issue
+process.env.TERMINFO = new URL(
+    './node_modules/blessed/usr',
+    import.meta.url,
+).pathname;
 import blessed from 'blessed';
 import { initHelpScreen } from './screens/help.js';
 import { initHomeScreen } from './screens/home.js';

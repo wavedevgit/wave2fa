@@ -58,10 +58,12 @@ async function initLoginScreen(screen: Widgets.Screen) {
         input.destroy();
         screen.render();
         screen.onceKey('enter', () => {
+            passwordStore.setPassword('');
             box.destroy();
             screen.render();
             initLoginScreen(screen);
         });
+        return;
     }
 
     if (isValidPassword) {
@@ -71,7 +73,7 @@ async function initLoginScreen(screen: Widgets.Screen) {
 
     const password = passwordStore.getPassword();
 
-    if (!password) process.kill(0);
+    if (!password) process.exit(0);
 
     let passwordStrength = checkPasswordStrength();
 
@@ -94,6 +96,7 @@ async function initLoginScreen(screen: Widgets.Screen) {
             screen.render();
             initHomeScreen(screen);
         });
+        return;
     }
 
     if (
@@ -118,13 +121,14 @@ async function initLoginScreen(screen: Widgets.Screen) {
         text += `Special Characters: ${symbols[String(passwordStrength.reasons.special)]}\n`;
 
         box.setContent(text);
-
         screen.render();
         screen.onceKey('enter', () => {
+            passwordStore.setPassword('');
             box.destroy();
             screen.render();
             initLoginScreen(screen);
         });
+        return;
     }
     if (
         (!isValidPassword && isValidPassword !== undefined) ||

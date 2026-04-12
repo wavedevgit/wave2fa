@@ -15,6 +15,7 @@
 
 - [x] add md5 to info.json for aur repo
 - [ ] fix binary
+- [x] fix invalid password repeating message on login screen
 
 ---
 
