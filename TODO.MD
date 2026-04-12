@@ -13,6 +13,9 @@
     - [x] auto migration
 - [ ] Change data directory to something less senstive
 
+- [x] add md5 to info.json for aur repo
+- [ ] fix binary
+
 ---
 
 # Modules:

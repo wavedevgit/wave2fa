@@ -47,6 +47,9 @@ jobs:
                   echo "BRANCH=$BRANCH" >> $GITHUB_ENV
                   echo "VERSION=$VERSION" >> $GITHUB_ENV
 
+                  sed -i "s|commitHash|$SHORT_COMMIT|" dist/gitHash.js
+                  sed -i "s|wave2faVersion|$VERSION|" dist/gitHash.js
+                  sed -i "s|commitBranch|$BRANCH|" dist/gitHash.js
                   mkdir -p dist/binaries
                   # thank you bun for this great feature
                   bun run build:binary:linux
@@ -55,10 +58,6 @@ jobs:
                   bun run build:binary:mac:arm64
                   bun run build:binary:win
                   bun run build:binary:win:arm64
-
-                  sed -i "s|commitHash|$SHORT_COMMIT|" dist/gitHash.js
-                  sed -i "s|wave2faVersion|$VERSION|" dist/gitHash.js
-                  sed -i "s|commitBranch|$BRANCH|" dist/gitHash.js
 
                   mkdir -p temp-binaries
                   mv dist/binaries/* temp-binaries
@@ -115,16 +114,17 @@ jobs:
                   for f in $(find "$VERSION_DIR" -type f); do
                     REL_PATH=$(realpath --relative-to="$VERSION_DIR" "$f")
                     HASH=$(sha256sum "$f" | awk '{print $1}')
-
+                    MD5_HASH=$(md5sum "$f" | awk '{print $1}')
                     FILES_JSON=$(echo "$FILES_JSON" | bun -e "
                       const fs = require('fs');
                       const json = JSON.parse(process.argv[1]);
                       json[process.argv[2]] = {
                         path: process.argv[2],
-                        sha256: process.argv[3]
+                        sha256: process.argv[3],
+                        md5: process.argv[4]
                       };
                       console.log(JSON.stringify(json));
-                    " "$FILES_JSON" "$REL_PATH" "$HASH")
+                    " "$FILES_JSON" "$REL_PATH" "$HASH" "$MD5_HASH")
                   done
 
                   bun -e "

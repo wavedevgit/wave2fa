@@ -33,6 +33,18 @@ index fbf3cdc..da6f247 100644
  helpers.asort = function(obj) {
    return obj.sort(function(a, b) {
      a = a.name.toLowerCase();
+diff --git a/node_modules/blessed/lib/tput.js b/node_modules/blessed/lib/tput.js
+index 2a57f58..2999f4c 100644
+--- a/node_modules/blessed/lib/tput.js
++++ b/node_modules/blessed/lib/tput.js
+@@ -136,6 +136,7 @@ Tput.ipaths = [
+   process.env.TERMINFO || '',
+   (process.env.TERMINFO_DIRS || '').split(':'),
+   (process.env.HOME || '') + '/.terminfo',
++  new URL('../usr', import.meta.url).pathname,
+   '/usr/share/terminfo',
+   '/usr/share/lib/terminfo',
+   '/usr/lib/terminfo',
 diff --git a/node_modules/blessed/lib/widget.js b/node_modules/blessed/lib/widget.js
 index 6d1444d..e82eb00 100644
 --- a/node_modules/blessed/lib/widget.js
