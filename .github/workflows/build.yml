@@ -156,7 +156,7 @@ jobs:
                   # Linux x64
                   mkdir -p tmp-linux-x64
                   cp dist/wave2fa-linux-x64 tmp-linux-x64/wave2fa
-                  cp scripts/wave2fa.sh tmp-linux-x64/
+                  cp /wave2fa.sh tmp-linux-x64/
                   (cd tmp-linux-x64 && zip -r "../bundles/wave2fa-linux-x64.zip" .)
                   rm -rf tmp-linux-x64
 
