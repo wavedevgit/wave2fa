@@ -26,6 +26,7 @@
     "description": "",
     "resolutions": {},
     "dependencies": {
+        "@node-rs/argon2": "^2.0.2",
         "@types/blessed": "^0.1.27",
         "argon2": "^0.44.0",
         "blessed": "^0.1.81",

@@ -1,11 +1,10 @@
 import fs from 'fs/promises';
 import crypto from 'crypto';
-import { isValidSecret } from './otp.js';
 import os from 'os';
 import path from 'path';
 import { SecretEncrypted, TotpItem, TotpItemRaw } from '../types.js';
-import argon2 from 'argon2';
 import PasswordStore from '../stores/password.js';
+import { hashRaw, Algorithm } from '@node-rs/argon2';
 
 const passwordStore = new PasswordStore();
 
@@ -17,15 +16,20 @@ export async function deriveKey(
     // outdated insecure version, wave2fa will automatically migrate user data to new version
     if (version === 1 || !version)
         return { key: crypto.createHash('sha256').update(password).digest() };
-    // this is more secure :)
+
     const saltToUse = salt || crypto.randomBytes(16);
+
+    const rawBytes = await hashRaw(password, {
+        algorithm: Algorithm.Argon2id,
+        salt: saltToUse,
+        outputLen: 32,
+        memoryCost: 65536,
+        timeCost: 3,
+        parallelism: 1,
+    });
+
     return {
-        key: await argon2.hash(password, {
-            type: argon2.argon2id,
-            salt: saltToUse,
-            hashLength: 32,
-            raw: true,
-        }),
+        key: Buffer.from(rawBytes),
         salt: saltToUse,
     };
 }

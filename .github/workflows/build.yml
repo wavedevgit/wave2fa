@@ -61,7 +61,7 @@ jobs:
                   sed -i "s|commitBranch|$BRANCH|" dist/gitHash.js
 
                   mkdir -p temp-binaries
-                  mv dist/binaries temp-binaries
+                  mv dist/binaries/* temp-binaries
                   rm -rf dist
                   bun run build
 
@@ -150,45 +150,53 @@ jobs:
 
             - name: Create bundle zip
               run: |
+                  ls dist
                   cd "releases/${BRANCH}/${VERSION}"
                   mkdir -p bundles
                   # Linux x64
                   mkdir -p tmp-linux-x64
                   cp dist/wave2fa-linux-x64 tmp-linux-x64/wave2fa
-                  cp scripts/wave2fa.sh tmp-linux-x64/
+                  cp ./wave2fa.sh tmp-linux-x64/
                   (cd tmp-linux-x64 && zip -r "../bundles/wave2fa-linux-x64.zip" .)
+                  rm -rf dist/wave2fa-linux-x64
                   rm -rf tmp-linux-x64
 
                   # Linux arm64
                   mkdir -p tmp-linux-arm64
                   cp dist/wave2fa-linux-arm64 tmp-linux-arm64/wave2fa
-                  cp scripts/wave2fa.sh tmp-linux-arm64/
+                  cp ./wave2fa.sh tmp-linux-arm64/
                   (cd tmp-linux-arm64 && zip -r "../bundles/wave2fa-linux-arm64.zip" .)
+                  rm -rf dist/wave2fa-linux-arm64
                   rm -rf tmp-linux-arm64
 
                   # macOS x64
                   mkdir -p tmp-macos-x64
                   cp dist/wave2fa-macos-x64 tmp-macos-x64/wave2fa
                   (cd tmp-macos-x64 && zip -r "../bundles/wave2fa-macos-x64.zip" .)
+                  rm -rf dist/wave2fa-macos-x64
                   rm -rf tmp-macos-x64
 
                   # macOS arm64
                   mkdir -p tmp-macos-arm64
                   cp dist/wave2fa-macos-arm64 tmp-macos-arm64/wave2fa
                   (cd tmp-macos-arm64 && zip -r "../bundles/wave2fa-macos-arm64.zip" .)
+                  rm -rf dist/wave2fa-macos-arm64
                   rm -rf tmp-macos-arm64
 
                   # Windows x64
                   mkdir -p tmp-win-x64
                   cp dist/wave2fa-windows-x64.exe tmp-win-x64/wave2fa.exe
                   (cd tmp-win-x64 && zip -r "../bundles/wave2fa-windows-x64.zip" .)
+                  rm -rf dist/wave2fa-windows-x64.exe
                   rm -rf tmp-win-x64
 
                   # Windows arm64
                   mkdir -p tmp-win-arm64
                   cp dist/wave2fa-windows-arm64.exe tmp-win-arm64/wave2fa.exe
                   (cd tmp-win-arm64 && zip -r "../bundles/wave2fa-windows-arm64.zip" .)
+                  rm -rf dist/wave2fa-windows-arm64.exe
                   rm -rf tmp-win-arm64
+
             - name: Commit & push
               run: |
                   git config --global user.name "github-actions"
