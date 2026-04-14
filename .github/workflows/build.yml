@@ -110,7 +110,7 @@ jobs:
                   # Linux x64
                   mkdir -p tmp-linux-x64
                   cp dist/wave2fa-linux-x64 tmp-linux-x64/wave2fa
-                  cp -r .terminfo/ tmp-linux-x64/
+                  cp -r "$GITHUB_WORKSPACE/.terminfo" tmp-linux-x64/
                   cp ./wave2fa.sh tmp-linux-x64/
                   (cd tmp-linux-x64 && zip -r "../bundles/wave2fa-linux-x64.zip" .)
                   rm -rf dist/wave2fa-linux-x64
@@ -120,7 +120,7 @@ jobs:
                   mkdir -p tmp-linux-arm64
                   cp dist/wave2fa-linux-arm64 tmp-linux-arm64/wave2fa
                   cp ./wave2fa.sh tmp-linux-arm64/
-                  cp -r .terminfo/ tmp-linux-arm64/
+                  cp -r "$GITHUB_WORKSPACE/.terminfo" tmp-linux-arm64/
                   (cd tmp-linux-arm64 && zip -r "../bundles/wave2fa-linux-arm64.zip" .)
                   rm -rf dist/wave2fa-linux-arm64
                   rm -rf tmp-linux-arm64
@@ -128,7 +128,7 @@ jobs:
                   # macOS x64
                   mkdir -p tmp-macos-x64
                   cp dist/wave2fa-macos-x64 tmp-macos-x64/wave2fa
-                  cp -r .terminfo/ tmp-macos-x64/
+                  cp -r "$GITHUB_WORKSPACE/.terminfo" tmp-macos-x64/
                   (cd tmp-macos-x64 && zip -r "../bundles/wave2fa-macos-x64.zip" .)
                   rm -rf dist/wave2fa-macos-x64
                   rm -rf tmp-macos-x64
@@ -136,7 +136,7 @@ jobs:
                   # macOS arm64
                   mkdir -p tmp-macos-arm64
                   cp dist/wave2fa-macos-arm64 tmp-macos-arm64/wave2fa
-                  cp -r .terminfo/ tmp-linux-arm64/
+                  cp -r "$GITHUB_WORKSPACE/.terminfo" tmp-macos-arm64/
                   (cd tmp-macos-arm64 && zip -r "../bundles/wave2fa-macos-arm64.zip" .)
                   rm -rf dist/wave2fa-macos-arm64
                   rm -rf tmp-macos-arm64
@@ -144,7 +144,7 @@ jobs:
                   # Windows x64
                   mkdir -p tmp-win-x64
                   cp dist/wave2fa-windows-x64.exe tmp-win-x64/wave2fa.exe
-                  cp -r .terminfo/ tmp-win-x64/
+                  cp -r "$GITHUB_WORKSPACE/.terminfo" tmp-win-x64/
                   (cd tmp-win-x64 && zip -r "../bundles/wave2fa-windows-x64.zip" .)
                   rm -rf dist/wave2fa-windows-x64.exe
                   rm -rf tmp-win-x64
@@ -152,7 +152,7 @@ jobs:
                   # Windows arm64
                   mkdir -p tmp-win-arm64
                   cp dist/wave2fa-windows-arm64.exe tmp-win-arm64/wave2fa.exe
-                  cp -r .terminfo/ tmp-win-arm64/
+                  cp -r "$GITHUB_WORKSPACE/.terminfo" tmp-win-arm64/
                   (cd tmp-win-arm64 && zip -r "../bundles/wave2fa-windows-arm64.zip" .)
                   rm -rf dist/wave2fa-windows-arm64.exe
                   rm -rf tmp-win-arm64
