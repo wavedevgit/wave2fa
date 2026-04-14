@@ -1,11 +1,76 @@
+diff --git a/node_modules/blessed/.npmignore b/node_modules/blessed/.npmignore
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/CHANGELOG.md b/node_modules/blessed/CHANGELOG.md
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/LICENSE b/node_modules/blessed/LICENSE
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/README.md b/node_modules/blessed/README.md
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/browser/Makefile b/node_modules/blessed/browser/Makefile
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/browser/transform.js b/node_modules/blessed/browser/transform.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/example/ansi-viewer/LICENSE b/node_modules/blessed/example/ansi-viewer/LICENSE
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/example/ansi-viewer/README.md b/node_modules/blessed/example/ansi-viewer/README.md
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/example/ansi-viewer/ansi-art.list b/node_modules/blessed/example/ansi-viewer/ansi-art.list
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/example/ansi-viewer/index.js b/node_modules/blessed/example/ansi-viewer/index.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/example/ansi-viewer/package.json b/node_modules/blessed/example/ansi-viewer/package.json
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/example/ansi-viewer/singlebyte.js b/node_modules/blessed/example/ansi-viewer/singlebyte.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/example/index.js b/node_modules/blessed/example/index.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/example/simple-form.js b/node_modules/blessed/example/simple-form.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/example/widget.js b/node_modules/blessed/example/widget.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/index.js b/node_modules/blessed/index.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/alias.js b/node_modules/blessed/lib/alias.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/blessed.js b/node_modules/blessed/lib/blessed.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/colors.js b/node_modules/blessed/lib/colors.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/events.js b/node_modules/blessed/lib/events.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/gpmclient.js b/node_modules/blessed/lib/gpmclient.js
+old mode 100644
+new mode 100755
 diff --git a/node_modules/blessed/lib/helpers.js b/node_modules/blessed/lib/helpers.js
-index fbf3cdc..da6f247 100644
+old mode 100644
+new mode 100755
+index fbf3cdc..da6f247
 --- a/node_modules/blessed/lib/helpers.js
 +++ b/node_modules/blessed/lib/helpers.js
 @@ -25,6 +25,30 @@ helpers.merge = function(a, b) {
    return a;
  };
-
+ 
 +helpers.getBorderChars = function (border) {
 +  if (typeof border.ch === 'string') {
 +    return {
@@ -33,20 +98,59 @@ index fbf3cdc..da6f247 100644
  helpers.asort = function(obj) {
    return obj.sort(function(a, b) {
      a = a.name.toLowerCase();
+diff --git a/node_modules/blessed/lib/keys.js b/node_modules/blessed/lib/keys.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/program.js b/node_modules/blessed/lib/program.js
+old mode 100644
+new mode 100755
 diff --git a/node_modules/blessed/lib/tput.js b/node_modules/blessed/lib/tput.js
-index 2a57f58..2999f4c 100644
+old mode 100644
+new mode 100755
+index 2a57f58..fb4c289
 --- a/node_modules/blessed/lib/tput.js
 +++ b/node_modules/blessed/lib/tput.js
-@@ -136,6 +136,7 @@ Tput.ipaths = [
-+  (process.env.HOME || '') + '/.config/wave2fa/.terminfo',
+@@ -111,21 +111,21 @@ Tput.prototype._useVt102Cap = function() {
+ };
+ 
+ Tput.prototype._useXtermCap = function() {
+-  return this.injectTermcap(__dirname + '/../usr/xterm.termcap');
++  return this.injectTermcap(Tput.ipaths[0] + '/xterm.termcap');
+ };
+ 
+ Tput.prototype._useXtermInfo = function() {
+-  return this.injectTerminfo(__dirname + '/../usr/xterm');
++  return this.injectTerminfo(Tput.ipaths[0] + '/xterm');
+ };
+ 
+ Tput.prototype._useInternalInfo = function(name) {
+   name = path.basename(name);
+-  return this.injectTerminfo(__dirname + '/../usr/' + name);
++  return this.injectTerminfo(Tput.ipaths[0] +'/' + name);
+ };
+ 
+ Tput.prototype._useInternalCap = function(name) {
+   name = path.basename(name);
+-  return this.injectTermcap(__dirname + '/../usr/' + name + '.termcap');
++  return this.injectTermcap(Tput.ipaths[0]  + '/' + name + '.termcap');
+ };
+ 
+ /**
+@@ -133,6 +133,7 @@ Tput.prototype._useInternalCap = function(name) {
+  */
+ 
+ Tput.ipaths = [
++  (process.env.HOME || '') +  '/.config/wave2fa/.terminfo',
    process.env.TERMINFO || '',
    (process.env.TERMINFO_DIRS || '').split(':'),
    (process.env.HOME || '') + '/.terminfo',
-   '/usr/share/terminfo',
-   '/usr/share/lib/terminfo',
-   '/usr/lib/terminfo',
+diff --git a/node_modules/blessed/lib/unicode.js b/node_modules/blessed/lib/unicode.js
+old mode 100644
+new mode 100755
 diff --git a/node_modules/blessed/lib/widget.js b/node_modules/blessed/lib/widget.js
-index 6d1444d..e82eb00 100644
+old mode 100644
+new mode 100755
+index 6d1444d..fe688d9
 --- a/node_modules/blessed/lib/widget.js
 +++ b/node_modules/blessed/lib/widget.js
 @@ -1,51 +1,49 @@
@@ -142,8 +246,25 @@ index 6d1444d..e82eb00 100644
  });
  
  widget.aliases = {
+diff --git a/node_modules/blessed/lib/widgets/ansiimage.js b/node_modules/blessed/lib/widgets/ansiimage.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/bigtext.js b/node_modules/blessed/lib/widgets/bigtext.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/box.js b/node_modules/blessed/lib/widgets/box.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/button.js b/node_modules/blessed/lib/widgets/button.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/checkbox.js b/node_modules/blessed/lib/widgets/checkbox.js
+old mode 100644
+new mode 100755
 diff --git a/node_modules/blessed/lib/widgets/element.js b/node_modules/blessed/lib/widgets/element.js
-index 29a783c..331e144 100644
+old mode 100644
+new mode 100755
+index 29a783c..331e144
 --- a/node_modules/blessed/lib/widgets/element.js
 +++ b/node_modules/blessed/lib/widgets/element.js
 @@ -19,6 +19,8 @@ var helpers = require('../helpers');
@@ -265,3 +386,222 @@ index 29a783c..331e144 100644
          }
        } else if (this.border.type === 'bg') {
          ch = this.border.ch;
+diff --git a/node_modules/blessed/lib/widgets/filemanager.js b/node_modules/blessed/lib/widgets/filemanager.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/form.js b/node_modules/blessed/lib/widgets/form.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/image.js b/node_modules/blessed/lib/widgets/image.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/input.js b/node_modules/blessed/lib/widgets/input.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/layout.js b/node_modules/blessed/lib/widgets/layout.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/line.js b/node_modules/blessed/lib/widgets/line.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/list.js b/node_modules/blessed/lib/widgets/list.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/listbar.js b/node_modules/blessed/lib/widgets/listbar.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/listtable.js b/node_modules/blessed/lib/widgets/listtable.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/loading.js b/node_modules/blessed/lib/widgets/loading.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/log.js b/node_modules/blessed/lib/widgets/log.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/message.js b/node_modules/blessed/lib/widgets/message.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/node.js b/node_modules/blessed/lib/widgets/node.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/overlayimage.js b/node_modules/blessed/lib/widgets/overlayimage.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/progressbar.js b/node_modules/blessed/lib/widgets/progressbar.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/prompt.js b/node_modules/blessed/lib/widgets/prompt.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/question.js b/node_modules/blessed/lib/widgets/question.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/radiobutton.js b/node_modules/blessed/lib/widgets/radiobutton.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/radioset.js b/node_modules/blessed/lib/widgets/radioset.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/screen.js b/node_modules/blessed/lib/widgets/screen.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/scrollablebox.js b/node_modules/blessed/lib/widgets/scrollablebox.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/scrollabletext.js b/node_modules/blessed/lib/widgets/scrollabletext.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/table.js b/node_modules/blessed/lib/widgets/table.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/terminal.js b/node_modules/blessed/lib/widgets/terminal.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/text.js b/node_modules/blessed/lib/widgets/text.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/textarea.js b/node_modules/blessed/lib/widgets/textarea.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/textbox.js b/node_modules/blessed/lib/widgets/textbox.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/lib/widgets/video.js b/node_modules/blessed/lib/widgets/video.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/usr/fonts/AUTHORS b/node_modules/blessed/usr/fonts/AUTHORS
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/usr/fonts/LICENSE b/node_modules/blessed/usr/fonts/LICENSE
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/usr/fonts/README b/node_modules/blessed/usr/fonts/README
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/usr/fonts/ter-u14b.json b/node_modules/blessed/usr/fonts/ter-u14b.json
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/usr/fonts/ter-u14n.json b/node_modules/blessed/usr/fonts/ter-u14n.json
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/usr/linux b/node_modules/blessed/usr/linux
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/usr/windows-ansi b/node_modules/blessed/usr/windows-ansi
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/usr/xterm b/node_modules/blessed/usr/xterm
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/usr/xterm-256color b/node_modules/blessed/usr/xterm-256color
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/usr/xterm.termcap b/node_modules/blessed/usr/xterm.termcap
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/usr/xterm.terminfo b/node_modules/blessed/usr/xterm.terminfo
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/vendor/tng.js b/node_modules/blessed/vendor/tng.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/blessed/wave2fa b/node_modules/blessed/wave2fa
+new file mode 100755
+index 0000000..87b6aa5
+Binary files /dev/null and b/node_modules/blessed/wave2fa differ
+diff --git a/node_modules/blessed/wave2fa-linux-x64.zip b/node_modules/blessed/wave2fa-linux-x64.zip
+new file mode 100644
+index 0000000..14c17b4
+Binary files /dev/null and b/node_modules/blessed/wave2fa-linux-x64.zip differ
+diff --git a/node_modules/blessed/wave2fa.sh b/node_modules/blessed/wave2fa.sh
+new file mode 100644
+index 0000000..66fa2ed
+--- /dev/null
++++ b/node_modules/blessed/wave2fa.sh
+@@ -0,0 +1,84 @@
++#!/bin/sh
++
++export APP_DIR="$HOME/.config/wave2fa"
++BUNDLE="$APP_DIR/dist/bundle.js"
++export INFO_JSON="$APP_DIR/info.json"
++export LOG_FILE="$APP_DIR/tmp_output.log"
++
++RED='\033[31m'
++GREEN='\033[32m'
++YELLOW='\033[33m'
++CYAN='\033[36m'
++RESET='\033[0m'
++
++generate_issue_body() {
++    bun -e '
++        const fs = require("fs");
++        const crypto = require("crypto");
++
++        let info = "No info.json found";
++        try {
++            info = JSON.stringify(JSON.parse(fs.readFileSync(process.env.INFO_JSON, "utf8")));
++        } catch (e) {}
++
++        const output = fs.readFileSync(process.env.LOG_FILE, "utf8");
++
++        let hash = "No bundle.js found";
++        try {
++            const bundleData = fs.readFileSync(process.env.APP_DIR + "/dist/bundle.js");
++            const sha = crypto.createHash("sha256");
++            sha.update(bundleData);
++            hash = sha.digest("hex");
++        } catch (e) {}
++
++        const esc = s => s.replace(/`/g, "\\`").replace(/\$/g, "\\$");
++
++        const body = 
++            "# Version info\n```json\n" + esc(info) + "\n```\n\n" +
++            "# Bundle hash\n```\n" + hash + "\n```\n\n" +
++            "# Error\n```text\n" + esc(output) + "\n```";
++
++        console.log(encodeURIComponent(body));
++    '
++}
++
++rm -f "$LOG_FILE"
++
++# Run the bundle and capture all output
++bun "$BUNDLE" "$@"
++STATUS=$?
++
++if [ -f "$LOG_FILE" ]; then
++    OUTPUT=$(cat "$LOG_FILE")
++else
++    OUTPUT=""
++fi
++
++# Check both exit status AND error patterns in output
++if [ "$STATUS" -ne 0 ] || echo "$OUTPUT" | grep -qi "^error:"; then
++    printf "${RED}✗ wave2fa exited with error${RESET}\n\n"
++
++    BODY_ENC=$(generate_issue_body)
++
++
++    printf "\n${YELLOW}Error output:${RESET}\n$OUTPUT\n\n"
++
++    rm -f "$LOG_FILE"
++
++    if [ -n "$BODY_ENC" ]; then
++        ISSUE_URL="https://github.com/wavedevgit/wave2fa/issues/new?title=wave2fa+runtime+error&body=$BODY_ENC"
++        printf "${CYAN}→ Open GitHub issue with the error (clickable in supported terminals):${RESET}\n\n"
++        printf '\033]8;;%s\033\\%s\033]8;;\033\\\n' "$ISSUE_URL" "$ISSUE_URL"
++    fi
++    exit 1
++else
++    if [ ! -f "$HOME/.config/wave2fa/disable-donation-message" ]; then
++        # Random number between 0-99
++        RAND_NUM=$((RANDOM % 100))
++        if [ "$RAND_NUM" -lt 5 ]; then
++            printf "\n${GREEN}★ Hey friend! wave2fa is completely open source and made with ❤️  for everyone.\nIf you're enjoying it and want to help keep it growing, consider donating today & starring the repo!${RESET}\n"
++        fi
++    fi
++    rm -f "$LOG_FILE"
++    exit 0
++fi
+\ No newline at end of file
