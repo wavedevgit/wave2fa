@@ -1,3 +1,18 @@
+// probably fix bun issue
+// @ts-ignore
+import _linux from '../node_modules/blessed/usr/linux' with { type: 'file' };
+// @ts-ignore
+import _windowsAnsi from '../node_modules/blessed/usr/windows-ansi' with { type: 'file' };
+// @ts-ignore
+import _xterm from '../node_modules/blessed/usr/xterm' with { type: 'file' };
+// @ts-ignore
+import _xterm256 from '../node_modules/blessed/usr/xterm-256color' with { type: 'file' };
+// @ts-ignore
+import _xtermCap from '../node_modules/blessed/usr/xterm.termcap' with { type: 'file' };
+// @ts-ignore
+import _xtermInfo from '../node_modules/blessed/usr/xterm.terminfo' with { type: 'file' };
+
+(void _linux, _windowsAnsi, _xterm, _xterm256, _xtermCap, _xtermInfo);
 import blessed from 'blessed';
 import { initHelpScreen } from './screens/help.js';
 import { initHomeScreen } from './screens/home.js';
@@ -13,6 +28,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import { homeConfigPath } from './utils/storage.js';
 import { buildStyle } from './utils/styles.js';
+import { zip } from 'puppeteer-core/lib/esm/third_party/rxjs/rxjs.js';
+import enableLogger from './errorLogger.js';
 
 if (process.argv.includes('--version')) {
     console.log(`Wave2fa ${VERSION} (${GIT_HASH})`);
@@ -21,38 +38,11 @@ if (process.argv.includes('--version')) {
 
 saveRun();
 
-const LOG_FILE = path.join(homeConfigPath, 'tmp_output.log');
-
 await fs.mkdir(homeConfigPath, { recursive: true });
-// errors logger
-process.on('uncaughtException', async (err) => {
-    await fs.writeFile(
-        LOG_FILE,
-        new Date().toLocaleString() +
-            ' ' +
-            (err.stack || err.toString()) +
-            '\n',
-        {
-            flag: 'a',
-        },
-    );
-    process.exit(1);
-});
 
-process.on('unhandledRejection', async (reason: any) => {
-    await fs.writeFile(
-        LOG_FILE,
-        new Date().toLocaleString() +
-            ' ' +
-            (reason.stack || reason).toString() +
-            '\n',
-        {
-            flag: 'a',
-        },
-    );
-});
-
+await enableLogger();
 process.noDeprecation = true;
+throw new Error('test error logger');
 
 // shim buffer as some libs are using old Buffer()
 const _Buffer = Buffer;
@@ -70,10 +60,9 @@ BufferShim.prototype = _Buffer.prototype;
 // @ts-ignore
 global.Buffer = BufferShim;
 
+console.log(blessed.screen);
 const screen = blessed.screen({
     smartCSR: true,
-    // this is a bad idea, but it doesn't matter, it'll default to xterm hard code ansii chars
-    tput: false as any,
     title: 'Wave2FA',
     _isBase: true,
 });

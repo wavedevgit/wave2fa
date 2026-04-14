@@ -5,7 +5,7 @@ index fbf3cdc..da6f247 100644
 @@ -25,6 +25,30 @@ helpers.merge = function(a, b) {
    return a;
  };
- 
+
 +helpers.getBorderChars = function (border) {
 +  if (typeof border.ch === 'string') {
 +    return {
@@ -38,10 +38,10 @@ index 2a57f58..2999f4c 100644
 --- a/node_modules/blessed/lib/tput.js
 +++ b/node_modules/blessed/lib/tput.js
 @@ -136,6 +136,7 @@ Tput.ipaths = [
++  (process.env.HOME || '') + '/.config/wave2fa/.terminfo',
    process.env.TERMINFO || '',
    (process.env.TERMINFO_DIRS || '').split(':'),
    (process.env.HOME || '') + '/.terminfo',
-+  new URL('../usr', import.meta.url).pathname,
    '/usr/share/terminfo',
    '/usr/share/lib/terminfo',
    '/usr/lib/terminfo',

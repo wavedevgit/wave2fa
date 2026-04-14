@@ -13,7 +13,7 @@
 
         "strict": true,
 
-        "types": ["node"],
+        "types": ["node", "bun"],
 
         "sourceMap": true,
         "skipLibCheck": true

@@ -16,6 +16,7 @@
 - [x] add md5 to info.json for aur repo
 - [ ] fix binary
 - [x] fix invalid password repeating message on login screen
+- [x] add runner logic to main.ts instead of having a runner
 
 ---
 
@@ -37,7 +38,3 @@
 - [ ] Publish to npm (`npx wave2fa`)
 - [ ] Homebrew tap (`brew install wavedevgit/tap/wave2fa`)
 - [ ] AUR package
-
-```
-
-```
