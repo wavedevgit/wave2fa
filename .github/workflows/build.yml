@@ -22,18 +22,25 @@ jobs:
         steps:
             - uses: actions/checkout@v4
               with:
-                  fetch-depth: 0
+                  fetch-depth: 1
                   ref: ${{ github.event.inputs.branch }}
+                  filter: blob:none
 
             - name: Install Bun
               run: |
                   curl -fsSL https://bun.sh/install | bash
                   echo "$HOME/.bun/bin" >> $GITHUB_PATH
 
+            - uses: actions/cache@v4
+              with:
+                  path: ~/.bun/install/cache
+                  key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
+                  restore-keys: ${{ runner.os }}-bun-
+
             - name: Install dependencies
               run: bun install
 
-            - name: Build all binaries
+            - name: Build
               run: |
                   bun run build:ts
 
@@ -42,14 +49,14 @@ jobs:
                   BRANCH="${{ github.event.inputs.branch }}"
                   VERSION="${{ github.event.inputs.version }}"
 
-                  echo "COMMIT=$COMMIT" >> $GITHUB_ENV
+                  echo "COMMIT=$COMMIT"           >> $GITHUB_ENV
                   echo "SHORT_COMMIT=$SHORT_COMMIT" >> $GITHUB_ENV
-                  echo "BRANCH=$BRANCH" >> $GITHUB_ENV
-                  echo "VERSION=$VERSION" >> $GITHUB_ENV
+                  echo "BRANCH=$BRANCH"           >> $GITHUB_ENV
+                  echo "VERSION=$VERSION"         >> $GITHUB_ENV
 
-                  sed -i "s|commitHash|$SHORT_COMMIT|" dist/gitHash.js
-                  sed -i "s|wave2faVersion|$VERSION|" dist/gitHash.js
-                  sed -i "s|commitBranch|$BRANCH|" dist/gitHash.js
+                  sed -i "s|commitHash|$SHORT_COMMIT|"   dist/gitHash.js
+                  sed -i "s|wave2faVersion|$VERSION|"    dist/gitHash.js
+                  sed -i "s|commitBranch|$BRANCH|"       dist/gitHash.js
 
                   mkdir -p dist/binaries
 
@@ -66,9 +73,9 @@ jobs:
 
                   bun run build
 
-                  sed -i "s|commitHash|$SHORT_COMMIT|" dist/bundle.js
-                  sed -i "s|wave2faVersion|$VERSION|" dist/bundle.js
-                  sed -i "s|commitBranch|$BRANCH|" dist/bundle.js
+                  sed -i "s|commitHash|$SHORT_COMMIT|"   dist/bundle.js
+                  sed -i "s|wave2faVersion|$VERSION|"    dist/bundle.js
+                  sed -i "s|commitBranch|$BRANCH|"       dist/bundle.js
 
                   mv temp-binaries/* dist
                   rm -rf temp-binaries
@@ -78,9 +85,7 @@ jobs:
                     cp -r ./node_modules/blessed/usr/* .terminfo/
                   fi
 
-            - name: Bump version
-              env:
-                  VERSION: ${{ github.event.inputs.version }}
+            - name: Bump version in package.json
               run: |
                   bun -e "
                     const fs = require('fs');
@@ -89,156 +94,178 @@ jobs:
                     fs.writeFileSync('package.json', JSON.stringify(pkg, null, 4));
                   "
 
-            - name: Checkout releases repo
-              uses: actions/checkout@v4
-              with:
-                  repository: wavedevgit/wave2fa-releases
-                  token: ${{ secrets.WAVE2FA_RELEASES_PAT }}
-                  path: releases
-                  fetch-depth: 1
-                  filter: blob:none
-
-            - name: Copy build to releases repo
-              env:
-                  TARGET: releases/${{ github.event.inputs.branch }}/${{ github.event.inputs.version }}
-              run: |
-                  BRANCH="${{ github.event.inputs.branch }}"
-                  VERSION="${{ github.event.inputs.version }}"
-
-                  TARGET="releases/${BRANCH}/${VERSION}"
-                  mkdir -p "$TARGET/dist"
-
-                  cp -r dist/* "$TARGET/dist"
-                  cp scripts/wave2fa.sh "$TARGET/"
-                  cp package.json "$TARGET/" || echo "no package.json"
-
-            - name: Create bundle zip
-              run: |
-                  cd "releases/${BRANCH}/${VERSION}"
-                  mkdir -p bundles
-
-                  copy_terminfo () {
-                    if [ -d "$GITHUB_WORKSPACE/.terminfo" ]; then
-                      cp -r "$GITHUB_WORKSPACE/.terminfo" "$1/"
-                    fi
-                  }
-
-                  # Linux x64
-                  mkdir -p tmp-linux-x64
-                  mv dist/wave2fa-linux-x64 tmp-linux-x64/wave2fa
-                  copy_terminfo tmp-linux-x64
-                  cp ./wave2fa.sh tmp-linux-x64/
-                  (cd tmp-linux-x64 && zip -r "../bundles/wave2fa-linux-x64.zip" .)
-                  rm -rf tmp-linux-x64
-
-                  # Linux arm64
-                  mkdir -p tmp-linux-arm64
-                  mv dist/wave2fa-linux-arm64 tmp-linux-arm64/wave2fa
-                  copy_terminfo tmp-linux-arm64
-                  cp ./wave2fa.sh tmp-linux-arm64/
-                  (cd tmp-linux-arm64 && zip -r "../bundles/wave2fa-linux-arm64.zip" .)
-                  rm -rf tmp-linux-arm64
-
-                  # macOS x64
-                  mkdir -p tmp-macos-x64
-                  mv dist/wave2fa-macos-x64 tmp-macos-x64/wave2fa
-                  copy_terminfo tmp-macos-x64
-                  cp ./wave2fa.sh tmp-macos-x64/
-                  (cd tmp-macos-x64 && zip -r "../bundles/wave2fa-macos-x64.zip" .)
-                  rm -rf tmp-macos-x64
-
-                  # macOS arm64
-                  mkdir -p tmp-macos-arm64
-                  mv dist/wave2fa-macos-arm64 tmp-macos-arm64/wave2fa
-                  copy_terminfo tmp-macos-arm64
-                  cp ./wave2fa.sh tmp-macos-arm64/
-                  (cd tmp-macos-arm64 && zip -r "../bundles/wave2fa-macos-arm64.zip" .)
-                  rm -rf tmp-macos-arm64
-
-                  # Windows x64
-                  mkdir -p tmp-win-x64
-                  mv dist/wave2fa-windows-x64.exe tmp-win-x64/wave2fa.exe
-                  copy_terminfo tmp-win-x64
-                  (cd tmp-win-x64 && zip -r "../bundles/wave2fa-windows-x64.zip" .)
-                  rm -rf tmp-win-x64
-
-                  # Windows arm64
-                  mkdir -p tmp-win-arm64
-                  mv dist/wave2fa-windows-arm64.exe tmp-win-arm64/wave2fa.exe
-                  copy_terminfo tmp-win-arm64
-                  (cd tmp-win-arm64 && zip -r "../bundles/wave2fa-windows-arm64.zip" .)
-                  rm -rf tmp-win-arm64
-
-            - name: Generate metadata
-              env:
-                  FILES_JSON: '{}'
-                  TARGET: releases/${{ github.event.inputs.branch }}/${{ github.event.inputs.version }}
-              run: |
-                  set -e
-
-                  mkdir -p "$TARGET"
-
-                  cat > "$TARGET/info.json" <<EOF
-                  {
-                    "version": "${VERSION}",
-                    "branch": "${BRANCH}",
-                    "commit": "${COMMIT}",
-                    "shortCommit": "${SHORT_COMMIT}",
-                    "buildTime": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-                  }
-                  EOF
-
-                  VERSION_DIR="$TARGET"
-
-                  while IFS= read -r f; do
-                    REL_PATH=$(realpath --relative-to="$VERSION_DIR" "$f")
-                    HASH=$(sha256sum "$f" | awk '{print $1}')
-                    MD5_HASH=$(md5sum "$f" | awk '{print $1}')
-
-                    FILES_JSON=$(node -e "
-                      const json = JSON.parse(process.argv[1]);
-                      json[process.argv[2]] = {
-                        path: process.argv[2],
-                        sha256: process.argv[3],
-                        md5: process.argv[4]
-                      };
-                      console.log(JSON.stringify(json));
-                    " "$FILES_JSON" "$REL_PATH" "$HASH" "$MD5_HASH")
-
-                  done < <(find "$VERSION_DIR" -type f)
-
-                  node -e "
-                    const fs = require('fs');
-
-                    const meta = {
-                      version: process.env.VERSION,
-                      branch: process.env.BRANCH,
-                      commit: process.env.COMMIT,
-                      shortCommit: process.env.SHORT_COMMIT,
-                      buildTime: new Date().toISOString(),
-                      files: JSON.parse(process.env.FILES_JSON || '{}')
-                    };
-
-                    fs.writeFileSync(
-                      process.env.TARGET + '/latest.json',
-                      JSON.stringify(meta, null, 4)
-                    );
-                  "
-
-            - name: Commit & push
+            - name: Commit bumped package.json
               run: |
                   git config --global user.name "github-actions"
                   git config --global user.email "github-actions@github.com"
-
                   git add package.json
                   if ! git diff --cached --quiet; then
                     git commit -m "bump version: ${VERSION}"
                     git push
                   fi
 
-                  cd releases
-                  git add .
-                  if ! git diff --cached --quiet; then
-                    git commit -m "release: ${BRANCH} @ ${VERSION} (${COMMIT})"
-                    git push
-                  fi
+            - name: Create release zips
+              run: |
+                  mkdir -p bundles
+
+                  copy_terminfo() {
+                    [ -d ".terminfo" ] && cp -r .terminfo "$1/"
+                  }
+
+                  pack() {
+                    local name="$1" bin="$2" ext="${3:-}"
+                    mkdir -p "tmp-$name"
+                    mv "dist/$bin" "tmp-$name/wave2fa${ext}"
+                    copy_terminfo "tmp-$name"
+                    [ -z "$ext" ] && cp scripts/wave2fa.sh "tmp-$name/"
+                    (cd "tmp-$name" && zip -r "../bundles/wave2fa-${name}.zip" .)
+                    rm -rf "tmp-$name"
+                  }
+
+                  pack linux-x64    wave2fa-linux-x64
+                  pack linux-arm64  wave2fa-linux-arm64
+                  pack macos-x64    wave2fa-macos-x64
+                  pack macos-arm64  wave2fa-macos-arm64
+                  pack windows-x64  wave2fa-windows-x64.exe  .exe
+                  pack windows-arm64 wave2fa-windows-arm64.exe .exe
+
+            - name: Generate metadata JSONs
+              run: |
+                  BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+                  sha_entry() {
+                    local f="$1" name="$2"
+                    SHA=$(sha256sum "$f" | awk '{print $1}')
+                    MD5=$(md5sum   "$f" | awk '{print $1}')
+                    echo "\"$name\": { \"sha256\": \"$SHA\", \"md5\": \"$MD5\" }"
+                  }
+
+                  # Build files object (filled after we know release URLs)
+                  # We'll inject URLs in the next step after release creation
+                  cat > info.json <<EOF
+                  {
+                    "version": "${VERSION}",
+                    "branch":  "${BRANCH}",
+                    "commit":  "${COMMIT}",
+                    "shortCommit": "${SHORT_COMMIT}",
+                    "buildTime": "${BUILD_TIME}"
+                  }
+                  EOF
+
+            - name: Create GitHub Release + upload assets
+              id: release
+              env:
+                  GH_TOKEN: ${{ secrets.WAVE2FA_RELEASES_PAT }}
+              run: |
+                  TAG="${BRANCH}-${VERSION}"
+
+                  gh release create "$TAG" \
+                    --repo wavedevgit/wave2fa-releases \
+                    --title "wave2fa ${VERSION} (${BRANCH})" \
+                    --notes "Branch: \`${BRANCH}\`  Commit: \`${SHORT_COMMIT}\`" \
+                    bundles/wave2fa-linux-x64.zip \
+                    bundles/wave2fa-linux-arm64.zip \
+                    bundles/wave2fa-macos-x64.zip \
+                    bundles/wave2fa-macos-arm64.zip \
+                    bundles/wave2fa-windows-x64.zip \
+                    bundles/wave2fa-windows-arm64.zip \
+                    dist/bundle.js \
+                    dist/bundle.js.map \
+                    scripts/wave2fa.sh \
+                    package.json
+
+                  # Capture base URL for assets
+                  RELEASE_URL="https://github.com/wavedevgit/wave2fa-releases/releases/download/${TAG}"
+                  echo "RELEASE_URL=$RELEASE_URL" >> $GITHUB_ENV
+
+            - name: Generate latest.json with asset URLs
+              run: |
+                  BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+                  asset_entry() {
+                    local file="$1" filename="$2"
+                    SHA=$(sha256sum "$file" | awk '{print $1}')
+                    MD5=$(md5sum   "$file" | awk '{print $1}')
+                    printf '"%s": { "url": "%s/%s", "sha256": "%s", "md5": "%s" }' \
+                      "$filename" "$RELEASE_URL" "$filename" "$SHA" "$MD5"
+                  }
+
+                  node -e "
+                    const fs = require('fs');
+                    const { execSync } = require('child_process');
+
+                    const assets = [
+                      ['bundles/wave2fa-linux-x64.zip',    'wave2fa-linux-x64.zip'],
+                      ['bundles/wave2fa-linux-arm64.zip',  'wave2fa-linux-arm64.zip'],
+                      ['bundles/wave2fa-macos-x64.zip',    'wave2fa-macos-x64.zip'],
+                      ['bundles/wave2fa-macos-arm64.zip',  'wave2fa-macos-arm64.zip'],
+                      ['bundles/wave2fa-windows-x64.zip',  'wave2fa-windows-x64.zip'],
+                      ['bundles/wave2fa-windows-arm64.zip','wave2fa-windows-arm64.zip'],
+                      ['dist/bundle.js',                   'bundle.js'],
+                      ['dist/bundle.js.map',               'bundle.js.map'],
+                      ['scripts/wave2fa.sh',               'wave2fa.sh'],
+                      ['package.json',                     'package.json'],
+                    ];
+
+                    const files = {};
+                    for (const [path, name] of assets) {
+                      const sha256 = execSync('sha256sum ' + path).toString().split(' ')[0];
+                      const md5    = execSync('md5sum '    + path).toString().split(' ')[0];
+                      files[name] = {
+                        url: process.env.RELEASE_URL + '/' + name,
+                        sha256,
+                        md5
+                      };
+                    }
+
+                    const meta = {
+                      version:     process.env.VERSION,
+                      branch:      process.env.BRANCH,
+                      commit:      process.env.COMMIT,
+                      shortCommit: process.env.SHORT_COMMIT,
+                      buildTime:   new Date().toISOString(),
+                      releaseUrl:  process.env.RELEASE_URL,
+                      files
+                    };
+
+                    fs.writeFileSync('latest.json',  JSON.stringify(meta, null, 2));
+                    fs.writeFileSync('info.json',    JSON.stringify({
+                      version:     meta.version,
+                      branch:      meta.branch,
+                      commit:      meta.commit,
+                      shortCommit: meta.shortCommit,
+                      buildTime:   meta.buildTime
+                    }, null, 2));
+                  "
+
+            - name: Push latest.json + info.json to releases repo via API
+              env:
+                  GH_TOKEN: ${{ secrets.WAVE2FA_RELEASES_PAT }}
+              run: |
+                  push_file() {
+                    local local_path="$1"
+                    local repo_path="$2"
+                    local content
+                    content=$(base64 -w0 < "$local_path")
+
+                    # get SHA if file exists (update) else create
+                    local sha
+                    sha=$(gh api "repos/wavedevgit/wave2fa-releases/contents/${repo_path}" \
+                      --jq '.sha' 2>/dev/null || true)
+
+                    if [ -n "$sha" ]; then
+                      gh api "repos/wavedevgit/wave2fa-releases/contents/${repo_path}" \
+                        --method PUT \
+                        -f message="release: ${BRANCH} @ ${VERSION} (${SHORT_COMMIT})" \
+                        -f content="$content" \
+                        -f sha="$sha"
+                    else
+                      gh api "repos/wavedevgit/wave2fa-releases/contents/${repo_path}" \
+                        --method PUT \
+                        -f message="release: ${BRANCH} @ ${VERSION} (${SHORT_COMMIT})" \
+                        -f content="$content"
+                    fi
+                  }
+
+                  push_file latest.json "${BRANCH}/latest.json"
+                  push_file info.json   "${BRANCH}/${VERSION}/info.json"
