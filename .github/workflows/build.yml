@@ -148,7 +148,6 @@ jobs:
 
             - name: Generate metadata files
               run: |
-                  cd releases
                   BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
                   node -e "
                     const fs = require('fs');
