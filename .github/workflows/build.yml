@@ -125,10 +125,32 @@ jobs:
                   pack windows-x64  wave2fa-windows-x64.exe  .exe
                   pack windows-arm64 wave2fa-windows-arm64.exe .exe
 
+            - name: Create GitHub Release
+              env:
+                  GH_TOKEN: ${{ secrets.WAVE2FA_RELEASES_PAT }}
+              run: |
+                  TAG="${BRANCH}-${VERSION}"
+
+                  gh release create "$TAG" \
+                    --repo wavedevgit/wave2fa-releases \
+                    --title "wave2fa ${VERSION} (${BRANCH})" \
+                    --notes "Branch: ${BRANCH} Commit: ${SHORT_COMMIT}" \
+                    bundles/*.zip \
+                    dist/bundle.js \
+                    dist/bundle.js.map \
+                    scripts/wave2fa.sh \
+                    package.json
+
+            - name: Checkout releases repo
+              uses: actions/checkout@v4
+              with:
+                  repository: wavedevgit/wave2fa-releases
+                  token: ${{ secrets.WAVE2FA_RELEASES_PAT }}
+                  path: releases
             - name: Generate metadata files
               run: |
+                  cd releases
                   BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-
                   node -e "
                     const fs = require('fs');
                     const { execSync } = require('child_process');
@@ -163,9 +185,9 @@ jobs:
                       files
                     };
 
-                    fs.writeFileSync('latest.json', JSON.stringify(meta, null, 2));
+                    fs.writeFileSync('./'+process.env.BRANCH+'/latest.json', JSON.stringify(meta, null, 2));
 
-                    fs.writeFileSync('info.json', JSON.stringify({
+                    fs.writeFileSync('./'+process.env.BRANCH+'/'+process.env.VERSION+'/info.json', JSON.stringify({
                       version: meta.version,
                       branch: meta.branch,
                       commit: meta.commit,
@@ -173,25 +195,9 @@ jobs:
                       buildTime: meta.buildTime
                     }, null, 2));
                   "
-
-            - name: Create GitHub Release
-              env:
-                  GH_TOKEN: ${{ secrets.WAVE2FA_RELEASES_PAT }}
-              run: |
-                  TAG="${BRANCH}-${VERSION}"
-
-                  gh release create "$TAG" \
-                    --repo wavedevgit/wave2fa-releases \
-                    --title "wave2fa ${VERSION} (${BRANCH})" \
-                    --notes "Branch: ${BRANCH} Commit: ${SHORT_COMMIT}" \
-                    bundles/*.zip \
-                    dist/bundle.js \
-                    dist/bundle.js.map \
-                    scripts/wave2fa.sh \
-                    package.json
-
             - name: Commit latest.json + info.json to branch folder
               run: |
+                  cd releases
                   git config --global user.name "github-actions"
                   git config --global user.email "github-actions@github.com"
 
@@ -203,6 +209,6 @@ jobs:
                   git add "$BRANCH/latest.json" "$BRANCH/info.json"
 
                   if ! git diff --cached --quiet; then
-                    git commit -m "release metadata: ${BRANCH} ${VERSION}"
+                    git commit -m "release metadata: ${BRANCH} @ ${VERSION} (${SHORT_COMMIT})"
                     git push origin HEAD:${BRANCH}
                   fi
