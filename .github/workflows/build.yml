@@ -95,6 +95,8 @@ jobs:
                   repository: wavedevgit/wave2fa-releases
                   token: ${{ secrets.WAVE2FA_RELEASES_PAT }}
                   path: releases
+                  fetch-depth: 1
+                  filter: blob:none
 
             - name: Copy build to releases repo
               env:
