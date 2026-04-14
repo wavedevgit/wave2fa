@@ -39,7 +39,7 @@ export async function verifyPassword(): Promise<boolean | undefined> {
         const data = await getKeys<TotpItemRaw>(true);
 
         // nothing to verify against
-        if (data.length === 0) return true;
+        if (data.length === 0) return undefined;
 
         // find an encrypted entry (not plaintext legacy)
         const encryptedItem = data.find(

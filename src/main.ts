@@ -76,7 +76,6 @@ BufferShim.prototype = _Buffer.prototype;
 // @ts-ignore
 global.Buffer = BufferShim;
 
-console.log(blessed.screen);
 const screen = blessed.screen({
     smartCSR: true,
     title: 'Wave2FA',
