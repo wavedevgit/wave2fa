@@ -50,8 +50,9 @@ jobs:
                   sed -i "s|commitHash|$SHORT_COMMIT|" dist/gitHash.js
                   sed -i "s|wave2faVersion|$VERSION|" dist/gitHash.js
                   sed -i "s|commitBranch|$BRANCH|" dist/gitHash.js
+
                   mkdir -p dist/binaries
-                  # thank you bun for this great feature
+
                   bun run build:binary:linux
                   bun run build:binary:linux:arm64
                   bun run build:binary:mac
@@ -62,17 +63,24 @@ jobs:
                   mkdir -p temp-binaries
                   mv dist/binaries/* temp-binaries
                   rm -rf dist
+
                   bun run build
 
                   sed -i "s|commitHash|$SHORT_COMMIT|" dist/bundle.js
                   sed -i "s|wave2faVersion|$VERSION|" dist/bundle.js
                   sed -i "s|commitBranch|$BRANCH|" dist/bundle.js
+
                   mv temp-binaries/* dist
                   rm -rf temp-binaries
+
                   mkdir -p .terminfo
-                  cp -r ./node_modules/blessed/usr/* .terminfo
+                  if [ -d "./node_modules/blessed/usr" ]; then
+                    cp -r ./node_modules/blessed/usr/* .terminfo/
+                  fi
 
             - name: Bump version
+              env:
+                  VERSION: ${{ github.event.inputs.version }}
               run: |
                   bun -e "
                     const fs = require('fs');
@@ -80,8 +88,6 @@ jobs:
                     pkg.version = process.env.VERSION;
                     fs.writeFileSync('package.json', JSON.stringify(pkg, null, 4));
                   "
-              env:
-                  VERSION: ${{ github.event.inputs.version }}
 
             - name: Checkout releases repo
               uses: actions/checkout@v4
@@ -91,123 +97,131 @@ jobs:
                   path: releases
 
             - name: Copy build to releases repo
+              env:
+                  TARGET: releases/${{ github.event.inputs.branch }}/${{ github.event.inputs.version }}
               run: |
+                  BRANCH="${{ github.event.inputs.branch }}"
+                  VERSION="${{ github.event.inputs.version }}"
+
                   TARGET="releases/${BRANCH}/${VERSION}"
-                  export BRANCH_TARGET="releases/${BRANCH}"
                   mkdir -p "$TARGET/dist"
 
                   cp -r dist/* "$TARGET/dist"
                   cp scripts/wave2fa.sh "$TARGET/"
                   cp package.json "$TARGET/" || echo "no package.json"
-              env:
-                  FILES_JSON: '{}'
-                  TARGET: releases/${{ github.event.inputs.branch }}/${{ github.event.inputs.version }}
+
             - name: Create bundle zip
               run: |
-                  ls dist
                   cd "releases/${BRANCH}/${VERSION}"
                   mkdir -p bundles
+
+                  copy_terminfo () {
+                    if [ -d "$GITHUB_WORKSPACE/.terminfo" ]; then
+                      cp -r "$GITHUB_WORKSPACE/.terminfo" "$1/"
+                    fi
+                  }
+
                   # Linux x64
                   mkdir -p tmp-linux-x64
                   cp dist/wave2fa-linux-x64 tmp-linux-x64/wave2fa
-                  cp -r "$GITHUB_WORKSPACE/.terminfo" tmp-linux-x64/
+                  copy_terminfo tmp-linux-x64
                   cp ./wave2fa.sh tmp-linux-x64/
                   (cd tmp-linux-x64 && zip -r "../bundles/wave2fa-linux-x64.zip" .)
-                  rm -rf dist/wave2fa-linux-x64
                   rm -rf tmp-linux-x64
 
                   # Linux arm64
                   mkdir -p tmp-linux-arm64
                   cp dist/wave2fa-linux-arm64 tmp-linux-arm64/wave2fa
+                  copy_terminfo tmp-linux-arm64
                   cp ./wave2fa.sh tmp-linux-arm64/
-                  cp -r "$GITHUB_WORKSPACE/.terminfo" tmp-linux-arm64/
                   (cd tmp-linux-arm64 && zip -r "../bundles/wave2fa-linux-arm64.zip" .)
-                  rm -rf dist/wave2fa-linux-arm64
                   rm -rf tmp-linux-arm64
 
                   # macOS x64
                   mkdir -p tmp-macos-x64
                   cp dist/wave2fa-macos-x64 tmp-macos-x64/wave2fa
-                  cp -r "$GITHUB_WORKSPACE/.terminfo" tmp-macos-x64/
+                  copy_terminfo tmp-macos-x64
+                  cp ./wave2fa.sh tmp-macos-x64/
                   (cd tmp-macos-x64 && zip -r "../bundles/wave2fa-macos-x64.zip" .)
-                  rm -rf dist/wave2fa-macos-x64
                   rm -rf tmp-macos-x64
 
                   # macOS arm64
                   mkdir -p tmp-macos-arm64
                   cp dist/wave2fa-macos-arm64 tmp-macos-arm64/wave2fa
-                  cp -r "$GITHUB_WORKSPACE/.terminfo" tmp-macos-arm64/
+                  copy_terminfo tmp-macos-arm64
+                  cp ./wave2fa.sh tmp-macos-arm64/
                   (cd tmp-macos-arm64 && zip -r "../bundles/wave2fa-macos-arm64.zip" .)
-                  rm -rf dist/wave2fa-macos-arm64
                   rm -rf tmp-macos-arm64
 
                   # Windows x64
                   mkdir -p tmp-win-x64
                   cp dist/wave2fa-windows-x64.exe tmp-win-x64/wave2fa.exe
-                  cp -r "$GITHUB_WORKSPACE/.terminfo" tmp-win-x64/
+                  copy_terminfo tmp-win-x64
                   (cd tmp-win-x64 && zip -r "../bundles/wave2fa-windows-x64.zip" .)
-                  rm -rf dist/wave2fa-windows-x64.exe
                   rm -rf tmp-win-x64
 
                   # Windows arm64
                   mkdir -p tmp-win-arm64
                   cp dist/wave2fa-windows-arm64.exe tmp-win-arm64/wave2fa.exe
-                  cp -r "$GITHUB_WORKSPACE/.terminfo" tmp-win-arm64/
+                  copy_terminfo tmp-win-arm64
                   (cd tmp-win-arm64 && zip -r "../bundles/wave2fa-windows-arm64.zip" .)
-                  rm -rf dist/wave2fa-windows-arm64.exe
                   rm -rf tmp-win-arm64
 
             - name: Generate metadata
-              run: |
-                  cat > "$TARGET/info.json" <<EOF
-                    {
-                      "version": "${VERSION}",
-                      "branch": "${BRANCH}",
-                      "commit": "${COMMIT}",
-                      "shortCommit": "${SHORT_COMMIT}",
-                      "buildTime": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-                    }
-                    EOF
-
-                    VERSION_DIR="$TARGET"
-                    export FILES_JSON="{}"
-
-                    for f in $(find "$VERSION_DIR" -type f); do
-                      REL_PATH=$(realpath --relative-to="$VERSION_DIR" "$f")
-                      HASH=$(sha256sum "$f" | awk '{print $1}')
-                      MD5_HASH=$(md5sum "$f" | awk '{print $1}')
-                      FILES_JSON=$(echo "$FILES_JSON" | bun -e "
-                        const fs = require('fs');
-                        const json = JSON.parse(process.argv[1]);
-                        json[process.argv[2]] = {
-                          path: process.argv[2],
-                          sha256: process.argv[3],
-                          md5: process.argv[4]
-                        };
-                        console.log(JSON.stringify(json));
-                      " "$FILES_JSON" "$REL_PATH" "$HASH" "$MD5_HASH")
-                    done
-
-                    bun -e "
-                      const fs = require('fs');
-
-                      const meta = {
-                        version: process.env.VERSION,
-                        branch: process.env.BRANCH,
-                        commit: process.env.COMMIT,
-                        shortCommit: process.env.SHORT_COMMIT,
-                        buildTime: new Date().toISOString(),
-                        files: JSON.parse(process.env.FILES_JSON || '{}')
-                      };
-
-                      fs.writeFileSync(
-                        process.env.BRANCH_TARGET + '/latest.json',
-                        JSON.stringify(meta, null, 4)
-                      );
-                    "
               env:
                   FILES_JSON: '{}'
                   TARGET: releases/${{ github.event.inputs.branch }}/${{ github.event.inputs.version }}
+              run: |
+                  set -e
+
+                  mkdir -p "$TARGET"
+
+                  cat > "$TARGET/info.json" <<EOF
+                  {
+                    "version": "${VERSION}",
+                    "branch": "${BRANCH}",
+                    "commit": "${COMMIT}",
+                    "shortCommit": "${SHORT_COMMIT}",
+                    "buildTime": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+                  }
+                  EOF
+
+                  VERSION_DIR="$TARGET"
+
+                  while IFS= read -r f; do
+                    REL_PATH=$(realpath --relative-to="$VERSION_DIR" "$f")
+                    HASH=$(sha256sum "$f" | awk '{print $1}')
+                    MD5_HASH=$(md5sum "$f" | awk '{print $1}')
+
+                    FILES_JSON=$(node -e "
+                      const json = JSON.parse(process.argv[1]);
+                      json[process.argv[2]] = {
+                        path: process.argv[2],
+                        sha256: process.argv[3],
+                        md5: process.argv[4]
+                      };
+                      console.log(JSON.stringify(json));
+                    " "$FILES_JSON" "$REL_PATH" "$HASH" "$MD5_HASH")
+
+                  done < <(find "$VERSION_DIR" -type f)
+
+                  node -e "
+                    const fs = require('fs');
+
+                    const meta = {
+                      version: process.env.VERSION,
+                      branch: process.env.BRANCH,
+                      commit: process.env.COMMIT,
+                      shortCommit: process.env.SHORT_COMMIT,
+                      buildTime: new Date().toISOString(),
+                      files: JSON.parse(process.env.FILES_JSON || '{}')
+                    };
+
+                    fs.writeFileSync(
+                      process.env.TARGET + '/latest.json',
+                      JSON.stringify(meta, null, 4)
+                    );
+                  "
 
             - name: Commit & push
               run: |
