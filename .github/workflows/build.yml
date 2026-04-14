@@ -20,12 +20,17 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Checkout
+            - name: Checkout source code repo
               uses: actions/checkout@v4
               with:
                   fetch-depth: 1
                   ref: ${{ github.event.inputs.branch }}
-
+            - name: Checkout releases repo
+              uses: actions/checkout@v4
+              with:
+                  repository: wavedevgit/wave2fa-releases
+                  token: ${{ secrets.WAVE2FA_RELEASES_PAT }}
+                  path: releases
             - name: Install Bun
               run: |
                   curl -fsSL https://bun.sh/install | bash
@@ -141,12 +146,6 @@ jobs:
                     scripts/wave2fa.sh \
                     package.json
 
-            - name: Checkout releases repo
-              uses: actions/checkout@v4
-              with:
-                  repository: wavedevgit/wave2fa-releases
-                  token: ${{ secrets.WAVE2FA_RELEASES_PAT }}
-                  path: releases
             - name: Generate metadata files
               run: |
                   cd releases
@@ -185,9 +184,9 @@ jobs:
                       files
                     };
 
-                    fs.writeFileSync('./'+process.env.BRANCH+'/latest.json', JSON.stringify(meta, null, 2));
+                    fs.writeFileSync('./releases/'+process.env.BRANCH+'/latest.json', JSON.stringify(meta, null, 2));
 
-                    fs.writeFileSync('./'+process.env.BRANCH+'/'+process.env.VERSION+'/info.json', JSON.stringify({
+                    fs.writeFileSync('./releases/'+process.env.BRANCH+'/'+process.env.VERSION+'/info.json', JSON.stringify({
                       version: meta.version,
                       branch: meta.branch,
                       commit: meta.commit,
