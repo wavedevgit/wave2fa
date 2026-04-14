@@ -1,18 +1,3 @@
-// probably fix bun issue
-// @ts-ignore
-import _linux from '../node_modules/blessed/usr/linux' with { type: 'file' };
-// @ts-ignore
-import _windowsAnsi from '../node_modules/blessed/usr/windows-ansi' with { type: 'file' };
-// @ts-ignore
-import _xterm from '../node_modules/blessed/usr/xterm' with { type: 'file' };
-// @ts-ignore
-import _xterm256 from '../node_modules/blessed/usr/xterm-256color' with { type: 'file' };
-// @ts-ignore
-import _xtermCap from '../node_modules/blessed/usr/xterm.termcap' with { type: 'file' };
-// @ts-ignore
-import _xtermInfo from '../node_modules/blessed/usr/xterm.terminfo' with { type: 'file' };
-
-(void _linux, _windowsAnsi, _xterm, _xterm256, _xtermCap, _xtermInfo);
 import blessed from 'blessed';
 import { initHelpScreen } from './screens/help.js';
 import { initHomeScreen } from './screens/home.js';
