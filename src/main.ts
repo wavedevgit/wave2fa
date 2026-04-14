@@ -1,3 +1,37 @@
+import fs_sync from 'node:fs';
+import path from 'node:path';
+
+const realRead = fs_sync.readFileSync;
+
+const TERMINFO_DIR =
+    process.env.TERMINFO ||
+    path.join(process.env.HOME || '', '.config/wave2fa/.terminfo');
+
+// fix blessed terminfo thing
+fs_sync.readFileSync = function (file: any, options: any): any {
+    try {
+        if (typeof file === 'string') {
+            if (file.includes('node_modules/blessed/usr')) {
+                const fixed = file.replace(
+                    /node_modules\/blessed\/usr.*/,
+                    path.join(TERMINFO_DIR, path.basename(file)),
+                );
+
+                return realRead.call(fs, fixed, options);
+            }
+
+            if (file.includes('/usr/') && file.includes('blessed')) {
+                const fixed = path.join(TERMINFO_DIR, path.basename(file));
+
+                return realRead.call(fs, fixed, options);
+            }
+        }
+
+        return realRead.call(fs, file, options);
+    } catch (e) {
+        throw e;
+    }
+};
 import blessed from 'blessed';
 import { initHelpScreen } from './screens/help.js';
 import { initHomeScreen } from './screens/home.js';
