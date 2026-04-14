@@ -1,0 +1,49 @@
+{
+  "version": "0.0.2",
+  "branch": "development",
+  "commit": "17b653c0cae47cb4698e2b64983c75ea2001c2c4",
+  "shortCommit": "17b653c",
+  "buildTime": "2026-04-14T18:50:44.040Z",
+  "files": {
+    "wave2fa-linux-x64.zip": {
+      "sha256": "33dbc4b2411ae80c3473c1bfbdc75eae955f22adcd3496a5997abd0141a2983c",
+      "md5": "e820e8f6e397c93c4c0d450e696b191f"
+    },
+    "wave2fa-linux-arm64.zip": {
+      "sha256": "2bb35ec71f10c9ec06cdc27a79bdcd8b02f1322e015399902d9e4e837f4608b4",
+      "md5": "8c5a8f8550790cd552fadb51078ffd2b"
+    },
+    "wave2fa-macos-x64.zip": {
+      "sha256": "dfb7d4d4d129876340e968a2a18f0cd25549ff11c22b962e216c655128e7a766",
+      "md5": "e81fc49decbf1c6536b65557ca8b61d7"
+    },
+    "wave2fa-macos-arm64.zip": {
+      "sha256": "619fb7a6e17717de6e0a320cc796a4d8809f865a9663fa5c9398f8d4a94a73df",
+      "md5": "6399ef2bd2fba31707c8b2adcbdf7e35"
+    },
+    "wave2fa-windows-x64.zip": {
+      "sha256": "5c94c482d4c593c906ad8c57c1fead7a450c999fccd60df88fae58be6f091533",
+      "md5": "e39c9477b526db47122d2ccc555bab15"
+    },
+    "wave2fa-windows-arm64.zip": {
+      "sha256": "1b6553dc69a4dd916302ee0dfeba6bfe5ce8cb61c2f2884408041dc2c7d2ac39",
+      "md5": "30e6f2f7887fec89d3418d805ac259f2"
+    },
+    "bundle.js": {
+      "sha256": "d89ab1dbf79a1d50443b7aef367b297215a38731d0b9c88665b73bdaa0989a0e",
+      "md5": "0f33f1904cce6893f15b123b7040ffaa"
+    },
+    "bundle.js.map": {
+      "sha256": "4667b15618c62c6dc0614a3abecb3d7e8bab0a3bdbd8c65d40bae8830d70bc3b",
+      "md5": "5c572cca28632c33392cb16c2d53a47b"
+    },
+    "wave2fa.sh": {
+      "sha256": "21971ecefc03dedf54d87764522d4b28e70aeb2db5b3cb00c97c17f669513dbc",
+      "md5": "4489d002227cc6d4c6994c005b5128f9"
+    },
+    "package.json": {
+      "sha256": "a12cd0197c2699ddad313b3973c16fa83719bbf73f7b915ad6fcc9de4169af1f",
+      "md5": "d2e327c752c6447f59f69564622f88f3"
+    }
+  }
+}
