@@ -1,215 +1,208 @@
 name: Build
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version number to use for this build'
-        required: true
-        default: '0.0.1'
-      branch:
-        description: 'Branch to build'
-        required: true
-        default: 'main'
+    workflow_dispatch:
+        inputs:
+            version:
+                description: 'Version number to use for this build'
+                required: true
+                default: '0.0.1'
+            branch:
+                description: 'Branch to build'
+                required: true
+                default: 'main'
 
 jobs:
-  build:
-    permissions:
-      contents: write
+    build:
+        permissions:
+            contents: write
 
-    runs-on: ubuntu-latest
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          ref: ${{ github.event.inputs.branch }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 1
+                  ref: ${{ github.event.inputs.branch }}
 
-      - name: Install Bun
-        run: |
-          curl -fsSL https://bun.sh/install | bash
-          echo "$HOME/.bun/bin" >> $GITHUB_PATH
+            - name: Install Bun
+              run: |
+                  curl -fsSL https://bun.sh/install | bash
+                  echo "$HOME/.bun/bin" >> $GITHUB_PATH
 
-      - name: Cache Bun
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
-          restore-keys: ${{ runner.os }}-bun-
+            - name: Install dependencies
+              run: bun install
 
-      - name: Install dependencies
-        run: bun install
+            - name: Build project
+              run: |
+                  bun run build:ts
 
-      - name: Build project
-        run: |
-          bun run build:ts
+                  COMMIT=$(git rev-parse HEAD)
+                  SHORT_COMMIT=$(git rev-parse --short HEAD)
+                  BRANCH="${{ github.event.inputs.branch }}"
+                  VERSION="${{ github.event.inputs.version }}"
 
-          COMMIT=$(git rev-parse HEAD)
-          SHORT_COMMIT=$(git rev-parse --short HEAD)
-          BRANCH="${{ github.event.inputs.branch }}"
-          VERSION="${{ github.event.inputs.version }}"
+                  echo "COMMIT=$COMMIT" >> $GITHUB_ENV
+                  echo "SHORT_COMMIT=$SHORT_COMMIT" >> $GITHUB_ENV
+                  echo "BRANCH=$BRANCH" >> $GITHUB_ENV
+                  echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-          echo "COMMIT=$COMMIT" >> $GITHUB_ENV
-          echo "SHORT_COMMIT=$SHORT_COMMIT" >> $GITHUB_ENV
-          echo "BRANCH=$BRANCH" >> $GITHUB_ENV
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+                  sed -i "s|commitHash|$SHORT_COMMIT|" dist/gitHash.js
+                  sed -i "s|wave2faVersion|$VERSION|" dist/gitHash.js
+                  sed -i "s|commitBranch|$BRANCH|" dist/gitHash.js
 
-          sed -i "s|commitHash|$SHORT_COMMIT|" dist/gitHash.js
-          sed -i "s|wave2faVersion|$VERSION|" dist/gitHash.js
-          sed -i "s|commitBranch|$BRANCH|" dist/gitHash.js
+                  mkdir -p dist/binaries
 
-          mkdir -p dist/binaries
+                  bun run build:binary:linux
+                  bun run build:binary:linux:arm64
+                  bun run build:binary:mac
+                  bun run build:binary:mac:arm64
+                  bun run build:binary:win
+                  bun run build:binary:win:arm64
 
-          bun run build:binary:linux
-          bun run build:binary:linux:arm64
-          bun run build:binary:mac
-          bun run build:binary:mac:arm64
-          bun run build:binary:win
-          bun run build:binary:win:arm64
+                  mkdir -p temp-binaries
+                  mv dist/binaries/* temp-binaries
+                  rm -rf dist
 
-          mkdir -p temp-binaries
-          mv dist/binaries/* temp-binaries
-          rm -rf dist
+                  bun run build
 
-          bun run build
+                  sed -i "s|commitHash|$SHORT_COMMIT|" dist/bundle.js
+                  sed -i "s|wave2faVersion|$VERSION|" dist/bundle.js
+                  sed -i "s|commitBranch|$BRANCH|" dist/bundle.js
 
-          sed -i "s|commitHash|$SHORT_COMMIT|" dist/bundle.js
-          sed -i "s|wave2faVersion|$VERSION|" dist/bundle.js
-          sed -i "s|commitBranch|$BRANCH|" dist/bundle.js
+                  mv temp-binaries/* dist
+                  rm -rf temp-binaries
 
-          mv temp-binaries/* dist
-          rm -rf temp-binaries
+                  mkdir -p .terminfo
+                  if [ -d "./node_modules/blessed/usr" ]; then
+                    cp -r ./node_modules/blessed/usr/* .terminfo/
+                  fi
 
-          mkdir -p .terminfo
-          if [ -d "./node_modules/blessed/usr" ]; then
-            cp -r ./node_modules/blessed/usr/* .terminfo/
-          fi
+            - name: Bump version in package.json
+              run: |
+                  bun -e "
+                    const fs = require('fs');
+                    const pkg = JSON.parse(fs.readFileSync('package.json','utf8'));
+                    pkg.version = process.env.VERSION;
+                    fs.writeFileSync('package.json', JSON.stringify(pkg, null, 4));
+                  "
 
-      - name: Bump version in package.json
-        run: |
-          bun -e "
-            const fs = require('fs');
-            const pkg = JSON.parse(fs.readFileSync('package.json','utf8'));
-            pkg.version = process.env.VERSION;
-            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 4));
-          "
+            - name: Commit bumped package.json
+              run: |
+                  git config --global user.name "github-actions"
+                  git config --global user.email "github-actions@github.com"
 
-      - name: Commit bumped package.json
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
+                  git add package.json
 
-          git add package.json
+                  if ! git diff --cached --quiet; then
+                    git commit -m "bump version: ${VERSION}"
+                    git push origin HEAD:${BRANCH}
+                  fi
 
-          if ! git diff --cached --quiet; then
-            git commit -m "bump version: ${VERSION}"
-            git push origin HEAD:${BRANCH}
-          fi
+            - name: Create release bundles
+              run: |
+                  mkdir -p bundles
 
-      - name: Create release bundles
-        run: |
-          mkdir -p bundles
+                  copy_terminfo() {
+                    [ -d ".terminfo" ] && cp -r .terminfo "$1/"
+                  }
 
-          copy_terminfo() {
-            [ -d ".terminfo" ] && cp -r .terminfo "$1/"
-          }
+                  pack() {
+                    local name="$1" bin="$2" ext="${3:-}"
+                    mkdir -p "tmp-$name"
+                    mv "dist/$bin" "tmp-$name/wave2fa${ext}"
+                    copy_terminfo "tmp-$name"
+                    [ -z "$ext" ] && cp scripts/wave2fa.sh "tmp-$name/"
+                    (cd "tmp-$name" && zip -r "../bundles/wave2fa-${name}.zip" .)
+                    rm -rf "tmp-$name"
+                  }
 
-          pack() {
-            local name="$1" bin="$2" ext="${3:-}"
-            mkdir -p "tmp-$name"
-            mv "dist/$bin" "tmp-$name/wave2fa${ext}"
-            copy_terminfo "tmp-$name"
-            [ -z "$ext" ] && cp scripts/wave2fa.sh "tmp-$name/"
-            (cd "tmp-$name" && zip -r "../bundles/wave2fa-${name}.zip" .)
-            rm -rf "tmp-$name"
-          }
+                  pack linux-x64    wave2fa-linux-x64
+                  pack linux-arm64  wave2fa-linux-arm64
+                  pack macos-x64    wave2fa-macos-x64
+                  pack macos-arm64  wave2fa-macos-arm64
+                  pack windows-x64  wave2fa-windows-x64.exe  .exe
+                  pack windows-arm64 wave2fa-windows-arm64.exe .exe
 
-          pack linux-x64    wave2fa-linux-x64
-          pack linux-arm64  wave2fa-linux-arm64
-          pack macos-x64    wave2fa-macos-x64
-          pack macos-arm64  wave2fa-macos-arm64
-          pack windows-x64  wave2fa-windows-x64.exe  .exe
-          pack windows-arm64 wave2fa-windows-arm64.exe .exe
+            - name: Generate metadata files
+              run: |
+                  BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
-      - name: Generate metadata files
-        run: |
-          BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+                  node -e "
+                    const fs = require('fs');
+                    const { execSync } = require('child_process');
 
-          node -e "
-            const fs = require('fs');
-            const { execSync } = require('child_process');
+                    const assets = [
+                      ['bundles/wave2fa-linux-x64.zip',    'wave2fa-linux-x64.zip'],
+                      ['bundles/wave2fa-linux-arm64.zip',  'wave2fa-linux-arm64.zip'],
+                      ['bundles/wave2fa-macos-x64.zip',    'wave2fa-macos-x64.zip'],
+                      ['bundles/wave2fa-macos-arm64.zip',  'wave2fa-macos-arm64.zip'],
+                      ['bundles/wave2fa-windows-x64.zip',  'wave2fa-windows-x64.zip'],
+                      ['bundles/wave2fa-windows-arm64.zip','wave2fa-windows-arm64.zip'],
+                      ['dist/bundle.js',                   'bundle.js'],
+                      ['dist/bundle.js.map',               'bundle.js.map'],
+                      ['scripts/wave2fa.sh',               'wave2fa.sh'],
+                      ['package.json',                     'package.json']
+                    ];
 
-            const assets = [
-              ['bundles/wave2fa-linux-x64.zip',    'wave2fa-linux-x64.zip'],
-              ['bundles/wave2fa-linux-arm64.zip',  'wave2fa-linux-arm64.zip'],
-              ['bundles/wave2fa-macos-x64.zip',    'wave2fa-macos-x64.zip'],
-              ['bundles/wave2fa-macos-arm64.zip',  'wave2fa-macos-arm64.zip'],
-              ['bundles/wave2fa-windows-x64.zip',  'wave2fa-windows-x64.zip'],
-              ['bundles/wave2fa-windows-arm64.zip','wave2fa-windows-arm64.zip'],
-              ['dist/bundle.js',                   'bundle.js'],
-              ['dist/bundle.js.map',               'bundle.js.map'],
-              ['scripts/wave2fa.sh',               'wave2fa.sh'],
-              ['package.json',                     'package.json']
-            ];
+                    const files = {};
+                    for (const [path, name] of assets) {
+                      const sha256 = execSync('sha256sum ' + path).toString().split(' ')[0];
+                      const md5 = execSync('md5sum ' + path).toString().split(' ')[0];
 
-            const files = {};
-            for (const [path, name] of assets) {
-              const sha256 = execSync('sha256sum ' + path).toString().split(' ')[0];
-              const md5 = execSync('md5sum ' + path).toString().split(' ')[0];
+                      files[name] = { sha256, md5 };
+                    }
 
-              files[name] = { sha256, md5 };
-            }
+                    const meta = {
+                      version: process.env.VERSION,
+                      branch: process.env.BRANCH,
+                      commit: process.env.COMMIT,
+                      shortCommit: process.env.SHORT_COMMIT,
+                      buildTime: new Date().toISOString(),
+                      files
+                    };
 
-            const meta = {
-              version: process.env.VERSION,
-              branch: process.env.BRANCH,
-              commit: process.env.COMMIT,
-              shortCommit: process.env.SHORT_COMMIT,
-              buildTime: new Date().toISOString(),
-              files
-            };
+                    fs.writeFileSync('latest.json', JSON.stringify(meta, null, 2));
 
-            fs.writeFileSync('latest.json', JSON.stringify(meta, null, 2));
+                    fs.writeFileSync('info.json', JSON.stringify({
+                      version: meta.version,
+                      branch: meta.branch,
+                      commit: meta.commit,
+                      shortCommit: meta.shortCommit,
+                      buildTime: meta.buildTime
+                    }, null, 2));
+                  "
 
-            fs.writeFileSync('info.json', JSON.stringify({
-              version: meta.version,
-              branch: meta.branch,
-              commit: meta.commit,
-              shortCommit: meta.shortCommit,
-              buildTime: meta.buildTime
-            }, null, 2));
-          "
+            - name: Create GitHub Release
+              env:
+                  GH_TOKEN: ${{ secrets.WAVE2FA_RELEASES_PAT }}
+              run: |
+                  TAG="${BRANCH}-${VERSION}"
 
-      - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ secrets.WAVE2FA_RELEASES_PAT }}
-        run: |
-          TAG="${BRANCH}-${VERSION}"
+                  gh release create "$TAG" \
+                    --repo wavedevgit/wave2fa-releases \
+                    --title "wave2fa ${VERSION} (${BRANCH})" \
+                    --notes "Branch: ${BRANCH} Commit: ${SHORT_COMMIT}" \
+                    bundles/*.zip \
+                    dist/bundle.js \
+                    dist/bundle.js.map \
+                    scripts/wave2fa.sh \
+                    package.json
 
-          gh release create "$TAG" \
-            --repo wavedevgit/wave2fa-releases \
-            --title "wave2fa ${VERSION} (${BRANCH})" \
-            --notes "Branch: ${BRANCH} Commit: ${SHORT_COMMIT}" \
-            bundles/*.zip \
-            dist/bundle.js \
-            dist/bundle.js.map \
-            scripts/wave2fa.sh \
-            package.json
+            - name: Commit latest.json + info.json to branch folder
+              run: |
+                  git config --global user.name "github-actions"
+                  git config --global user.email "github-actions@github.com"
 
-      - name: Commit latest.json + info.json to branch folder
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
+                  mkdir -p "$BRANCH"
 
-          mkdir -p "$BRANCH"
+                  cp latest.json "$BRANCH/latest.json"
+                  cp info.json "$BRANCH/info.json"
 
-          cp latest.json "$BRANCH/latest.json"
-          cp info.json "$BRANCH/info.json"
+                  git add "$BRANCH/latest.json" "$BRANCH/info.json"
 
-          git add "$BRANCH/latest.json" "$BRANCH/info.json"
-
-          if ! git diff --cached --quiet; then
-            git commit -m "release metadata: ${BRANCH} ${VERSION}"
-            git push origin HEAD:${BRANCH}
-          fi
+                  if ! git diff --cached --quiet; then
+                    git commit -m "release metadata: ${BRANCH} ${VERSION}"
+                    git push origin HEAD:${BRANCH}
+                  fi
