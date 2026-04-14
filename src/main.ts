@@ -25,10 +25,8 @@ import { initLoginScreen } from './screens/loginScreen.js';
 import { saveRun } from './utils/lastRun.js';
 import { roundedBorder } from './utils/roundedBorder.js';
 import fs from 'fs/promises';
-import path from 'path';
 import { homeConfigPath } from './utils/storage.js';
 import { buildStyle } from './utils/styles.js';
-import { zip } from 'puppeteer-core/lib/esm/third_party/rxjs/rxjs.js';
 import enableLogger from './errorLogger.js';
 
 if (process.argv.includes('--version')) {
