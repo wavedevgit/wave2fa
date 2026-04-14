@@ -40,7 +40,6 @@ await fs.mkdir(homeConfigPath, { recursive: true });
 
 await enableLogger();
 process.noDeprecation = true;
-throw new Error('test error logger');
 
 // shim buffer as some libs are using old Buffer()
 const _Buffer = Buffer;
