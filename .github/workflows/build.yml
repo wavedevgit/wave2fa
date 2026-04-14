@@ -95,6 +95,8 @@ jobs:
                   repository: wavedevgit/wave2fa-releases
                   token: ${{ secrets.WAVE2FA_RELEASES_PAT }}
                   path: releases
+                  fetch-depth: 1
+                  filter: blob:none
 
             - name: Copy build to releases repo
               env:
@@ -123,7 +125,7 @@ jobs:
 
                   # Linux x64
                   mkdir -p tmp-linux-x64
-                  cp dist/wave2fa-linux-x64 tmp-linux-x64/wave2fa
+                  mv dist/wave2fa-linux-x64 tmp-linux-x64/wave2fa
                   copy_terminfo tmp-linux-x64
                   cp ./wave2fa.sh tmp-linux-x64/
                   (cd tmp-linux-x64 && zip -r "../bundles/wave2fa-linux-x64.zip" .)
@@ -131,7 +133,7 @@ jobs:
 
                   # Linux arm64
                   mkdir -p tmp-linux-arm64
-                  cp dist/wave2fa-linux-arm64 tmp-linux-arm64/wave2fa
+                  mv dist/wave2fa-linux-arm64 tmp-linux-arm64/wave2fa
                   copy_terminfo tmp-linux-arm64
                   cp ./wave2fa.sh tmp-linux-arm64/
                   (cd tmp-linux-arm64 && zip -r "../bundles/wave2fa-linux-arm64.zip" .)
@@ -139,7 +141,7 @@ jobs:
 
                   # macOS x64
                   mkdir -p tmp-macos-x64
-                  cp dist/wave2fa-macos-x64 tmp-macos-x64/wave2fa
+                  mv dist/wave2fa-macos-x64 tmp-macos-x64/wave2fa
                   copy_terminfo tmp-macos-x64
                   cp ./wave2fa.sh tmp-macos-x64/
                   (cd tmp-macos-x64 && zip -r "../bundles/wave2fa-macos-x64.zip" .)
@@ -147,7 +149,7 @@ jobs:
 
                   # macOS arm64
                   mkdir -p tmp-macos-arm64
-                  cp dist/wave2fa-macos-arm64 tmp-macos-arm64/wave2fa
+                  mv dist/wave2fa-macos-arm64 tmp-macos-arm64/wave2fa
                   copy_terminfo tmp-macos-arm64
                   cp ./wave2fa.sh tmp-macos-arm64/
                   (cd tmp-macos-arm64 && zip -r "../bundles/wave2fa-macos-arm64.zip" .)
@@ -155,14 +157,14 @@ jobs:
 
                   # Windows x64
                   mkdir -p tmp-win-x64
-                  cp dist/wave2fa-windows-x64.exe tmp-win-x64/wave2fa.exe
+                  mv dist/wave2fa-windows-x64.exe tmp-win-x64/wave2fa.exe
                   copy_terminfo tmp-win-x64
                   (cd tmp-win-x64 && zip -r "../bundles/wave2fa-windows-x64.zip" .)
                   rm -rf tmp-win-x64
 
                   # Windows arm64
                   mkdir -p tmp-win-arm64
-                  cp dist/wave2fa-windows-arm64.exe tmp-win-arm64/wave2fa.exe
+                  mv dist/wave2fa-windows-arm64.exe tmp-win-arm64/wave2fa.exe
                   copy_terminfo tmp-win-arm64
                   (cd tmp-win-arm64 && zip -r "../bundles/wave2fa-windows-arm64.zip" .)
                   rm -rf tmp-win-arm64
