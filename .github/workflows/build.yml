@@ -205,5 +205,5 @@ jobs:
 
                   if ! git diff --cached --quiet; then
                     git commit -m "release metadata: ${BRANCH} @ ${VERSION} (${SHORT_COMMIT})"
-                    git push origin HEAD:${BRANCH}
+                    git push 
                   fi
