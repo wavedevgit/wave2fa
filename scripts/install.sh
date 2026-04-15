@@ -26,7 +26,7 @@ get_arch() {
 ARCH=$(get_arch)
 PLATFORM=$(uname -s | awk '{print ($1=="Linux")?"linux":($1=="Darwin")?"macos":"linux"}')
 
-if "$ARCH" = "unsupported"; then
+if [ "$ARCH" = "unsupported" ]; then
   echo "Wave2fa native bianry isn't supported on x86 systems."
   echo "You may however use node to run the bundle.js provided in release" 
   exit 1 
@@ -72,7 +72,7 @@ fi
 echo "Latest version for branch $BRANCH is $VERSION"
 
 # download bundle.zip
-BUNDLE_URL="https://github.com/wavedevgit/wave2fa-releases/releases/download/${BRANCH}-${VERSION}/wave2fa-${PLATFORM}-${ARCH}.zip "
+BUNDLE_URL="https://github.com/wavedevgit/wave2fa-releases/releases/download/${BRANCH}-${VERSION}/wave2fa-${PLATFORM}-${ARCH}.zip"
 echo "Downloading $BUNDLE_URL..."
 if [ "$DOWNLOAD_CMD" = "curl -sL" ]; then
   curl -L "$BUNDLE_URL" -o "$APP_DIR/bundle.zip"
@@ -92,7 +92,6 @@ mkdir -p "$HOME/bin"
 if [ -d "/data/data/com.termux/files/usr/bin" ]; then
   ln -sf "$APP_DIR/wave2fa.sh" "/data/data/com.termux/files/usr/bin/wave2fa"
 else
-  clear
   echo adding wave2fa to /bin/wave2fa
   sudo ln -sf "$APP_DIR/wave2fa.sh" "/bin/wave2fa"
 fi
