@@ -1,6 +1,6 @@
 {
     "name": "wave2fa",
-    "version": "0.0.4",
+    "version": "0.0.6",
     "main": "index.js",
     "type": "module",
     "scripts": {
