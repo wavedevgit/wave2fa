@@ -149,6 +149,7 @@ jobs:
 
             - name: Generate metadata files
               run: |
+                  mkdir -p "./releases/$BRANCH/$VERSION"
                   BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
                   node -e "
                     const fs = require('fs');
