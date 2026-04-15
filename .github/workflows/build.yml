@@ -201,12 +201,7 @@ jobs:
                   git config --global user.name "github-actions"
                   git config --global user.email "github-actions@github.com"
 
-                  mkdir -p "$BRANCH"
-
-                  cp latest.json "$BRANCH/latest.json"
-                  cp info.json "$BRANCH/info.json"
-
-                  git add "$BRANCH/latest.json" "$BRANCH/info.json"
+                  git add "$BRANCH/latest.json" "$BRANCH/$VERSION/info.json"
 
                   if ! git diff --cached --quiet; then
                     git commit -m "release metadata: ${BRANCH} @ ${VERSION} (${SHORT_COMMIT})"
