@@ -26,11 +26,11 @@ get_arch() {
 ARCH=$(get_arch)
 PLATFORM=$(uname -s | awk '{print ($1=="Linux")?"linux":($1=="Darwin")?"macos":"linux"}')
 
-if [ "$ARCH" = "unsupported"]; (
+if "$ARCH" = "unsupported"; then
   echo "Wave2fa native bianry isn't supported on x86 systems."
   echo "You may however use node to run the bundle.js provided in release" 
   exit 1 
-)
+fi
 
 
 APP_DIR="$HOME/.config/wave2fa"
