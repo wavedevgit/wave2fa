@@ -123,12 +123,13 @@ export default async function enableLogger() {
         // to not be annoying, there is 5% chance message it shows, and it is not shown if `~/.config/wave2fa/disable-donation-message` exists
         try {
             await access(DISABLE_DONATION);
+        } catch {
             if (Math.random() < 0.05) {
                 console.log(
                     '\x1b[32m* wave2fa is open source ❤️ If you like it, a star or donation helps keep it going, thanks!\x1b[0m\n',
                 );
             }
-        } catch {}
+        }
 
         process.exitCode = 0;
     });

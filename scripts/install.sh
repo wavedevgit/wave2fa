@@ -1,14 +1,40 @@
 #!/bin/sh
 
+
+get_arch() {
+    arch=$(uname -m)
+
+    case "$(uname -m)" in
+        x86_64|amd64)
+            echo "x64"
+            ;;
+        i386|i686)
+            echo "unsupported"
+            ;;
+        aarch64|arm64)
+            echo "arm64"
+            ;;
+        armv7l|armv6l)
+            echo "unsupported"
+            ;;
+        *)
+            echo "$arch"
+            ;;
+    esac
+}
+
+ARCH=$(get_arch)
+PLATFORM=$(uname -s | awk '{print ($1=="Linux")?"linux":($1=="Darwin")?"macos":"linux"}')
+
+if [ "$ARCH" = "unsupported"]; (
+  echo "Wave2fa native bianry isn't supported on x86 systems."
+  echo "You may however use node to run the bundle.js provided in release" 
+  exit 1 
+)
+
+
 APP_DIR="$HOME/.config/wave2fa"
 BRANCH=${1:-main} # default to main
-
-# check bun
-if ! command -v bun >/dev/null 2>&1; then
-  echo "Bun is not installed, please install it!"
-  echo "Help: install it from https://bun.com/docs/installation"
-  exit 1
-fi
 
 # check curl or wget
 DOWNLOAD_CMD=""
@@ -46,7 +72,7 @@ fi
 echo "Latest version for branch $BRANCH is $VERSION"
 
 # download bundle.zip
-BUNDLE_URL="https://wavedevgit.github.io/wave2fa-releases/$BRANCH/$VERSION/bundle.zip"
+BUNDLE_URL="https://github.com/wavedevgit/wave2fa-releases/releases/download/${BRANCH}-${VERSION}/wave2fa-${PLATFORM}-${ARCH}.zip "
 echo "Downloading $BUNDLE_URL..."
 if [ "$DOWNLOAD_CMD" = "curl -sL" ]; then
   curl -L "$BUNDLE_URL" -o "$APP_DIR/bundle.zip"
@@ -72,9 +98,6 @@ else
 fi
 
 cd "$APP_DIR" || exit 1
-
-# install deps
-bun i
 
 # preserve user data
 if [ ! -f "$APP_DIR/_data.json" ]; then
