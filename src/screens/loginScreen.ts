@@ -8,11 +8,11 @@ import {
     saveWithPassword,
     verifyPassword,
 } from '../utils/storage.js';
-import { getArg } from '../utils/cli.js';
 import { roundedBorder } from '../utils/roundedBorder.js';
 import { buildStyle } from '../utils/styles.js';
+import { screen } from '../main.js';
 
-async function initLoginScreen(screen: Widgets.Screen) {
+async function initLoginScreen() {
     clearScreen(screen);
     const box = blessed.box({
         tags: true,
@@ -20,17 +20,15 @@ async function initLoginScreen(screen: Widgets.Screen) {
         width: '100%',
         align: 'center',
         height: 9,
-        parent: screen,
     });
     const input = blessed.textbox({
-        parent: screen,
         top: 'center',
         left: 'center',
         width: '50%',
         height: 3,
         label: '  ',
         border: roundedBorder,
-        style: await buildStyle({ border: { fg: 'input' } }),
+        style: await buildStyle({ border: { fg: 'input' } }, 'login.input'),
         censor: false,
     });
 
@@ -41,13 +39,27 @@ async function initLoginScreen(screen: Widgets.Screen) {
     screen.render();
 
     // this is ONLY meant for testing wave2fa, please do not put this in .bashrc or anything
-    // it is very insecure and very easily hackable, that's why only its only useable on demo mode
+    // it is very insecure and very easily hackable, that's why it's only usable on demo mode
     if (process.argv.includes('--demo'))
-        passwordStore.setPassword(
-            getArg('password') || process.env.WAVE2FA_PASSWORD_INSECURE || '',
-        );
-    if (passwordStore.getPassword() === '')
-        passwordStore.setPassword(await readInputAsync(input));
+        passwordStore.setPassword(process.env.WAVE2FA_PASSWORD_INSECURE || '');
+
+    if (passwordStore.getPassword() === '') {
+        const inputPassword = await readInputAsync(input);
+        if (inputPassword.length > 72) {
+            box.setContent(
+                '{red-fg}{bold}✗{/bold} Password too long (max 72 characters).{/red-fg} Press enter to retry!',
+            );
+            screen.render();
+            screen.onceKey('enter', () => {
+                box.destroy();
+                screen.render();
+                initLoginScreen();
+            });
+            return;
+        }
+
+        passwordStore.setPassword(inputPassword);
+    }
 
     const isValidPassword = await verifyPassword();
     if (!isValidPassword && isValidPassword !== undefined) {
@@ -61,13 +73,13 @@ async function initLoginScreen(screen: Widgets.Screen) {
             passwordStore.setPassword('');
             box.destroy();
             screen.render();
-            initLoginScreen(screen);
+            initLoginScreen();
         });
         return;
     }
 
     if (isValidPassword) {
-        initHomeScreen(screen);
+        initHomeScreen();
         return;
     }
 
@@ -77,13 +89,31 @@ async function initLoginScreen(screen: Widgets.Screen) {
 
     let passwordStrength = checkPasswordStrength();
 
-    // if password is invalid, and is valid apssword === undefined that means
+    // if password is invalid, and is valid password === undefined that means
     // password has been set (will be used)
     if (
         !isValidPassword &&
         isValidPassword === undefined &&
         passwordStrength.valid
     ) {
+        input.setLabel('Confirm password:');
+        input.clearValue();
+        screen.render();
+        const confirmPassword = await readInputAsync(input);
+
+        if (confirmPassword !== passwordStore.getPassword()) {
+            box.setContent(
+                '{red-fg}{bold}✗{/bold} Passwords do not match.{/red-fg} Press enter to retry!',
+            );
+            screen.render();
+            screen.onceKey('enter', () => {
+                box.destroy();
+                screen.render();
+                initLoginScreen();
+            });
+            return;
+        }
+
         box.height = 3;
         input.destroy();
         await saveWithPassword();
@@ -94,7 +124,7 @@ async function initLoginScreen(screen: Widgets.Screen) {
         screen.onceKey('enter', () => {
             box.destroy();
             screen.render();
-            initHomeScreen(screen);
+            initHomeScreen();
         });
         return;
     }
@@ -112,7 +142,7 @@ async function initLoginScreen(screen: Widgets.Screen) {
         box.height = 9;
         input.destroy();
 
-        let text = `{bold} {red-fg}✗ Invalid Password! ✗{/red-fg} {/bold}\nYour password contents {bold}must{/bold} include the following:\n\n`;
+        let text = `{bold} {red-fg}✗ Invalid Password! ✗{/red-fg} {/bold}\nYour password must contain the following:\n\n`;
 
         text += `{bold}At least{/bold} 8 characters: ${symbols[String(passwordStrength.reasons.chars_requirement)]}\n`;
         text += `Lowercase characters: ${symbols[String(passwordStrength.reasons.lowercase)]}\n`;
@@ -126,7 +156,7 @@ async function initLoginScreen(screen: Widgets.Screen) {
             passwordStore.setPassword('');
             box.destroy();
             screen.render();
-            initLoginScreen(screen);
+            initLoginScreen();
         });
         return;
     }

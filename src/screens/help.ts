@@ -2,8 +2,9 @@ import blessed, { Widgets } from 'blessed';
 import clearScreen from '../utils/clearScreen.js';
 import { roundedBorder } from '../utils/roundedBorder.js';
 import { buildStyle } from '../utils/styles.js';
+import { screen } from '../main.js';
 
-async function initHelpScreen(screen: Widgets.Screen) {
+async function initHelpScreen() {
     clearScreen(screen);
     const helpBox = blessed.box({
         top: 'center',
@@ -17,8 +18,9 @@ async function initHelpScreen(screen: Widgets.Screen) {
         },
         content: `{bold}Wave2FA Help:{/bold}\nPress {bold}h{/bold} - Open this menu\nPress {bold}n{/bold} - Add new code\nPress {bold}e{/bold} - Add new code using downloaded QR code\nPress {bold}t{/bold} - Import codes from Google Authenticator\nPress {bold}m{/bold} - Go to home screen`,
         tags: true,
+
         border: roundedBorder,
-        style: await buildStyle({ border: { fg: 'help.border' } }),
+        style: await buildStyle({ border: { fg: 'help.border' } }, 'help'),
     });
 
     screen.append(helpBox);

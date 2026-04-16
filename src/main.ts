@@ -96,9 +96,12 @@ screen.append(
         tags: true,
         align: 'center',
         border: roundedBorder,
-        style: await buildStyle({
-            border: { fg: 'versioninfo.border' },
-        }),
+        style: await buildStyle(
+            {
+                border: { fg: 'versioninfo.border' },
+            },
+            'versioninfo',
+        ),
     }),
 );
 screen.append(
@@ -112,13 +115,16 @@ screen.append(
             'press {bold}q{/bold} to quit, press {bold}h{/bold} for help, press {bold}m{/bold} for home',
         border: roundedBorder,
 
-        style: await buildStyle({
-            border: { fg: 'tips.border' },
-        }),
+        style: await buildStyle(
+            {
+                border: { fg: 'tips.border' },
+            },
+            'tips',
+        ),
     }),
 );
 
-initLoginScreen(screen);
+initLoginScreen();
 
 checkForUpdates(screen);
 
@@ -128,20 +134,22 @@ screen.key(['q', 'C-c'], () => {
 });
 
 screen.key('h', () => {
-    initHelpScreen(screen);
+    initHelpScreen();
 });
 
 screen.key('m', () => {
-    initHomeScreen(screen);
+    initHomeScreen();
 });
 screen.key('n', () => {
-    initAddSecretScreen(screen);
+    initAddSecretScreen();
 });
 screen.key('e', () => {
-    initAddSecretQrCodeScreen(screen);
+    initAddSecretQrCodeScreen();
 });
 screen.key('t', () => {
-    initImportFromGoogleAuthScreen(screen);
+    initImportFromGoogleAuthScreen();
 });
 
 screen.render();
+
+export { screen };

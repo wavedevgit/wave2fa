@@ -12,3 +12,7 @@ export const roundedBorder: Widgets.Border = {
         v: '│',
     },
 };
+
+export const roundedBorderBg: Widgets.Border = {
+    type: 'bg',
+};

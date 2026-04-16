@@ -31,6 +31,7 @@ const parseUri = (uri: ResponseOrError<string>): ResponseOrError<TotpItem> => {
             return { err: 'Invalid qr code.' };
         if (url.host !== 'totp') return { err: 'Only TOTP is supported.' };
         return {
+            date: Date.now(),
             uuid: randomUUID(),
             name: decodeURIComponent(
                 url.searchParams.get('issuer') +

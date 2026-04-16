@@ -9,6 +9,8 @@ import { TotpItem } from '../types.js';
 import type { Algorithm as SpeakeasyAlgorithm } from 'speakeasy';
 import { roundedBorder } from '../utils/roundedBorder.js';
 import { buildStyle } from '../utils/styles.js';
+import { screen } from '../main.js';
+import { log } from '../errorLogger.js';
 
 function getSecondsLeft(step: number) {
     const epoch = Math.floor(Date.now() / 1000);
@@ -21,7 +23,7 @@ function shouldRedactInfo() {
     );
 }
 
-async function initHomeScreen(screen: Widgets.Screen) {
+async function initHomeScreen() {
     clearScreen(screen);
 
     const main = blessed.list({
@@ -37,12 +39,25 @@ async function initHomeScreen(screen: Widgets.Screen) {
         vi: true,
         keys: true,
         content: '',
+
         border: roundedBorder,
-        style: await buildStyle({
-            border: { fg: 'home.list.border' },
-            selected: { bg: 'home.list.selected' },
-        }),
+        style: await buildStyle(
+            {
+                border: { fg: 'home.list.border' },
+                selected: { bg: 'home.list.selected' },
+            },
+            'home.list',
+        ),
     });
+    log(
+        await buildStyle(
+            {
+                border: { fg: 'home.list.border' },
+                selected: { bg: 'home.list.selected' },
+            },
+            'home.list',
+        ),
+    );
     main.focus();
     let cache: Record<string, string> = {};
     const keys = await getKeys<TotpItem>();
@@ -72,9 +87,9 @@ async function initHomeScreen(screen: Widgets.Screen) {
         screen.render();
     };
     const updateSecrets = async (period: number) => {
-        for (let item of keys.filter(
-            (item: TotpItem) => item.period === period,
-        )) {
+        for (let item of keys
+            .filter((item: TotpItem) => item.period === period)
+            .sort((a, b) => (b.date || 0) - (a.date || 0))) {
             cache[item.uuid] = await speakeasy.totp({
                 digits: item.digits || 6,
                 step: period,
@@ -86,28 +101,33 @@ async function initHomeScreen(screen: Widgets.Screen) {
         }
     };
 
+    const intervalIds: NodeJS.Timeout[] = [];
+
     await updateSecrets(30);
     await updateSecrets(60);
     updateContent();
-    setInterval(() => updateSecrets(30), 30 * 1e3);
 
     setTimeout(
         () => {
             updateSecrets(30);
-
-            setInterval(() => updateSecrets(30), 30 * 1000);
+            intervalIds.push(setInterval(() => updateSecrets(30), 30 * 1000));
         },
         getSecondsLeft(30) * 1e3,
     );
     setTimeout(
         () => {
             updateSecrets(60);
-
-            setInterval(() => updateSecrets(60), 60 * 1000);
+            intervalIds.push(setInterval(() => updateSecrets(60), 60 * 1000));
         },
         getSecondsLeft(60) * 1e3,
     );
-    setInterval(updateContent, 1 * 1e3);
+    intervalIds.push(setInterval(updateContent, 1 * 1e3));
+
+    screen.on('destroy', () => {
+        for (const id of intervalIds) {
+            clearInterval(id);
+        }
+    });
 
     main.on('select', (item, index) => {
         const code = cache[keys[index].uuid];

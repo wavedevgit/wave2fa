@@ -11,8 +11,9 @@ import { initHomeScreen } from './home.js';
 import { TotpItem } from '../types.js';
 import { roundedBorder } from '../utils/roundedBorder.js';
 import { buildStyle } from '../utils/styles.js';
+import { screen } from '../main.js';
 
-async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
+async function initAddSecretQrCodeScreen() {
     clearScreen(screen);
     const box = blessed.box({
         tags: true,
@@ -30,7 +31,10 @@ async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
         align: 'center',
         label: 'Enter QR image path',
         border: roundedBorder,
-        style: await buildStyle({ input: { fg: 'input' } }),
+        style: await buildStyle(
+            { input: { fg: 'input' } },
+            'addSecretQrCode.input',
+        ),
         parent: screen,
     });
 
@@ -47,7 +51,7 @@ async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
         screen.onceKey('enter', () => {
             box.destroy();
             screen.render();
-            initHomeScreen(screen);
+            initHomeScreen();
         });
         return;
     }
@@ -64,7 +68,7 @@ async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
         screen.onceKey('enter', () => {
             box.destroy();
             screen.render();
-            initHomeScreen(screen);
+            initHomeScreen();
         });
         return;
     }
@@ -79,7 +83,7 @@ async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
         screen.onceKey('enter', () => {
             box.destroy();
             screen.render();
-            initHomeScreen(screen);
+            initHomeScreen();
         });
         return;
     }
@@ -105,7 +109,7 @@ async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
         screen.onceKey('enter', () => {
             box.destroy();
             screen.render();
-            initHomeScreen(screen);
+            initHomeScreen();
         });
         return;
     }
@@ -118,7 +122,7 @@ async function initAddSecretQrCodeScreen(screen: Widgets.Screen) {
     screen.onceKey('enter', () => {
         box.destroy();
         screen.render();
-        initHomeScreen(screen);
+        initHomeScreen();
     });
 }
 export { initAddSecretQrCodeScreen };

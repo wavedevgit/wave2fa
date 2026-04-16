@@ -64,14 +64,15 @@ new mode 100755
 diff --git a/node_modules/blessed/lib/helpers.js b/node_modules/blessed/lib/helpers.js
 old mode 100644
 new mode 100755
-index fbf3cdc..da6f247
+index fbf3cdc..b5b95f2
 --- a/node_modules/blessed/lib/helpers.js
 +++ b/node_modules/blessed/lib/helpers.js
-@@ -25,6 +25,30 @@ helpers.merge = function(a, b) {
+@@ -25,6 +25,31 @@ helpers.merge = function(a, b) {
    return a;
  };
  
 +helpers.getBorderChars = function (border) {
++  if (border.type === "bg") return border.ch
 +  if (typeof border.ch === 'string') {
 +    return {
 +      tl: border.ch,
@@ -508,12 +509,10 @@ old mode 100644
 new mode 100755
 diff --git a/node_modules/blessed/wave2fa b/node_modules/blessed/wave2fa
 new file mode 100755
-index 0000000..87b6aa5
-Binary files /dev/null and b/node_modules/blessed/wave2fa differ
+index 0000000..e69de29
 diff --git a/node_modules/blessed/wave2fa-linux-x64.zip b/node_modules/blessed/wave2fa-linux-x64.zip
 new file mode 100644
-index 0000000..14c17b4
-Binary files /dev/null and b/node_modules/blessed/wave2fa-linux-x64.zip differ
+index 0000000..e69de29
 diff --git a/node_modules/blessed/wave2fa.sh b/node_modules/blessed/wave2fa.sh
 new file mode 100644
 index 0000000..66fa2ed

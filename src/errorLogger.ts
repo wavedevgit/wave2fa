@@ -17,12 +17,20 @@ function sha256(buf: Buffer) {
     return createHash('sha256').update(buf).digest('hex');
 }
 
-async function log(data: any) {
+export async function log(...data: any[]) {
     await writeFile(
         LOG_FILE,
         new Date().toLocaleString() +
             ' ' +
-            (data?.stack || String(data)) +
+            data
+                .map(
+                    (item) =>
+                        item?.stack ||
+                        (typeof item === 'object'
+                            ? JSON.stringify(item)
+                            : String(item)),
+                )
+                .join(' ') +
             '\n',
         { flag: 'a' },
     );

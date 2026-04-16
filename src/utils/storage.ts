@@ -45,16 +45,20 @@ export async function verifyPassword(): Promise<boolean | undefined> {
         const encryptedItem = data.find(
             (item: any) => typeof item.secret !== 'string',
         );
-
         if (!encryptedItem) {
             return undefined;
         }
 
         // try decrypting ONE item only
+        // detect version from presence of 'tag' field (GCM) vs legacy
+        const hasTag =
+            typeof encryptedItem.secret === 'object' &&
+            'tag' in encryptedItem.secret;
+        const detectedVersion = encryptedItem.version ?? (hasTag ? 2 : 1);
         await decryptSecret(
             encryptedItem.secret,
             passwordStore.getPassword(),
-            encryptedItem.version,
+            detectedVersion,
         );
 
         return true;
@@ -207,6 +211,10 @@ async function getKeys<T>(raw?: boolean): Promise<T[]> {
 }
 
 export async function migrateDataToV2() {
+    const rawData = await getKeys<TotpItemRaw>(true);
+    const backupPath = path.join(homeConfigPath, `_data_v1.json`);
+    await fs.writeFile(backupPath, JSON.stringify(rawData), 'utf-8');
+
     const data = await getKeys<TotpItem | TotpItemRaw>(false);
     for (const item of data) {
         if (item.version === 2) continue;
@@ -220,15 +228,15 @@ export async function migrateDataToV2() {
 }
 
 async function addItem(item: TotpItem) {
-    const data: any = await getKeys<TotpItem>();
+    const data: any = await getKeys<TotpItemRaw>(true);
+    item.version = 2;
+    item.date = Date.now();
+    (item as unknown as TotpItemRaw).secret = await encryptSecret(
+        item.secret,
+        passwordStore.getPassword(),
+    );
     data.push(item);
 
-    for (let item of data) {
-        item.secret = await encryptSecret(
-            item.secret,
-            passwordStore.getPassword(),
-        );
-    }
     await fs.writeFile(dataPath, JSON.stringify(data), 'utf-8');
 }
 

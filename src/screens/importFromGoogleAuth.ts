@@ -8,12 +8,11 @@ import path from 'path';
 import os from 'os';
 import { initHomeScreen } from './home.js';
 import { isValidSecret } from '../utils/otp.js';
-import { randomUUID } from 'crypto';
-import { TotpItem } from '../types.js';
 import { roundedBorder } from '../utils/roundedBorder.js';
 import { buildStyle } from '../utils/styles.js';
+import { screen } from '../main.js';
 
-async function initImportFromGoogleAuthScreen(screen: Widgets.Screen) {
+async function initImportFromGoogleAuthScreen() {
     clearScreen(screen);
     const box = blessed.box({
         tags: true,
@@ -21,7 +20,6 @@ async function initImportFromGoogleAuthScreen(screen: Widgets.Screen) {
         width: '100%',
         align: 'center',
         height: 3,
-        parent: screen,
     });
     const input = blessed.textbox({
         top: 'center',
@@ -31,8 +29,7 @@ async function initImportFromGoogleAuthScreen(screen: Widgets.Screen) {
         align: 'center',
         label: 'Enter QR image path ',
         border: roundedBorder,
-        style: await buildStyle({ border: { fg: 'input' } }),
-        parent: screen,
+        style: await buildStyle({ border: { fg: 'input' } }, 'importga.input'),
     });
 
     let filePath = await readInputAsync(input);
@@ -48,7 +45,7 @@ async function initImportFromGoogleAuthScreen(screen: Widgets.Screen) {
         screen.onceKey('enter', () => {
             box.destroy();
             screen.render();
-            initHomeScreen(screen);
+            initHomeScreen();
         });
         return;
     }
@@ -66,7 +63,7 @@ async function initImportFromGoogleAuthScreen(screen: Widgets.Screen) {
         screen.onceKey('enter', () => {
             box.destroy();
             screen.render();
-            initHomeScreen(screen);
+            initHomeScreen();
         });
         return;
     }
@@ -81,7 +78,7 @@ async function initImportFromGoogleAuthScreen(screen: Widgets.Screen) {
         screen.onceKey('enter', () => {
             box.destroy();
             screen.render();
-            initHomeScreen(screen);
+            initHomeScreen();
         });
         return;
     }
@@ -93,7 +90,7 @@ async function initImportFromGoogleAuthScreen(screen: Widgets.Screen) {
         screen.onceKey('enter', () => {
             box.destroy();
             screen.render();
-            initHomeScreen(screen);
+            initHomeScreen();
         });
         return;
     }
@@ -105,13 +102,10 @@ async function initImportFromGoogleAuthScreen(screen: Widgets.Screen) {
         screen.onceKey('enter', () => {
             box.destroy();
             screen.render();
-            initHomeScreen(screen);
+            initHomeScreen();
         });
         return;
     }
-    // @ts-ignore
-    screen.leave();
-
     if (values.some((item) => !isValidSecret(item.secret))) {
         box.setContent('Invalid base32 secret...');
         input.destroy();
@@ -119,7 +113,7 @@ async function initImportFromGoogleAuthScreen(screen: Widgets.Screen) {
         screen.onceKey('enter', () => {
             box.destroy();
             screen.render();
-            initHomeScreen(screen);
+            initHomeScreen();
         });
         return;
     }
@@ -132,7 +126,7 @@ async function initImportFromGoogleAuthScreen(screen: Widgets.Screen) {
     screen.onceKey('enter', () => {
         box.destroy();
         screen.render();
-        initHomeScreen(screen);
+        initHomeScreen();
     });
 }
 export { initImportFromGoogleAuthScreen };

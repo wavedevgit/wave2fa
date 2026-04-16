@@ -8,8 +8,9 @@ import { initHomeScreen } from './home.js';
 import { TotpItem } from '../types.js';
 import { roundedBorder } from '../utils/roundedBorder.js';
 import { buildStyle } from '../utils/styles.js';
+import { screen } from '../main.js';
 
-async function initAddSecretScreen(screen: Widgets.Screen) {
+async function initAddSecretScreen() {
     clearScreen(screen);
     const box = blessed.box({
         tags: true,
@@ -17,23 +18,22 @@ async function initAddSecretScreen(screen: Widgets.Screen) {
         width: '100%',
         align: 'center',
         height: 3,
-        parent: screen,
     });
     const input = blessed.textbox({
-        parent: screen,
         top: 'center',
         left: 'center',
         width: '50%',
         height: 3,
         border: roundedBorder,
         label: '  ',
-        style: await buildStyle({ border: { fg: 'input' } }),
+        style: await buildStyle({ border: { fg: 'input' } }, 'addSecret.input'),
         censor: false,
     });
 
     const values: TotpItem = {
         // default to 30s period and 6 digits and SHA1
         // if needed to be changed, use import from qr code
+        date: Date.now(),
         period: 30,
         digits: 6,
         algorithm: 'SHA1',
@@ -63,7 +63,7 @@ async function initAddSecretScreen(screen: Widgets.Screen) {
         screen.onceKey('enter', () => {
             box.destroy();
             screen.render();
-            initHomeScreen(screen);
+            initHomeScreen();
         });
         return;
     }
@@ -76,7 +76,7 @@ async function initAddSecretScreen(screen: Widgets.Screen) {
     screen.onceKey('enter', () => {
         box.destroy();
         screen.render();
-        initHomeScreen(screen);
+        initHomeScreen();
     });
 }
 export { initAddSecretScreen };

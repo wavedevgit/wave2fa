@@ -6,6 +6,9 @@ import { homeConfigPath } from '../utils/storage.js';
 type Wave2faConfig = {
     loaded: boolean;
     colors: Record<string, string>;
+    stylesheet?: {
+        theme?: string;
+    };
 };
 
 const DEFAULT_CONFIG: Wave2faConfig = {
@@ -18,6 +21,10 @@ const DEFAULT_CONFIG: Wave2faConfig = {
         'toast.border': 'magenta',
         'versioninfo.border': 'blue',
         'tips.border': 'cyan',
+        'screen.background': '',
+    },
+    stylesheet: {
+        theme: undefined, // set to path like "~/my-theme.json" or "/path/to/theme.json"
     },
 };
 

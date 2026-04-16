@@ -1,4 +1,5 @@
 export type TotpItem = {
+    date: number;
     // used for migration
     version?: number;
     uuid: string;
@@ -16,6 +17,7 @@ export type SecretEncrypted = {
 };
 
 export type TotpItemRaw = {
+    date: number;
     // used for migration
     version?: number;
     uuid: string;
