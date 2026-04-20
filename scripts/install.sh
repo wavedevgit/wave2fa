@@ -49,17 +49,16 @@ fi
 
 mkdir -p "$APP_DIR"
 
-# download latest.json
-LATEST_JSON_URL="https://wavedevgit.github.io/wave2fa-releases/$BRANCH/latest.json"
-LATEST_JSON=$($DOWNLOAD_CMD "$LATEST_JSON_URL")
+# download latest
+LATEST_VER_URL="https://wavedevgit.github.io/wave2fa-releases/$BRANCH/latest"
+LATEST_VER=$($DOWNLOAD_CMD "$LATEST_VER_URL")
 
 if [ -z "$LATEST_JSON" ]; then
   echo "Could not fetch latest.json from branch $BRANCH"
   exit 1
 fi
 
-# extract version using awk
-VERSION=$(echo "$LATEST_JSON" | awk -F'"' '{for(i=1;i<=NF;i++)if($i==": "){print $(i+1);break}}' | tr -d '}')
+VERSION=$LATEST_VER
 
 if [ -z "$VERSION" ]; then
   echo "Could not determine latest version from latest.json"
