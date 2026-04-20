@@ -37,7 +37,7 @@ export default {
         module: false,
         path: __dirname + '/dist',
         filename: 'bundle.cjs',
-        clean: true,
+        clean: false,
     },
 
     plugins: [

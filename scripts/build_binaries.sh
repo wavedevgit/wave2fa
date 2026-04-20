@@ -23,7 +23,6 @@ get_node_archive_extension() {
         linux-*) echo ".tar.xz" ;;
         win-*) echo ".zip" ;;
         darwin-*) echo ".tar.gz" ;;
-        aix-*) echo ".tar.gz" ;;
         *) return 1 ;;
     esac
 }
@@ -74,17 +73,23 @@ get_node_path() {
         echo "[+] using system node ($NODE_TARGET_VERSION)" >&2
         echo "$NODE_BIN"
     else
-        echo "[+] downloading node $NODE_TARGET_VERSION for $TARGET..." >&2
-
         NODE_ARCHIVE_PATH="$NODE_BINARIES_DIR/${TARGET}${NODE_ARCHIVE_EXT}"
-        mkdir -p "$NODE_BINARIES_DIR"
+        NODE_EXTRACTED_PATH="$NODE_BINARIES_DIR/$NODE_BUNDLE/$(get_node_archive_bin_location "$TARGET")"
 
-        download_file "$NODE_DOWNLOAD_URL" "$NODE_ARCHIVE_PATH"
-        extract_node || return 1
+        if [ -f "$NODE_EXTRACTED_PATH" ]; then
+            echo "[+] using existing node $NODE_TARGET_VERSION for $TARGET" >&2
+        else
+            echo "[+] downloading node $NODE_TARGET_VERSION for $TARGET..." >&2
 
-        echo "[+] finished downloading node $NODE_TARGET_VERSION for $TARGET" >&2
+            mkdir -p "$NODE_BINARIES_DIR"
 
-        echo "$NODE_BINARIES_DIR/$NODE_BUNDLE/$(get_node_archive_bin_location "$TARGET")"
+            download_file "$NODE_DOWNLOAD_URL" "$NODE_ARCHIVE_PATH"
+            extract_node || return 1
+
+            echo "[+] finished downloading node $NODE_TARGET_VERSION for $TARGET" >&2
+        fi
+
+        echo "$NODE_EXTRACTED_PATH"
     fi
 }
 
@@ -95,7 +100,7 @@ check_target() {
     fi
 
     case "$TARGET" in
-        linux-x64|linux-arm64|win-x64|win-arm64|aix-ppc64|darwin-x64|darwin-arm64)
+        linux-x64|linux-arm64|win-x64|win-arm64|darwin-x64|darwin-arm64)
             return 0
             ;;
         *)
