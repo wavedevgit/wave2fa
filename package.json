@@ -13,8 +13,8 @@
         "build:binary:linux:arm64": "bash ./scripts/build_binaries.sh linux-arm64",
         "build:binary:mac": "bash ./scripts/build_binaries.sh darwin-x64",
         "build:binary:mac:arm64": "bash ./scripts/build_binaries.sh darwin-arm64",
-        "build:binary:win": "bash ./scripts/build_binaries.sh windows-x64",
-        "build:binary:win:arm64": "bash ./scripts/build_binaries.sh windows-arm64",
+        "build:binary:win": "bash ./scripts/build_binaries.sh win-x64",
+        "build:binary:win:arm64": "bash ./scripts/build_binaries.sh win-arm64",
         "build:binary:aix:ppc64": "bash ./scripts/build_binaries.sh aix-ppc64",
         "lint": "tsc --noEmit",
         "postinstall": "patch-package"
