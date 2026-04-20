@@ -55,8 +55,6 @@ jobs:
                   echo "BRANCH=${{ github.event.inputs.branch }}" >> $GITHUB_ENV
                   echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
 
-                  npm run set-build-info
-
                   npm run build:binary:linux
                   npm run build:binary:linux:arm64
                   npm run build:binary:mac
