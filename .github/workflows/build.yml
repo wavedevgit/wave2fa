@@ -99,8 +99,8 @@ jobs:
 
                   pack linux-x64    wave2fa-linux-x64
                   pack linux-arm64  wave2fa-linux-arm64
-                  pack macos-x64    wave2fa-macos-x64
-                  pack macos-arm64  wave2fa-macos-arm64
+                  pack macos-x64    wave2fa-darwin-x64
+                  pack macos-arm64  wave2fa-darwin-arm64
                   pack windows-x64  wave2fa-windows-x64.exe  .exe
                   pack windows-arm64 wave2fa-windows-arm64.exe .exe
 
