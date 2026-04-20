@@ -16,6 +16,10 @@ export async function deriveKey(
     if (version === 1 || !version)
         return { key: crypto.createHash('sha256').update(password).digest() };
 
+    // v2 and v3 use argon2
+    if (version !== 2 && version !== 3)
+        throw new Error(`Unknown key derivation version: ${version}`);
+
     const saltToUse = salt || crypto.randomBytes(16);
 
     const rawBytes = crypto.argon2Sync('argon2id', {
@@ -24,9 +28,9 @@ export async function deriveKey(
             : Buffer.from(password, 'utf8'),
         nonce: saltToUse,
         parallelism: 1,
-        memory: 65536, // KiB (64MB)
-        passes: 3, // timeCost
-        tagLength: 32, // outputLen
+        memory: version === 3 ? 8192 : 65536,
+        passes: version === 3 ? 2 : 3,
+        tagLength: 32,
     });
 
     return {
@@ -118,7 +122,7 @@ export async function encryptSecret(
     secret: string,
     password: string,
 ): Promise<SecretEncrypted> {
-    const { key, salt } = await deriveKey(password, 2);
+    const { key, salt } = await deriveKey(password, 3);
 
     const iv = crypto.randomBytes(12);
 
@@ -170,7 +174,7 @@ export async function decryptSecret(
                 "Wave2FA: invalid encrypted data (missing 'tag' for AES-GCM v2 secret)",
             );
         }
-        if (version === 2) {
+        if (version === 2 || version === 3) {
             decipher.setAuthTag(Buffer.from(tag, 'base64'));
             let decrypted = decipher.update(data, 'base64', 'utf8');
             decrypted += decipher.final('utf8');
@@ -220,6 +224,23 @@ export async function migrateDataToV2() {
     for (const item of data) {
         if (item.version === 2) continue;
         item.version = 2;
+        item.secret = await encryptSecret(
+            item.secret as string,
+            passwordStore.getPassword(),
+        );
+    }
+    await fs.writeFile(dataPath, JSON.stringify(data), 'utf-8');
+}
+
+export async function migrateToLatest() {
+    const rawData = await getKeys<TotpItemRaw>(true);
+    const backupPath = path.join(homeConfigPath, `_data_v1.json`);
+    await fs.writeFile(backupPath, JSON.stringify(rawData), 'utf-8');
+
+    const data = await getKeys<TotpItem | TotpItemRaw>(false);
+    for (const item of data) {
+        if (item.version === 3) continue;
+        item.version = 3;
         item.secret = await encryptSecret(
             item.secret as string,
             passwordStore.getPassword(),

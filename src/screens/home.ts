@@ -1,6 +1,6 @@
 import blessed, { Widgets } from 'blessed';
 import clearScreen from '../utils/clearScreen.ts';
-import { getKeys, migrateDataToV2 } from '../utils/storage.ts';
+import { getKeys, migrateToLatest } from '../utils/storage.ts';
 import * as speakeasy from 'speakeasy';
 import { isTruthy } from '../utils/cli.ts';
 import clipboardy from 'clipboardy';
@@ -55,13 +55,13 @@ async function initHomeScreen() {
     await initPleaseWait();
     const keys = await getKeys<TotpItem>();
     clearScreen(screen);
-    if (keys.some((item) => item.version !== 2)) {
-        await migrateDataToV2();
+    if (keys.some((item) => item.version !== 3)) {
+        await migrateToLatest();
 
         // nextTick is for waiting for next render
         process.nextTick(() => {
             toast(
-                '{bold}{green-fg}✓ Migrated data to more secure encryption method.{green-fg}{bold}',
+                '{bold}{green-fg}✓ Migrated data to v3.{green-fg}{bold}',
                 screen,
             );
             screen.render();
