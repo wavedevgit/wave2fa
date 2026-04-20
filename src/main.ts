@@ -7,6 +7,24 @@ const TERMINFO_DIR =
     process.env.TERMINFO ||
     path.join(process.env.HOME || '', '.config/wave2fa/.terminfo');
 
+if (fs_sync.existsSync(TERMINFO_DIR)) {
+    try {
+        const terminfoCheck = fs_sync.readdirSync(TERMINFO_DIR, {
+            withFileTypes: true,
+        });
+        if (!terminfoCheck.some((f: any) => f.isFile())) {
+            console.warn(
+                `[WARN] TERMINFO_DIR (${TERMINFO_DIR}) is empty or missing required binary files.`,
+            );
+            console.warn(
+                `[WARN] You may need to copy terminfo files (download from wave2fa-releases repo) there for blessed to work properly.`,
+            );
+        }
+    } catch {
+        console.warn(`[WARN] Could not read TERMINFO_DIR (${TERMINFO_DIR}).`);
+    }
+}
+
 // fix blessed terminfo thing
 fs_sync.readFileSync = function (file: any, options: any): any {
     try {
