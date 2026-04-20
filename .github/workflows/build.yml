@@ -31,68 +31,44 @@ jobs:
                   repository: wavedevgit/wave2fa-releases
                   token: ${{ secrets.WAVE2FA_RELEASES_PAT }}
                   path: releases
-            - name: Install Bun
-              run: |
-                  curl -fsSL https://bun.sh/install | bash
-                  echo "$HOME/.bun/bin" >> $GITHUB_PATH
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 25.9.0
 
             - name: Install dependencies
-              run: bun install
-
-            - name: Build project
-              run: |
-
-                  COMMIT=$(git rev-parse HEAD)
-                  SHORT_COMMIT=$(git rev-parse --short HEAD)
-                  BRANCH="${{ github.event.inputs.branch }}"
-                  VERSION="${{ github.event.inputs.version }}"
-
-                  echo "COMMIT=$COMMIT" >> $GITHUB_ENV
-                  echo "SHORT_COMMIT=$SHORT_COMMIT" >> $GITHUB_ENV
-                  echo "BRANCH=$BRANCH" >> $GITHUB_ENV
-                  echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-                  # this doesnt really matter as it is not added to git
-                  sed -i "s|commitHash|$SHORT_COMMIT|" src/gitHash.ts
-                  sed -i "s|wave2faVersion|$VERSION|" src/gitHash.ts
-                  sed -i "s|commitBranch|$BRANCH|" src/gitHash.ts
-
-                  mkdir -p dist/binaries
-
-                  bun run build:binary:linux
-                  bun run build:binary:linux:arm64
-                  bun run build:binary:mac
-                  bun run build:binary:mac:arm64
-                  bun run build:binary:win
-                  bun run build:binary:win:arm64
-
-
-                  mkdir -p temp-binaries
-                  mv dist/binaries/* temp-binaries
-                  rm -rf dist
-
-                  bun run build
-
-                  sed -i "s|commitHash|$SHORT_COMMIT|" dist/bundle.js
-                  sed -i "s|wave2faVersion|$VERSION|" dist/bundle.js
-                  sed -i "s|commitBranch|$BRANCH|" dist/bundle.js
-
-                  mv temp-binaries/* dist
-                  rm -rf temp-binaries
-
-                  mkdir -p .terminfo
-                  if [ -d "./node_modules/blessed/usr" ]; then
-                    cp -r ./node_modules/blessed/usr/* .terminfo/
-                  fi
+              run: npm install
 
             - name: Bump version in package.json
               run: |
-                  bun -e "
+                  node -e "
                     const fs = require('fs');
                     const pkg = JSON.parse(fs.readFileSync('package.json','utf8'));
                     pkg.version = process.env.VERSION;
                     fs.writeFileSync('package.json', JSON.stringify(pkg, null, 4));
                   "
+
+            - name: Build project
+              run: |
+                  echo "COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
+                  echo "SHORT_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+                  echo "BRANCH=${{ github.event.inputs.branch }}" >> $GITHUB_ENV
+                  echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+
+                  npm run set-build-info
+
+                  npm run build:binary:linux
+                  npm run build:binary:linux:arm64
+                  npm run build:binary:mac
+                  npm run build:binary:mac:arm64
+                  npm run build:binary:win
+                  npm run build:binary:win:arm64
+                  npm run build:binary:aix:pp64
+
+                  mkdir -p .terminfo
+                  if [ -d "./node_modules/blessed/usr" ]; then
+                    cp -r ./node_modules/blessed/usr/* .terminfo/
+                  fi
 
             - name: Commit bumped package.json
               run: |
@@ -142,8 +118,8 @@ jobs:
                     --title "wave2fa ${VERSION} (${BRANCH})" \
                     --notes "Branch: ${BRANCH} Commit: ${SHORT_COMMIT}" \
                     bundles/*.zip \
-                    dist/bundle.js \
-                    dist/bundle.js.map \
+                    dist/bundle.cjs \
+                    dist/bundle.cjs.map \
                     scripts/wave2fa.sh \
                     package.json
 
@@ -162,8 +138,8 @@ jobs:
                       ['bundles/wave2fa-macos-arm64.zip',  'wave2fa-macos-arm64.zip'],
                       ['bundles/wave2fa-windows-x64.zip',  'wave2fa-windows-x64.zip'],
                       ['bundles/wave2fa-windows-arm64.zip','wave2fa-windows-arm64.zip'],
-                      ['dist/bundle.js',                   'bundle.js'],
-                      ['dist/bundle.js.map',               'bundle.js.map'],
+                      ['dist/bundle.cjs',                 'bundle.cjs'],
+                      ['dist/bundle.cjs.map',             'bundle.cjs.map'],
                       ['scripts/wave2fa.sh',               'wave2fa.sh'],
                       ['package.json',                     'package.json']
                     ];
