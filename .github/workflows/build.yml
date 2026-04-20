@@ -159,6 +159,7 @@ jobs:
                     };
 
                     fs.writeFileSync('./releases/'+process.env.BRANCH+'/latest.json', JSON.stringify(meta, null, 2));
+                    fs.writeFileSync('./releases/'+process.env.BRANCH+'/latest', JSON.stringify(meta.version, null, 2));
 
                     fs.writeFileSync('./releases/'+process.env.BRANCH+'/'+process.env.VERSION+'/info.json', JSON.stringify({
                       version: meta.version,
