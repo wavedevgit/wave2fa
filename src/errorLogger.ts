@@ -1,11 +1,11 @@
 import path from 'node:path';
 import { homeConfigPath } from './utils/storage.ts';
-import { access, readFile, writeFile } from 'node:fs/promises';
+import { accessSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import os from 'node:os';
-import { rm } from 'node:fs/promises';
 import { getOSInfo } from './utils/osDetect.ts';
 import { GIT_HASH, repo, VERSION } from './gitHash.ts';
+import { screen } from './main.ts';
 
 const LOG_FILE = path.join(homeConfigPath, 'tmp_output.log');
 const INFO_JSON = path.join(homeConfigPath, 'info.json');
@@ -19,8 +19,8 @@ function sha256(buf: Buffer) {
     return createHash('sha256').update(buf).digest('hex');
 }
 
-export async function log(...data: any[]) {
-    await writeFile(
+export function log(...data: any[]) {
+    writeFileSync(
         LOG_FILE,
         new Date().toLocaleString() +
             ' ' +
@@ -38,7 +38,7 @@ export async function log(...data: any[]) {
     );
 }
 
-async function buildIssueBody() {
+function buildIssueBody() {
     const runtime =
         typeof (globalThis as any).Bun !== 'undefined'
             ? `bun ${(globalThis as any).Bun.version ?? ''}`.trim()
@@ -57,7 +57,7 @@ async function buildIssueBody() {
 
     let info = 'No info.json found';
     try {
-        info = JSON.stringify(JSON.parse(await readFile(INFO_JSON, 'utf8')));
+        info = JSON.stringify(JSON.parse(readFileSync(INFO_JSON, 'utf8')));
     } catch {}
 
     const infoFromBinary = `**Version:** \`${VERSION}\`
@@ -67,12 +67,12 @@ async function buildIssueBody() {
 
     let output = '';
     try {
-        output = await readFile(LOG_FILE, 'utf8');
+        output = readFileSync(LOG_FILE, 'utf8');
     } catch {}
 
     let hash = 'No binary found';
     try {
-        const bundle = await readFile(BINARY_PATH);
+        const bundle = readFileSync(BINARY_PATH);
         hash = sha256(bundle);
     } catch {}
 
@@ -97,50 +97,41 @@ async function buildIssueBody() {
     return body;
 }
 
-export default async function enableLogger() {
-    // empty file
-    await rm(LOG_FILE, { force: true });
+function handleFatalError(err: any) {
+    log(err);
+    try {
+        screen.destroy();
+    } catch {}
+    const output = readFileSync(LOG_FILE, 'utf8');
+    console.log('\x1b[31m✗ wave2fa exited with error\x1b[0m\n');
+    console.log('\x1b[33mError output:\x1b[0m\n' + output + '\n');
+    const body = buildIssueBody();
+    const url = new URL('https://github.com/wavedevgit/wave2fa/issues/new');
+    url.searchParams.set('title', 'wave2fa runtime error');
+    url.searchParams.set('body', body);
+    console.log('\x1b[36m→ Issue URL:\x1b[0m\n' + url);
+    process.exit(1);
+}
+
+export default function enableLogger() {
+    rmSync(LOG_FILE, { force: true });
     let fatalError: any = null;
     let didFail = false;
     process.on('uncaughtException', (err) => {
         didFail = true;
         fatalError = err;
+        handleFatalError(err);
     });
 
     process.on('unhandledRejection', (err) => {
         didFail = true;
         fatalError = err;
+        handleFatalError(err);
     });
 
-    let handled = false;
-    process.on('beforeExit', async () => {
-        if (handled) return;
-        handled = true;
-        if (didFail) {
-            await log(fatalError);
-
-            const output = await readFile(LOG_FILE, 'utf8').catch(() => '');
-
-            console.log('\x1b[31m✗ wave2fa exited with error\x1b[0m\n');
-            console.log('\x1b[33mError output:\x1b[0m\n' + output + '\n');
-
-            const body = await buildIssueBody();
-
-            const url = new URL(
-                'https://github.com/wavedevgit/wave2fa/issues/new',
-            );
-            url.searchParams.set('title', 'wave2fa runtime error');
-            url.searchParams.set('body', body);
-
-            console.log('\x1b[36m→ Issue URL:\x1b[0m\n' + url);
-
-            process.exitCode = 1;
-            return;
-        }
-
-        // to not be annoying, there is 5% chance message it shows, and it is not shown if `~/.config/wave2fa/disable-donation-message` exists
+    process.on('beforeExit', () => {
         try {
-            await access(DISABLE_DONATION);
+            accessSync(DISABLE_DONATION);
         } catch {
             if (Math.random() < 0.05) {
                 console.log(
@@ -148,7 +139,5 @@ export default async function enableLogger() {
                 );
             }
         }
-
-        process.exitCode = 0;
     });
 }

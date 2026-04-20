@@ -1,3 +1,5 @@
+enableLogger();
+
 import fs_sync from 'node:fs';
 import path from 'node:path';
 
@@ -75,7 +77,6 @@ saveRun();
 
 await fs.mkdir(homeConfigPath, { recursive: true });
 
-await enableLogger();
 process.noDeprecation = true;
 
 // shim buffer as some libs are using old Buffer()
