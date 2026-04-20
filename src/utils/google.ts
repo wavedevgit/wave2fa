@@ -1,7 +1,7 @@
 import protobufjs from 'protobufjs';
-import { base32Encode } from './base32.js';
-import { normalizeBase32 } from './otp.js';
-import { TotpItem } from '../types.js';
+import { base32Encode } from './base32.ts';
+import { normalizeBase32 } from './otp.ts';
+import { TotpItem } from '../types.ts';
 import { randomUUID } from 'node:crypto';
 
 const { parse } = protobufjs;
@@ -118,6 +118,7 @@ export function parseUri(uri: string): { err: string } | TotpItem[] {
             digits: DigitCount[otpParam.digits] || 6,
             secret: normalizeBase32(base32Encode(otpParam.secret)),
             period: 30,
+            date: Date.now(),
         }));
     } catch (err) {
         return {

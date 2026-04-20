@@ -1,7 +1,7 @@
 import * as Jimp from 'jimp';
 import fs from 'fs/promises';
 import jsQR from 'jsqr';
-import { TotpItem } from '../types.js';
+import { TotpItem } from '../types.ts';
 import { randomUUID } from 'crypto';
 
 type ResponseOrError<T> = T | { err: string };

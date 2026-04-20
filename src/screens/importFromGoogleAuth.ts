@@ -1,20 +1,22 @@
 import blessed, { Widgets } from 'blessed';
-import clearScreen from '../utils/clearScreen.js';
-import { parseUri } from '../utils/google.js';
-import { readInputAsync } from '../utils/inputs.js';
-import { addItem, validatePath } from '../utils/storage.js';
-import { scanQrCode } from '../utils/qrcode.js';
+import clearScreen from '../utils/clearScreen.ts';
+import { parseUri } from '../utils/google.ts';
+import { readInputAsync } from '../utils/inputs.ts';
+import { addItem, validatePath } from '../utils/storage.ts';
+import { scanQrCode } from '../utils/qrcode.ts';
 import path from 'path';
 import os from 'os';
-import { initHomeScreen } from './home.js';
-import { isValidSecret } from '../utils/otp.js';
-import { roundedBorder } from '../utils/roundedBorder.js';
-import { buildStyle } from '../utils/styles.js';
-import { screen } from '../main.js';
+import { initHomeScreen } from './home.ts';
+import { isValidSecret } from '../utils/otp.ts';
+import { roundedBorder } from '../utils/roundedBorder.ts';
+import { buildStyle } from '../utils/styles.ts';
+import { screen } from '../main.ts';
+import { initPleaseWait } from './pleaseWait.ts';
 
 async function initImportFromGoogleAuthScreen() {
     clearScreen(screen);
     const box = blessed.box({
+        parent: screen,
         tags: true,
         top: 'center',
         width: '100%',
@@ -22,6 +24,8 @@ async function initImportFromGoogleAuthScreen() {
         height: 3,
     });
     const input = blessed.textbox({
+        parent: screen,
+
         top: 'center',
         width: '100%',
         height: 3,
@@ -118,10 +122,14 @@ async function initImportFromGoogleAuthScreen() {
         return;
     }
 
+    input.destroy();
+
+    await initPleaseWait();
     for (const value of values) await addItem(value);
 
+    clearScreen(screen);
     box.setContent('{bold}✓{/bold} Succesfuly added!');
-    input.destroy();
+    screen.append(box);
     screen.render();
     screen.onceKey('enter', () => {
         box.destroy();

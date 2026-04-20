@@ -1,16 +1,17 @@
 import blessed, { Widgets } from 'blessed';
-import clearScreen from '../utils/clearScreen.js';
-import { readInputAsync } from '../utils/inputs.js';
-import { initHomeScreen } from './home.js';
+import clearScreen from '../utils/clearScreen.ts';
+import { readInputAsync } from '../utils/inputs.ts';
+import { initHomeScreen } from './home.ts';
 import {
     checkPasswordStrength,
     passwordStore,
     saveWithPassword,
     verifyPassword,
-} from '../utils/storage.js';
-import { roundedBorder } from '../utils/roundedBorder.js';
-import { buildStyle } from '../utils/styles.js';
-import { screen } from '../main.js';
+} from '../utils/storage.ts';
+import { roundedBorder } from '../utils/roundedBorder.ts';
+import { buildStyle } from '../utils/styles.ts';
+import { screen } from '../main.ts';
+import { initPleaseWait } from './pleaseWait.ts';
 
 async function initLoginScreen() {
     clearScreen(screen);
@@ -61,7 +62,11 @@ async function initLoginScreen() {
         passwordStore.setPassword(inputPassword);
     }
 
+    await initPleaseWait();
     const isValidPassword = await verifyPassword();
+    clearScreen(screen);
+    screen.append(box);
+
     if (!isValidPassword && isValidPassword !== undefined) {
         box.height = 3;
         box.setContent(

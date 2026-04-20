@@ -2,6 +2,9 @@
 _data.json
 testing_keys
 
+# bundle 
+sea.blob
+
 # used by build script (just copy of ./node_modules/blessed/usr)
 .terminfo
 

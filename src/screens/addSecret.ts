@@ -1,14 +1,15 @@
 import blessed, { Widgets } from 'blessed';
-import clearScreen from '../utils/clearScreen.js';
-import { addItem } from '../utils/storage.js';
+import clearScreen from '../utils/clearScreen.ts';
+import { addItem } from '../utils/storage.ts';
 import crypto from 'node:crypto';
-import { readInputAsync } from '../utils/inputs.js';
-import { isValidSecret, normalizeBase32 } from '../utils/otp.js';
-import { initHomeScreen } from './home.js';
-import { TotpItem } from '../types.js';
-import { roundedBorder } from '../utils/roundedBorder.js';
-import { buildStyle } from '../utils/styles.js';
-import { screen } from '../main.js';
+import { readInputAsync } from '../utils/inputs.ts';
+import { isValidSecret, normalizeBase32 } from '../utils/otp.ts';
+import { initHomeScreen } from './home.ts';
+import { TotpItem } from '../types.ts';
+import { roundedBorder } from '../utils/roundedBorder.ts';
+import { buildStyle } from '../utils/styles.ts';
+import { screen } from '../main.ts';
+import { initPleaseWait } from './pleaseWait.ts';
 
 async function initAddSecretScreen() {
     clearScreen(screen);
@@ -68,10 +69,14 @@ async function initAddSecretScreen() {
         return;
     }
 
-    await addItem(values);
     input.destroy();
+    await initPleaseWait();
+
+    await addItem(values);
+    clearScreen(screen);
 
     box.setContent('{bold}✓{/bold} Succesfuly added!');
+    screen.append(box);
     screen.render();
     screen.onceKey('enter', () => {
         box.destroy();

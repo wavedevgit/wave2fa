@@ -58,11 +58,8 @@ if [ -z "$LATEST_JSON" ]; then
   exit 1
 fi
 
-# extract version using bun
-TMPFILE=$(mktemp)
-printf '%s' "$LATEST_JSON" > "$TMPFILE"
-VERSION=$(bun --eval "console.log(JSON.parse(require('fs').readFileSync('$TMPFILE','utf8')).version)")
-rm -f "$TMPFILE"
+# extract version using awk
+VERSION=$(echo "$LATEST_JSON" | awk -F'"' '{for(i=1;i<=NF;i++)if($i==": "){print $(i+1);break}}' | tr -d '}')
 
 if [ -z "$VERSION" ]; then
   echo "Could not determine latest version from latest.json"

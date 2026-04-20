@@ -1,7 +1,7 @@
-import { GIT_HASH, VERSION } from './gitHash.js';
-import { repo } from './gitHash.js';
-import { toast } from './utils/toast.js';
-import { getLastRun } from './utils/lastRun.js';
+import { GIT_HASH, VERSION } from './gitHash.ts';
+import { repo } from './gitHash.ts';
+import { toast } from './utils/toast.ts';
+import { getLastRun } from './utils/lastRun.ts';
 import type { Widgets } from 'blessed';
 
 async function getLatestReleaseInfo() {

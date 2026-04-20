@@ -2,9 +2,8 @@ import fs from 'fs/promises';
 import crypto from 'crypto';
 import os from 'os';
 import path from 'path';
-import { SecretEncrypted, TotpItem, TotpItemRaw } from '../types.js';
-import PasswordStore from '../stores/password.js';
-import { hashRaw, Algorithm } from '@node-rs/argon2';
+import { SecretEncrypted, TotpItem, TotpItemRaw } from '../types.ts';
+import PasswordStore from '../stores/password.ts';
 
 const passwordStore = new PasswordStore();
 
@@ -19,13 +18,15 @@ export async function deriveKey(
 
     const saltToUse = salt || crypto.randomBytes(16);
 
-    const rawBytes = await hashRaw(password, {
-        algorithm: Algorithm.Argon2id,
-        salt: saltToUse,
-        outputLen: 32,
-        memoryCost: 65536,
-        timeCost: 3,
+    const rawBytes = crypto.argon2Sync('argon2id', {
+        message: Buffer.isBuffer(password)
+            ? password
+            : Buffer.from(password, 'utf8'),
+        nonce: saltToUse,
         parallelism: 1,
+        memory: 65536, // KiB (64MB)
+        passes: 3, // timeCost
+        tagLength: 32, // outputLen
     });
 
     return {

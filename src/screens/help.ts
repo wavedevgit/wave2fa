@@ -1,8 +1,8 @@
 import blessed, { Widgets } from 'blessed';
-import clearScreen from '../utils/clearScreen.js';
-import { roundedBorder } from '../utils/roundedBorder.js';
-import { buildStyle } from '../utils/styles.js';
-import { screen } from '../main.js';
+import clearScreen from '../utils/clearScreen.ts';
+import { roundedBorder } from '../utils/roundedBorder.ts';
+import { buildStyle } from '../utils/styles.ts';
+import { screen } from '../main.ts';
 
 async function initHelpScreen() {
     clearScreen(screen);

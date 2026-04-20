@@ -1,16 +1,17 @@
 import blessed, { Widgets } from 'blessed';
-import clearScreen from '../utils/clearScreen.js';
-import { getKeys, migrateDataToV2 } from '../utils/storage.js';
+import clearScreen from '../utils/clearScreen.ts';
+import { getKeys, migrateDataToV2 } from '../utils/storage.ts';
 import * as speakeasy from 'speakeasy';
-import { isTruthy } from '../utils/cli.js';
+import { isTruthy } from '../utils/cli.ts';
 import clipboardy from 'clipboardy';
-import { toast } from '../utils/toast.js';
-import { TotpItem } from '../types.js';
+import { toast } from '../utils/toast.ts';
+import { TotpItem } from '../types.ts';
 import type { Algorithm as SpeakeasyAlgorithm } from 'speakeasy';
-import { roundedBorder } from '../utils/roundedBorder.js';
-import { buildStyle } from '../utils/styles.js';
-import { screen } from '../main.js';
-import { log } from '../errorLogger.js';
+import { roundedBorder } from '../utils/roundedBorder.ts';
+import { buildStyle } from '../utils/styles.ts';
+import { screen } from '../main.ts';
+import { log } from '../errorLogger.ts';
+import { initPleaseWait } from './pleaseWait.ts';
 
 function getSecondsLeft(step: number) {
     const epoch = Math.floor(Date.now() / 1000);
@@ -25,7 +26,6 @@ function shouldRedactInfo() {
 
 async function initHomeScreen() {
     clearScreen(screen);
-
     const main = blessed.list({
         top: 'center',
         padding: {
@@ -49,18 +49,12 @@ async function initHomeScreen() {
             'home.list',
         ),
     });
-    log(
-        await buildStyle(
-            {
-                border: { fg: 'home.list.border' },
-                selected: { bg: 'home.list.selected' },
-            },
-            'home.list',
-        ),
-    );
+
     main.focus();
     let cache: Record<string, string> = {};
+    await initPleaseWait();
     const keys = await getKeys<TotpItem>();
+    clearScreen(screen);
     if (keys.some((item) => item.version !== 2)) {
         await migrateDataToV2();
 
@@ -89,7 +83,7 @@ async function initHomeScreen() {
     const updateSecrets = async (period: number) => {
         for (let item of keys
             .filter((item: TotpItem) => item.period === period)
-            .sort((a, b) => (b.date || 0) - (a.date || 0))) {
+            .sort((a, b) => (b.date ?? -Infinity) - (a.date ?? -Infinity))) {
             cache[item.uuid] = await speakeasy.totp({
                 digits: item.digits || 6,
                 step: period,

@@ -1,5 +1,5 @@
 import { readFile, writeFile } from 'fs/promises';
-import { homeConfigPath } from './storage.js';
+import { homeConfigPath } from './storage.ts';
 import path from 'path';
 
 const lastRunFile = path.join(homeConfigPath, '.last_run');

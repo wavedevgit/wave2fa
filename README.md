@@ -45,3 +45,12 @@ Made with ❤️ by @wavedevgit
 ## Benchmarks
 
 Soon.
+
+## Acknowledgements
+
+- **Win8.1VMUser**
+    - Provided benchmark data for Google Authenticator
+    - Helped add & test Termux support
+
+- **Library Maintainers**
+    - Thanks to all maintainers of the libraries used in this project

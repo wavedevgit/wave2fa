@@ -1,9 +1,10 @@
 import path from 'node:path';
-import { homeConfigPath } from './utils/storage.js';
+import { homeConfigPath } from './utils/storage.ts';
 import { access, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import os from 'node:os';
 import { rm } from 'node:fs/promises';
+import { getOSInfo } from './utils/osDetect.ts';
 
 const LOG_FILE = path.join(homeConfigPath, 'tmp_output.log');
 const INFO_JSON = path.join(homeConfigPath, 'info.json');
@@ -39,10 +40,11 @@ export async function log(...data: any[]) {
 async function buildIssueBody() {
     const runtime =
         typeof (globalThis as any).Bun !== 'undefined'
-            ? `bun ${Bun.version ?? ''}`.trim()
+            ? `bun ${(globalThis as any).Bun.version ?? ''}`.trim()
             : `node ${process.version}`;
 
     const platform = `**Platform:** \`${os.platform()}\`
+**OS:** \`${getOSInfo()}\`
 **Arch:** \`${os.arch()}\`
 **Kernel:** \`${os.release()}\`
 **Exec:** \`${process.argv[0]}\`

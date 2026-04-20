@@ -3,17 +3,17 @@
         "target": "ESNext",
         "module": "NodeNext",
         "moduleResolution": "NodeNext",
-
         "rootDir": "./src",
         "outDir": "./dist",
+        "allowImportingTsExtensions": true,
 
         "allowJs": true,
         "checkJs": true,
-        "noEmit": false,
+        "noEmit": true,
 
         "strict": true,
 
-        "types": ["node", "bun"],
+        "types": ["node"],
 
         "sourceMap": true,
         "skipLibCheck": true

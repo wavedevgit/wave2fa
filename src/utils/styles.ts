@@ -1,7 +1,7 @@
-import config from '../stores/config.js';
+import config from '../stores/config.ts';
 import { readFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
-import { log } from '../errorLogger.js';
+import { log } from '../errorLogger.ts';
 
 type StyleSheet = Record<string, { fg?: string; bg?: string } | string>;
 type ThemeStyles = Record<string, Record<string, unknown>>;

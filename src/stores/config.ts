@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { homeConfigPath } from '../utils/storage.js';
+import { homeConfigPath } from '../utils/storage.ts';
 
 type Wave2faConfig = {
     loaded: boolean;

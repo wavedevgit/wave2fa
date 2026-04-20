@@ -1,5 +1,5 @@
 import { Widgets } from 'blessed';
-import config from '../stores/config.js';
+import config from '../stores/config.ts';
 
 export const roundedBorder: Widgets.Border = {
     type: 'line',

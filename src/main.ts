@@ -33,20 +33,20 @@ fs_sync.readFileSync = function (file: any, options: any): any {
     }
 };
 import blessed from 'blessed';
-import { initHelpScreen } from './screens/help.js';
-import { initHomeScreen } from './screens/home.js';
-import { initAddSecretScreen } from './screens/addSecret.js';
-import { initImportFromGoogleAuthScreen } from './screens/importFromGoogleAuth.js';
-import { initAddSecretQrCodeScreen } from './screens/addSecretQrCode.js';
-import { GIT_HASH, VERSION } from './gitHash.js';
-import checkForUpdates from './updater.js';
-import { initLoginScreen } from './screens/loginScreen.js';
-import { saveRun } from './utils/lastRun.js';
-import { roundedBorder } from './utils/roundedBorder.js';
-import fs from 'fs/promises';
-import { homeConfigPath } from './utils/storage.js';
-import { buildStyle } from './utils/styles.js';
-import enableLogger from './errorLogger.js';
+import { initHelpScreen } from './screens/help.ts';
+import { initHomeScreen } from './screens/home.ts';
+import { initAddSecretScreen } from './screens/addSecret.ts';
+import { initImportFromGoogleAuthScreen } from './screens/importFromGoogleAuth.ts';
+import { initAddSecretQrCodeScreen } from './screens/addSecretQrCode.ts';
+import { GIT_HASH, VERSION } from './gitHash.ts';
+import checkForUpdates from './updater.ts';
+import { initLoginScreen } from './screens/loginScreen.ts';
+import { saveRun } from './utils/lastRun.ts';
+import { roundedBorder } from './utils/roundedBorder.ts';
+import fs from 'node:fs/promises';
+import { homeConfigPath } from './utils/storage.ts';
+import { buildStyle } from './utils/styles.ts';
+import enableLogger from './errorLogger.ts';
 
 if (process.argv.includes('--version')) {
     console.log(`Wave2fa ${VERSION} (${GIT_HASH})`);
