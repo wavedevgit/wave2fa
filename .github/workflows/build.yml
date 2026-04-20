@@ -61,7 +61,7 @@ jobs:
                   npm run build:binary:mac:arm64
                   npm run build:binary:win
                   npm run build:binary:win:arm64
-                  npm run build:binary:aix:pp64
+                  npm run build:binary:aix:ppc64
 
                   mkdir -p .terminfo
                   if [ -d "./node_modules/blessed/usr" ]; then
