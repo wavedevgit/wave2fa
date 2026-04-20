@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import os from 'node:os';
 import { rm } from 'node:fs/promises';
 import { getOSInfo } from './utils/osDetect.ts';
+import { GIT_HASH, repo, VERSION } from './gitHash.ts';
 
 const LOG_FILE = path.join(homeConfigPath, 'tmp_output.log');
 const INFO_JSON = path.join(homeConfigPath, 'info.json');
@@ -59,6 +60,11 @@ async function buildIssueBody() {
         info = JSON.stringify(JSON.parse(await readFile(INFO_JSON, 'utf8')));
     } catch {}
 
+    const infoFromBinary = `**Version:** \`${VERSION}\`
+**Commit Hash:** \`${GIT_HASH}\`
+**Branch:** \`${repo.branch}\`
+**Releases Repo:** \`${repo.owner}/${repo.repo}\``;
+
     let output = '';
     try {
         output = await readFile(LOG_FILE, 'utf8');
@@ -76,8 +82,10 @@ async function buildIssueBody() {
         '# Platform\n```\n' +
         esc(platform) +
         '\n```\n\n' +
-        '# Version info\n```json\n' +
+        '# Version info (info.json)\n```json\n' +
         esc(info) +
+        '# Version info (from binary/bundle)\n```json\n' +
+        esc(infoFromBinary) +
         '\n```\n\n' +
         '# Bundle hash\n```\n' +
         hash +
