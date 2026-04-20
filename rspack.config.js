@@ -10,6 +10,8 @@ const branch = execSync('git rev-parse --symbolic-full-name --abbrev-ref HEAD')
     .toString()
     .trim();
 
+const isDev = process.env.NO_COMMIT_INFO === '1';
+
 export default {
     entry: './src/main.ts',
     target: 'node',
@@ -40,9 +42,11 @@ export default {
 
     plugins: [
         new DefinePlugin({
-            __COMMIT__HASH__: JSON.stringify(shortCommit),
+            __COMMIT__HASH__: JSON.stringify(
+                isDev ? 'commitHash' : shortCommit,
+            ),
             __COMMIT__BRANCH__: JSON.stringify(branch),
-            __VERSION__: JSON.stringify(package_.version),
+            __VERSION__: JSON.stringify(isDev ? 'testing' : package_.version),
         }),
     ],
     resolve: {
