@@ -53,15 +53,15 @@ mkdir -p "$APP_DIR"
 LATEST_VER_URL="https://wavedevgit.github.io/wave2fa-releases/$BRANCH/latest"
 LATEST_VER=$($DOWNLOAD_CMD "$LATEST_VER_URL")
 
-if [ -z "$LATEST_JSON" ]; then
-  echo "Could not fetch latest.json from branch $BRANCH"
+if [ -z "$LATEST_VER" ]; then
+  echo "Could not fetch 'latest' from branch $BRANCH"
   exit 1
 fi
 
 VERSION=$LATEST_VER
 
 if [ -z "$VERSION" ]; then
-  echo "Could not determine latest version from latest.json"
+  echo "Could not determine latest version from 'latest' file"
   exit 1
 fi
 
