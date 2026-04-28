@@ -199,17 +199,10 @@ make_final_binary() {
     cp "$NODE_BIN_PATH" "$SEA_BINARY"
 
     if [ "$IS_ANDROID" = "y" ]; then
-        echo "[+] Android detected -> using llvm-objcopy (postject doesnt work)" >&2
+        echo "[+] Android detected -> using Node SEA builder" >&2
 
-        llvm-objcopy \
-        --add-section NODE_SEA_BLOB="$SEA_BLOB" \
-        --set-section-flags NODE_SEA_BLOB=alloc,readonly \
-        --add-section NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2=/dev/null \
-        --set-section-flags NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2=alloc,readonly \
-        "$SEA_BINARY" "$SEA_BINARY.tmp"
-
-        mv "$SEA_BINARY.tmp" "$SEA_BINARY"
-
+        node --build-sea sea.config.json 
+        mv ./sea.blob "$SEA_BINARY"
     else
         echo "[+] non-Android -> using postject" >&2
 
@@ -238,6 +231,13 @@ if [ $IS_FOR_ANDROID = "y" ]; then
 else
     NODE_TARGET_VERSION="v25.9.0"
 fi
+
+if [[ $IS_FOR_ANDROID = "y" && "$PLATFORM" != "$TARGET" ]]; then 
+    echo "You can't build for android if you aren't running it."
+    echo "This is because postject fails to make correct binary."
+    exit 1
+fi 
+
 NODE_BIN="$(which node)"
 NODE_VERSION="$(node --version)"
 NODE_BINARIES_DIR="$HOME/.wave2fa-sea-builder/node-binaries"

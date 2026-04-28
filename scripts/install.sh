@@ -68,7 +68,7 @@ fi
 
 if [ "$ARCH" = "unsupported" ]; then
   echo "Wave2fa native bianry isn't supported on x86 systems."
-  echo "You may however use node to run the bundle.js provided in release" 
+  echo "You may however try to find some node binary for your arch to run the bundle.js provided in release" 
   exit 1 
 fi
 
@@ -107,33 +107,67 @@ fi
 
 echo "Latest version for branch $BRANCH is $VERSION"
 
-# download bundle.zip
-BUNDLE_URL="https://github.com/wavedevgit/wave2fa-releases/releases/download/${BRANCH}-${VERSION}/wave2fa-${PLATFORM}-${ARCH}.zip"
-echo "Downloading $BUNDLE_URL..."
-if [ "$DOWNLOAD_CMD" = "curl -sL" ]; then
-  curl -L "$BUNDLE_URL" -o "$APP_DIR/bundle.zip"
-else
-  wget -q "$BUNDLE_URL" -O "$APP_DIR/bundle.zip"
-fi
+if [ "$PLATFORM" = "android" ]; then
+  BASE_URL="https://github.com/wavedevgit/wave2fa-releases/releases/download/${BRANCH}-${VERSION}"
+  SEA_CONFIG_URL="https://raw.githubusercontent.com/wavedevgit/wave2fa/refs/heads/$BRANCH/sea.config.json"
+  WAVE2FA_BUNDLE="$BASE_URL/bundle.cjs"
+  WAVE2FA_SH="$BASE_URL/wave2fa.sh"
 
-# unzip
-unzip -o "$APP_DIR/bundle.zip" -d "$APP_DIR"
-rm -rf "$APP_DIR/bundle.zip"
+  echo "[+] building wave2fa for android..."
+
+  if command -v node >/dev/null 2>&1; then
+      IS_NODE_INSTALLED="yes"
+  else
+      IS_NODE_INSTALLED="no"
+      pkg install nodejs -y
+  fi
+  
+  rm -rf wave2fa-temp-build
+  mkdir wave2fa-temp-build
+  cd wave2fa-temp-build || exit 1
+
+  wget "$SEA_CONFIG_URL" -O sea.config.json || exit 1
+  mkdir -p dist
+
+  wget "$WAVE2FA_BUNDLE" -O dist/bundle.cjs || exit 1
+
+  wget "$WAVE2FA_SH" -O "$APP_DIR/wave2fa.sh" || exit 1
+  chmod +x "$APP_DIR/wave2fa.sh"
+
+  node --build-sea sea.config.json
+
+  SEA_BLOB_FILE="sea-prep.blob"
+
+  mv "$SEA_BLOB_FILE" "$APP_DIR/wave2fa"
+
+  cd ..
+  rm -rf wave2fa-temp-build
+  # this only removes nodejs if user didnt have it, to not be bloated
+  if [ "$IS_NODE_INSTALLED" = "no" ]; then 
+    pkg uninstall nodejs 
+  fi 
+
+else
+  # download bundle.zip
+  BUNDLE_URL="https://github.com/wavedevgit/wave2fa-releases/releases/download/${BRANCH}-${VERSION}/wave2fa-${PLATFORM}-${ARCH}.zip"
+  echo "Downloading $BUNDLE_URL..."
+  if [ "$DOWNLOAD_CMD" = "curl -sL" ]; then
+    curl -L "$BUNDLE_URL" -o "$APP_DIR/bundle.zip"
+  else
+    wget -q "$BUNDLE_URL" -O "$APP_DIR/bundle.zip"
+  fi
+
+  # unzip
+  unzip -o "$APP_DIR/bundle.zip" -d "$APP_DIR"
+  rm -rf "$APP_DIR/bundle.zip"
+fi  
 
 chmod +x "$APP_DIR/wave2fa.sh"
-
-mkdir -p "$HOME/bin"
 
 # create symlink
 if [ -d "/data/data/com.termux/files/usr/bin" ]; then
   ln -sf "$APP_DIR/wave2fa.sh" "/data/data/com.termux/files/usr/bin/wave2fa"
   echo Installing required packages
-  pkg install libc++ -y
-  pkg install openssl -y 
-  pkg install libicu -y 
-  pkg install libsqlite -y 
-  pkg install zlib -y 
-  pkg install c-ares -y 
 else
   echo adding wave2fa to /bin/wave2fa
   sudo ln -sf "$APP_DIR/wave2fa.sh" "/bin/wave2fa"
