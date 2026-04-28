@@ -93,7 +93,7 @@ if [ -d "/data/data/com.termux/files/usr/bin" ]; then
   pkg install libicu -y 
   pkg install libsqlite -y 
   pkg install zlib -y 
-  pkg install libcares -y 
+  pkg install c-ares -y 
 else
   echo adding wave2fa to /bin/wave2fa
   sudo ln -sf "$APP_DIR/wave2fa.sh" "/bin/wave2fa"
