@@ -23,8 +23,48 @@ get_arch() {
     esac
 }
 
-ARCH=$(get_arch)
-PLATFORM=$(uname -s | awk '{print ($1=="Linux")?"linux":($1=="Darwin")?"macos":"linux"}')
+get_arch_android() {
+    case "$(uname -m)" in
+        aarch64|arm64)
+            echo "aarch64"
+            ;;
+
+        x86_64|amd64)
+            echo "x86_64"
+            ;;
+
+        armv7l|armv8l|arm)
+            echo "arm"
+            ;;
+
+        *)
+            echo "unsupported"
+            ;;
+    esac
+}
+
+PLATFORM=$(
+    case "$(uname -s)" in
+        Darwin)
+            echo "macos"
+            ;;
+        Linux)
+            if [ -n "$ANDROID_ROOT" ] || [ -n "$ANDROID_DATA" ] || grep -qi "android" /proc/version 2>/dev/null; then
+                echo "android"
+            else
+                echo "linux"
+            fi
+            ;;
+        *)
+            echo "linux"
+            ;;
+    esac
+)
+if [ "$PLATFORM" = "android" ]; then 
+ ARCH=$(get_arch_android)
+else 
+ ARCH=$(get_arch)
+fi 
 
 if [ "$ARCH" = "unsupported" ]; then
   echo "Wave2fa native bianry isn't supported on x86 systems."
