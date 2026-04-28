@@ -14,6 +14,9 @@
         "build:binary:mac:arm64": "bash ./scripts/build_binaries.sh darwin-arm64",
         "build:binary:win": "bash ./scripts/build_binaries.sh win-x64",
         "build:binary:win:arm64": "bash ./scripts/build_binaries.sh win-arm64",
+        "build:binary:android": "bash ./scripts/build_binaries.sh android-x86_64",
+        "build:binary:android:aarch64": "bash ./scripts/build_binaries.sh android-aarch64",
+        "build:binary:android:arm32": "bash ./scripts/build_binaries.sh android-arm",
         "lint": "tsc --noEmit",
         "postinstall": "patch-package"
     },

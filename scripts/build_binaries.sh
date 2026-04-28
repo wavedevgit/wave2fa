@@ -129,9 +129,12 @@ extract_node_android() {
     mkdir -p "$NODE_BINARIES_DIR"
     mkdir -p "node_$TARGET"
     ar x $NODE_ARCHIVE_PATH && tar -xf data.tar.* -C "node_$TARGET"
-    rm -rf $NODE_ARCHIVE_PATH
     mv "node_$TARGET/data/data/com.termux/files/usr/" "$NODE_BINARIES_DIR/node-$NODE_TARGET_VERSION-$TARGET"
     rm -rf "node_$TARGET"
+    rm -rf $NODE_ARCHIVE_PATH
+    rm -rf control.tar.xz 
+    rm -rf data.tar.xz 
+    rm -rf debian-binary 
 }
 get_node_path_android() {
     if [ "$NODE_VERSION" = "$NODE_TARGET_VERSION" ] && [ "$PLATFORM" = "$TARGET" ]; then
@@ -165,7 +168,7 @@ check_target() {
     fi
 
     case "$TARGET" in
-        linux-x64|linux-arm64|win-x64|win-arm64|darwin-x64|darwin-arm64|android-x86_64|android-arm64|android-arm32)
+        linux-x64|linux-arm64|win-x64|win-arm64|darwin-x64|darwin-arm64|android-x86_64|android-aarch64|android-arm)
             return 0
             ;;
         *)
