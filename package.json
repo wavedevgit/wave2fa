@@ -2,6 +2,7 @@
     "name": "wave2fa",
     "main": "src/main.ts",
     "type": "module",
+    "version": "0.0.8",
     "scripts": {
         "dev": "npm run build:dev && node --enable-source-maps dist/bundle.cjs --demo",
         "test": "npm run build:dev && node --enable-source-maps dist/bundle.cjs --demo",

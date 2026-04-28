@@ -109,43 +109,25 @@ echo "Latest version for branch $BRANCH is $VERSION"
 
 if [ "$PLATFORM" = "android" ]; then
   BASE_URL="https://github.com/wavedevgit/wave2fa-releases/releases/download/${BRANCH}-${VERSION}"
-  SEA_CONFIG_URL="https://raw.githubusercontent.com/wavedevgit/wave2fa/refs/heads/$BRANCH/sea.config.json"
   WAVE2FA_BUNDLE="$BASE_URL/bundle.cjs"
   WAVE2FA_SH="$BASE_URL/wave2fa.sh"
 
-  echo "[+] building wave2fa for android..."
+  echo "[+] installing wave2fa (bundle.cjs version) for android..."
 
   if command -v node >/dev/null 2>&1; then
-      IS_NODE_INSTALLED="yes"
+    echo "Node is installed, skipping install of node..."
   else
-      IS_NODE_INSTALLED="no"
+      echo "Installing Node..."
       pkg install nodejs -y
   fi
   
-  rm -rf wave2fa-temp-build
-  mkdir wave2fa-temp-build
-  cd wave2fa-temp-build || exit 1
-
-  wget "$SEA_CONFIG_URL" -O sea.config.json || exit 1
-  mkdir -p dist
-
-  wget "$WAVE2FA_BUNDLE" -O dist/bundle.cjs || exit 1
+  wget "$WAVE2FA_BUNDLE" -O "$APP_DIR/bundle.cjs" || exit 1
 
   wget "$WAVE2FA_SH" -O "$APP_DIR/wave2fa.sh" || exit 1
+  printf '#!/bin/bash\nnode "%s/bundle.cjs"\n' "$APP_DIR" > "$APP_DIR/wave2fa"
+  chmod +x "$APP_DIR/wave2fa"
   chmod +x "$APP_DIR/wave2fa.sh"
 
-  node --build-sea sea.config.json
-
-  SEA_BLOB_FILE="sea-prep.blob"
-
-  mv "$SEA_BLOB_FILE" "$APP_DIR/wave2fa"
-
-  cd ..
-  rm -rf wave2fa-temp-build
-  # this only removes nodejs if user didnt have it, to not be bloated
-  if [ "$IS_NODE_INSTALLED" = "no" ]; then 
-    pkg uninstall nodejs 
-  fi 
 
 else
   # download bundle.zip

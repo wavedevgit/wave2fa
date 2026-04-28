@@ -41,6 +41,7 @@ jobs:
 
             - name: Bump version in package.json
               run: |
+                  export VERSION=${{ github.event.inputs.version }}
                   node -e "
                     const fs = require('fs');
                     const pkg = JSON.parse(fs.readFileSync('package.json','utf8'));
