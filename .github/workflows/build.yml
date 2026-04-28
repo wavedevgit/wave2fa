@@ -50,6 +50,7 @@ jobs:
 
             - name: Build project
               run: |
+                  sudo apt install llvm -y
                   echo "COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
                   echo "SHORT_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
                   echo "BRANCH=${{ github.event.inputs.branch }}" >> $GITHUB_ENV
@@ -61,6 +62,9 @@ jobs:
                   npm run build:binary:mac:arm64
                   npm run build:binary:win
                   npm run build:binary:win:arm64
+                  npm run build:binary:android
+                  npm run build:binary:android:aarch64
+                  npm run build:binary:android:arm32
 
                   mkdir -p .terminfo
                   if [ -d "./node_modules/blessed/usr" ]; then
@@ -99,6 +103,9 @@ jobs:
 
                   pack linux-x64    wave2fa-linux-x64
                   pack linux-arm64  wave2fa-linux-arm64
+                  pack android-x86_64 wave2fa-android-x86_64
+                  pack android-aarch64 wave2fa-android-aarch64
+                  pack android-arm32 wave2fa-android-arm32
                   pack macos-x64    wave2fa-darwin-x64
                   pack macos-arm64  wave2fa-darwin-arm64
                   pack windows-x64  wave2fa-win-x64.exe  .exe
