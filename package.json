@@ -44,6 +44,7 @@
         "@rspack/cli": "1.7.11",
         "@rspack/core": "1.7.11",
         "@types/node": "25.5.2",
+        "@types/screenshot-desktop": "^1.15.0",
         "@types/speakeasy": "2.0.10",
         "@typescript-eslint/eslint-plugin": "8.58.0",
         "@typescript-eslint/parser": "8.58.0",

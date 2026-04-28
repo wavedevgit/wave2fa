@@ -87,6 +87,13 @@ mkdir -p "$HOME/bin"
 # create symlink
 if [ -d "/data/data/com.termux/files/usr/bin" ]; then
   ln -sf "$APP_DIR/wave2fa.sh" "/data/data/com.termux/files/usr/bin/wave2fa"
+  echo Installing required packages
+  pkg install libc++ -y
+  pkg install openssl -y 
+  pkg install libicu -y 
+  pkg install libsqlite -y 
+  pkg install zlib -y 
+  pkg install libcares -y 
 else
   echo adding wave2fa to /bin/wave2fa
   sudo ln -sf "$APP_DIR/wave2fa.sh" "/bin/wave2fa"
