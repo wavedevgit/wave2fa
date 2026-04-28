@@ -50,6 +50,7 @@ jobs:
 
             - name: Build project
               run: |
+                  sudo apt install llvm -y
                   echo "COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
                   echo "SHORT_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
                   echo "BRANCH=${{ github.event.inputs.branch }}" >> $GITHUB_ENV

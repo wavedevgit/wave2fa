@@ -194,16 +194,32 @@ make_final_binary() {
     local NODE_BIN_PATH="$1"
     local SEA_BINARY="$2"
 
-    echo "[+] injecting SEA into Node binary ($NODE_BIN_PATH)..." >&2
+    echo "[+] preparing SEA binary ($SEA_BINARY)..." >&2
 
     cp "$NODE_BIN_PATH" "$SEA_BINARY"
 
-    npx postject "$SEA_BINARY" \
-        NODE_SEA_BLOB \
-        "$SEA_BLOB" \
-        --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
+    if [ "$IS_ANDROID" = "y" ]; then
+        echo "[+] Android detected -> using llvm-objcopy (postject doesnt work)" >&2
 
-    echo "[+] final binary: $SEA_BINARY" >&2
+        llvm-objcopy \
+        --add-section NODE_SEA_BLOB="$SEA_BLOB" \
+        --set-section-flags NODE_SEA_BLOB=alloc,readonly \
+        --add-section NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2=/dev/null \
+        --set-section-flags NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2=alloc,readonly \
+        "$SEA_BINARY" "$SEA_BINARY.tmp"
+
+        mv "$SEA_BINARY.tmp" "$SEA_BINARY"
+
+    else
+        echo "[+] non-Android -> using postject" >&2
+
+        npx postject "$SEA_BINARY" \
+            NODE_SEA_BLOB \
+            "$SEA_BLOB" \
+            --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
+    fi
+
+    echo "[+] final binary ready: $SEA_BINARY" >&2
 }
 
 # config
