@@ -110,6 +110,8 @@ echo "Latest version for branch $BRANCH is $VERSION"
 if [ "$PLATFORM" = "android" ]; then
   BASE_URL="https://github.com/wavedevgit/wave2fa-releases/releases/download/${BRANCH}-${VERSION}"
   WAVE2FA_BUNDLE="$BASE_URL/bundle.cjs"
+  WAVE2FA_BUNDLE_SOURCEMAP="$BASE_URL/bundle.cjs.map"
+  WAVE2FA_TERMINFO="$BASE_URL/terminfo.zip"
   WAVE2FA_SH="$BASE_URL/wave2fa.sh"
 
   echo "[+] installing wave2fa (bundle.cjs version) for android..."
@@ -122,9 +124,13 @@ if [ "$PLATFORM" = "android" ]; then
   fi
   
   wget "$WAVE2FA_BUNDLE" -O "$APP_DIR/bundle.cjs" || exit 1
+  wget "$WAVE2FA_BUNDLE_SOURCEMAP" -O "$APP_DIR/bundle.cjs.map" || exit 1
+  wget "$WAVE2FA_TERMINFO" -O "$APP_DIR/terminfo.zip" || exit 1
+  unzip "$APP_DIR/terminfo.zip" -d "$APP_DIR"
+  rm -rf "$APP_DIR/terminfo.zip" 
 
   wget "$WAVE2FA_SH" -O "$APP_DIR/wave2fa.sh" || exit 1
-  printf '#!/bin/bash\nnode "%s/bundle.cjs"\n' "$APP_DIR" > "$APP_DIR/wave2fa"
+  printf '#!/bin/bash\nnode --enable-source-map "%s/bundle.cjs"\n' "$APP_DIR" > "$APP_DIR/wave2fa"
   chmod +x "$APP_DIR/wave2fa"
   chmod +x "$APP_DIR/wave2fa.sh"
 

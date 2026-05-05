@@ -97,6 +97,7 @@ jobs:
                     (cd "tmp-$name" && zip -r "../bundles/wave2fa-${name}.zip" .)
                     rm -rf "tmp-$name"
                   }
+                  zip -r terminfo.zip .terminfo
 
                   pack linux-x64    wave2fa-linux-x64
                   pack linux-arm64  wave2fa-linux-arm64
@@ -119,6 +120,7 @@ jobs:
                     dist/bundle.cjs \
                     dist/bundle.cjs.map \
                     scripts/wave2fa.sh \
+                    terminfo.zip       \
                     package.json
 
             - name: Generate metadata files
