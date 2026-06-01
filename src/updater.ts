@@ -36,6 +36,6 @@ export default async function checkForUpdates(screen: Widgets.Screen) {
             );
         }
     } catch (err) {
-        console.error('Failed to check for updates:', err);
+        await toast('Failed to check for updates:' + err, screen);
     }
 }
