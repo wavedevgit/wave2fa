@@ -7,6 +7,8 @@ import PasswordStore from '../stores/password.ts';
 
 const passwordStore = new PasswordStore();
 
+const LATEST_VERSION = 3;
+
 export async function deriveKey(
     password: string,
     version?: number | undefined,
@@ -251,7 +253,7 @@ export async function migrateToLatest() {
 
 async function addItem(item: TotpItem) {
     const data: any = await getKeys<TotpItemRaw>(true);
-    item.version = 2;
+    item.version = LATEST_VERSION;
     item.date = Date.now();
     (item as unknown as TotpItemRaw).secret = await encryptSecret(
         item.secret,
