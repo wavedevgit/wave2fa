@@ -54,3 +54,7 @@ Soon.
 
 - **Library Maintainers**
     - Thanks to all maintainers of the libraries used in this project
+
+## Tags:
+
+Google authenticator alternative, tui, 2fa, authenticator, authy, 2fa secrets, login, alternatives to
