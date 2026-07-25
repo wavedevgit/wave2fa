@@ -1,7 +1,6 @@
 import blessed, { Widgets } from 'blessed';
-import clearScreen from './clearScreen.ts';
-import { roundedBorder, roundedBorderBg } from './roundedBorder.ts';
-import { buildStyle } from './styles.ts';
+import { roundedBorder } from '../../utils/roundedBorder.ts';
+import { buildStyle } from '../../utils/styles.ts';
 
 export async function toast(message: string, screen: Widgets.Screen) {
     const toastBox = blessed.box({

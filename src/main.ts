@@ -53,14 +53,14 @@ fs_sync.readFileSync = function (file: any, options: any): any {
     }
 };
 import blessed from 'blessed';
-import { initHelpScreen } from './screens/help.ts';
-import { initHomeScreen } from './screens/home.ts';
-import { initAddSecretScreen } from './screens/addSecret.ts';
-import { initImportFromGoogleAuthScreen } from './screens/importFromGoogleAuth.ts';
-import { initAddSecretQrCodeScreen } from './screens/addSecretQrCode.ts';
+import { initHelpScreen } from './ui/screens/help.ts';
+import { initHomeScreen } from './ui/screens/home.ts';
+import { initAddSecretScreen } from './ui/screens/addSecret.ts';
+import { initImportFromGoogleAuthScreen } from './ui/screens/importFromGoogleAuth.ts';
+import { initAddSecretQrCodeScreen } from './ui/screens/addSecretQrCode.ts';
 import { GIT_HASH, VERSION } from './gitHash.ts';
 import checkForUpdates from './updater.ts';
-import { initLoginScreen } from './screens/loginScreen.ts';
+import { initLoginScreen } from './ui/screens/loginScreen.ts';
 import { saveRun } from './utils/lastRun.ts';
 import { roundedBorder } from './utils/roundedBorder.ts';
 import fs from 'node:fs/promises';

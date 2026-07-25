@@ -1,17 +1,18 @@
 import blessed, { Widgets } from 'blessed';
-import clearScreen from '../utils/clearScreen.ts';
-import { getKeys, migrateToLatest } from '../utils/storage.ts';
+import clearScreen from '../../utils/clearScreen.ts';
+import { getKeys, migrateToLatest, removeItem } from '../../utils/storage.ts';
 import * as speakeasy from 'speakeasy';
-import { isTruthy } from '../utils/cli.ts';
+import { isTruthy } from '../../utils/cli.ts';
 import clipboardy from 'clipboardy';
-import { toast } from '../utils/toast.ts';
-import { TotpItem } from '../types.ts';
+import { toast } from '../components/toast.ts';
+import { TotpItem } from '../../types.ts';
 import type { Algorithm as SpeakeasyAlgorithm } from 'speakeasy';
-import { roundedBorder } from '../utils/roundedBorder.ts';
-import { buildStyle } from '../utils/styles.ts';
-import { screen } from '../main.ts';
-import { log } from '../errorLogger.ts';
+import { roundedBorder } from '../../utils/roundedBorder.ts';
+import { buildStyle } from '../../utils/styles.ts';
+import { screen } from '../../main.ts';
+import { log } from '../../errorLogger.ts';
 import { initPleaseWait } from './pleaseWait.ts';
+import { modal } from '../components/modal.ts';
 
 function getSecondsLeft(step: number) {
     const epoch = Math.floor(Date.now() / 1000);
@@ -134,6 +135,34 @@ async function initHomeScreen() {
         const code = cache[keys[index].uuid];
         clipboardy.writeSync(code);
         toast(`{bold}{green-fg}✓ Copied ${code}!{green-fg}{bold}`, screen);
+    });
+
+    main.key('delete', async () => {
+        // @ts-ignore
+        const index = main.selected;
+        const code = cache[keys[index].uuid];
+        clipboardy.writeSync(code);
+
+        await modal(
+            '{bold}Delete secret?{/bold}\n\nThis action cannot be undone.',
+            screen,
+            {
+                confirmText: 'Delete',
+                closeText: 'Cancel',
+                size: 'small',
+                onConfirm: async () => {
+                    // @ts-ignore
+                    const item = keys[main.selected].uuid;
+                    await removeItem(item);
+
+                    await initHomeScreen();
+                    toast('Secret deleted.', screen);
+                },
+                onClose: () => {
+                    toast('Cancelled deletion.', screen);
+                },
+            },
+        );
     });
 
     screen.append(main);

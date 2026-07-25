@@ -1,16 +1,16 @@
 import blessed, { Widgets } from 'blessed';
-import clearScreen from '../utils/clearScreen.ts';
-import { readInputAsync } from '../utils/inputs.ts';
+import clearScreen from '../../utils/clearScreen.ts';
+import { readInputAsync } from '../../utils/inputs.ts';
 import { initHomeScreen } from './home.ts';
 import {
     checkPasswordStrength,
     passwordStore,
     saveWithPassword,
     verifyPassword,
-} from '../utils/storage.ts';
-import { roundedBorder } from '../utils/roundedBorder.ts';
-import { buildStyle } from '../utils/styles.ts';
-import { screen } from '../main.ts';
+} from '../../utils/storage.ts';
+import { roundedBorder } from '../../utils/roundedBorder.ts';
+import { buildStyle } from '../../utils/styles.ts';
+import { screen } from '../../main.ts';
 import { initPleaseWait } from './pleaseWait.ts';
 
 async function initLoginScreen() {

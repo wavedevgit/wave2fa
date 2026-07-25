@@ -264,6 +264,16 @@ async function addItem(item: TotpItem) {
     await fs.writeFile(dataPath, JSON.stringify(data), 'utf-8');
 }
 
+async function removeItem(uuid: string) {
+    const data: any = await getKeys<TotpItemRaw>(true);
+
+    await fs.writeFile(
+        dataPath,
+        JSON.stringify(data.filter((item: TotpItemRaw) => item.uuid !== uuid)),
+        'utf-8',
+    );
+}
+
 async function validatePath(path: string) {
     try {
         await fs.stat(path);
@@ -273,4 +283,11 @@ async function validatePath(path: string) {
     }
 }
 
-export { getKeys, addItem, validatePath, homeConfigPath, passwordStore };
+export {
+    getKeys,
+    addItem,
+    removeItem,
+    validatePath,
+    homeConfigPath,
+    passwordStore,
+};

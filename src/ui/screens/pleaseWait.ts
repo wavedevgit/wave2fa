@@ -1,8 +1,8 @@
 import blessed from 'blessed';
-import clearScreen from '../utils/clearScreen.ts';
-import { roundedBorder } from '../utils/roundedBorder.ts';
-import { buildStyle } from '../utils/styles.ts';
-import { screen } from '../main.ts';
+import clearScreen from '../../utils/clearScreen.ts';
+import { roundedBorder } from '../../utils/roundedBorder.ts';
+import { buildStyle } from '../../utils/styles.ts';
+import { screen } from '../../main.ts';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 

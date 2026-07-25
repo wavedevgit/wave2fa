@@ -1,39 +1,42 @@
 import blessed, { Widgets } from 'blessed';
-import clearScreen from '../utils/clearScreen.ts';
-import { parseUri } from '../utils/google.ts';
-import { readInputAsync } from '../utils/inputs.ts';
-import { addItem, validatePath } from '../utils/storage.ts';
-import { scanQrCode } from '../utils/qrcode.ts';
-import path from 'path';
+import clearScreen from '../../utils/clearScreen.ts';
+import { addItem, validatePath } from '../../utils/storage.ts';
+import crypto from 'node:crypto';
+import { readInputAsync } from '../../utils/inputs.ts';
+import path from 'node:path';
 import os from 'os';
+import { parseUri, scanQrCode } from '../../utils/qrcode.ts';
+import { isValidSecret } from '../../utils/otp.ts';
 import { initHomeScreen } from './home.ts';
-import { isValidSecret } from '../utils/otp.ts';
-import { roundedBorder } from '../utils/roundedBorder.ts';
-import { buildStyle } from '../utils/styles.ts';
-import { screen } from '../main.ts';
+import { TotpItem } from '../../types.ts';
+import { roundedBorder } from '../../utils/roundedBorder.ts';
+import { buildStyle } from '../../utils/styles.ts';
+import { screen } from '../../main.ts';
 import { initPleaseWait } from './pleaseWait.ts';
 
-async function initImportFromGoogleAuthScreen() {
+async function initAddSecretQrCodeScreen() {
     clearScreen(screen);
     const box = blessed.box({
-        parent: screen,
         tags: true,
         top: 'center',
         width: '100%',
         align: 'center',
         height: 3,
+        parent: screen,
     });
     const input = blessed.textbox({
-        parent: screen,
-
         top: 'center',
         width: '100%',
         height: 3,
         valign: 'middle',
         align: 'center',
-        label: 'Enter QR image path ',
+        label: 'Enter QR image path',
         border: roundedBorder,
-        style: await buildStyle({ border: { fg: 'input' } }, 'importga.input'),
+        style: await buildStyle(
+            { input: { fg: 'input' } },
+            'addSecretQrCode.input',
+        ),
+        parent: screen,
     });
 
     let filePath = await readInputAsync(input);
@@ -53,14 +56,13 @@ async function initImportFromGoogleAuthScreen() {
         });
         return;
     }
-
     if (
         !['.png', '.jpg', '.jpeg', '.webp'].includes(
             path.extname(filePath).toLowerCase(),
         )
     ) {
         box.setContent(
-            '{red-fg} File extension is not {bold}.png,.jpg,.jpeg,.webp (not an image){bold} {red-fg}\n\n Press {bold}ENTER{/bold} to continue.',
+            'File extension is not .png,.jpg,.jpeg,.webp (not an image)',
         );
         input.destroy();
         screen.render();
@@ -87,30 +89,21 @@ async function initImportFromGoogleAuthScreen() {
         return;
     }
 
-    if (typeof res === 'object' && 'err' in res) {
-        box.setContent(res.err);
-        input.destroy();
-        screen.render();
-        screen.onceKey('enter', () => {
-            box.destroy();
-            screen.render();
-            initHomeScreen();
-        });
-        return;
-    }
     const values = parseUri(res);
+
     if ('err' in values) {
         box.setContent(values.err);
         input.destroy();
         screen.render();
-        screen.onceKey('enter', () => {
-            box.destroy();
-            screen.render();
-            initHomeScreen();
-        });
         return;
     }
-    if (values.some((item) => !isValidSecret(item.secret))) {
+    // @ts-ignore
+    screen.leave();
+
+    // @ts-ignore
+    values.uuid = crypto.randomUUID();
+
+    if (!(await isValidSecret(values.secret))) {
         box.setContent('Invalid base32 secret...');
         input.destroy();
         screen.render();
@@ -123,10 +116,9 @@ async function initImportFromGoogleAuthScreen() {
     }
 
     input.destroy();
+    initPleaseWait();
 
-    await initPleaseWait();
-    for (const value of values) await addItem(value);
-
+    await addItem(values as TotpItem);
     clearScreen(screen);
     box.setContent('{bold}✓{/bold} Succesfuly added!');
     screen.append(box);
@@ -137,4 +129,5 @@ async function initImportFromGoogleAuthScreen() {
         initHomeScreen();
     });
 }
-export { initImportFromGoogleAuthScreen };
+
+export { initAddSecretQrCodeScreen };

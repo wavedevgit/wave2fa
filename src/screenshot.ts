@@ -94,8 +94,12 @@ function screenshot(throwIfFail?: boolean): ScreenShotResult {
                 type: [
                     res.error && 'error_in_res',
                     res.signal && 'signal',
-                    res.status !== 0 && 'status',
-                ].filter(Boolean) as ('error_in_res' | 'signal' | 'status')[],
+                    res.status !== 0 && 'status_code',
+                ].filter(Boolean) as (
+                    | 'error_in_res'
+                    | 'signal'
+                    | 'status_code'
+                )[],
                 status: res.status,
                 stdout: res.stdout,
                 stderr: res.stderr,

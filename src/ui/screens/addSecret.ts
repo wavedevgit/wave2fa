@@ -1,14 +1,14 @@
 import blessed, { Widgets } from 'blessed';
-import clearScreen from '../utils/clearScreen.ts';
-import { addItem } from '../utils/storage.ts';
+import clearScreen from '../../utils/clearScreen.ts';
+import { addItem } from '../../utils/storage.ts';
 import crypto from 'node:crypto';
-import { readInputAsync } from '../utils/inputs.ts';
-import { isValidSecret, normalizeBase32 } from '../utils/otp.ts';
+import { readInputAsync } from '../../utils/inputs.ts';
+import { isValidSecret, normalizeBase32 } from '../../utils/otp.ts';
 import { initHomeScreen } from './home.ts';
-import { TotpItem } from '../types.ts';
-import { roundedBorder } from '../utils/roundedBorder.ts';
-import { buildStyle } from '../utils/styles.ts';
-import { screen } from '../main.ts';
+import { TotpItem } from '../../types.ts';
+import { roundedBorder } from '../../utils/roundedBorder.ts';
+import { buildStyle } from '../../utils/styles.ts';
+import { screen } from '../../main.ts';
 import { initPleaseWait } from './pleaseWait.ts';
 
 async function initAddSecretScreen() {
@@ -55,7 +55,7 @@ async function initAddSecretScreen() {
     screen.render();
     const secret = await readInputAsync(input);
     values.secret = normalizeBase32(secret || '');
-    values.uuid = crypto.randomUUID();
+    values.uuid = Date.now() + ':' + crypto.randomUUID();
 
     if (!(await isValidSecret(values.secret))) {
         input.destroy();

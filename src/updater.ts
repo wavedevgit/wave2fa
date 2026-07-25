@@ -1,6 +1,6 @@
 import { GIT_HASH, VERSION } from './gitHash.ts';
 import { repo } from './gitHash.ts';
-import { toast } from './utils/toast.ts';
+import { toast } from './ui/components/toast.ts';
 import { getLastRun } from './utils/lastRun.ts';
 import type { Widgets } from 'blessed';
 
