@@ -34,13 +34,13 @@
         "blessed": "0.1.81",
         "clipboardy": "5.3.1",
         "esbuild": "0.27.2",
-        "jimp": "1.6.0",
+        "jimp": "1.6.1",
         "jsqr": "1.4.0",
         "jsqrcode": "0.0.7",
         "node-file-dialog": "1.0.3",
         "patch-package": "8.0.1",
         "prettier": "3.8.2",
-        "protobufjs": "8.0.1",
+        "protobufjs": "8.7.1",
         "speakeasy": "2.0.0"
     },
     "devDependencies": {
